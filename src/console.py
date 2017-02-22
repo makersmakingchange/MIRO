@@ -1,9 +1,11 @@
-# Test server for sound component
-# binds PUB socket to tcp://*:5556
-
-import zmq
+# For future compatibility with python 3
+from __future__ import print_function
+from __future__ import unicode_literals
+# Python imports
 import threading
 import subprocess
+# Third-party imports
+import zmq
 
 # Constants
 SOCKET_PUB = 'tcp://*:5556'

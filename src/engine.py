@@ -1,3 +1,7 @@
+# For future compatibility with python 3
+from __future__ import print_function
+from __future__ import unicode_literals
+# Third-party imports
 import zmq
 
 # Constants and stable vars
