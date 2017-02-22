@@ -33,14 +33,25 @@ alive = True
 poll_thread = threading.Thread(target=poll)
 poll_thread.start()
 
+available_modules = ['gui','audio','engine']
+
 while True:
 	user_in = raw_input('[$] ')
 	in_parts = user_in.split()
 	if len(in_parts) > 0:
 		if in_parts[0] == 'start':
-			subprocess.Popen(['python',in_parts[1]+'.py'])
+			if len(in_parts) > 1:
+				if in_parts[1] == 'all':
+					for available_module in available_modules:
+						subprocess.Popen(['python',available_module+'.py'])
+				else:
+					subprocess.Popen(['python',in_parts[1]+'.py'])
+		elif in_parts[0] == 'quit':
+			if len(in_parts) > 1:
+				if in_parts[1] == 'all':
+					for available_module in available_modules:
+						pub.send_string(available_module+' cmd=quit')
+			alive = False
+			quit()
 		else:
 			pub.send_string(user_in)
-			if user_in == 'quit':
-				alive = False
-				quit()

@@ -126,6 +126,8 @@ y_to_z.add_children(y,z)
 def command(cmd_string):
 	if cmd_string == 'quit':
 		quit()
+	elif cmd_string == 'refresh':
+		process_selection()
 
 current_option = options
 gui_msg = ''
@@ -147,8 +149,6 @@ def select(sel_string):
 		sel = int(sel_string)
 		current_option = current_option.children[sel]
 		process_selection()
-		#audio_msg = topic_audio+' '+option
-		#push.send_string(audio_msg)
 	except IndexError:
 		pass
 	except ValueError:
