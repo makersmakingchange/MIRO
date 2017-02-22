@@ -10,6 +10,7 @@ import zmq
 # Constants
 SOCKET_PUB = 'tcp://*:5556'
 SOCKET_PULL = 'tcp://*:5557'
+LOG_PATH = '../log/'
 
 # Create sockets and poller
 context = zmq.Context()
@@ -35,10 +36,11 @@ poll_thread.start()
 while True:
 	user_in = raw_input('[$] ')
 	in_parts = user_in.split()
-	if in_parts[0] == 'start':
-		subprocess.Popen(['python',in_parts[1]+'.py'])
-	else:
-		pub.send_string(user_in)
-		if user_in == 'quit':
-			alive = False
-			quit()
+	if len(in_parts) > 0:
+		if in_parts[0] == 'start':
+			subprocess.Popen(['python',in_parts[1]+'.py'])
+		else:
+			pub.send_string(user_in)
+			if user_in == 'quit':
+				alive = False
+				quit()

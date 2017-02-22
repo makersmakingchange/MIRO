@@ -41,6 +41,7 @@ def write(console_text):
 function_dict = {}
 function_dict['cmd'] = command
 function_dict['write'] = write
+function_dict['opt'] = write
 
 class Application(Frame):
 	def __init__(self,master=None,size=(1080, 720)):
@@ -53,7 +54,7 @@ class Application(Frame):
 	def _createWidgets(self):
 		''' Create the base canvas, menu/selection elements, mouse/key functions '''
 		self.canvas = Canvas(self.master,width=self.size[0],height=self.size[1])
-		self.console = self.canvas.create_text(100,100,font=console_font)
+		self.console = self.canvas.create_text(150,50,font=console_font)
 		self.canvas.pack()
 
 	def _draw_periodic(self):
@@ -86,8 +87,8 @@ class Application(Frame):
 root = Tk()
 #root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
-console_font = font.Font(family='Helvetica',size=50, weight='bold')
+console_font = font.Font(family='Helvetica',size=20, weight='bold')
 
-gui = Application(master=root,size=(500,500))
+gui = Application(master=root,size=(500,200))
 gui.mainloop()
 gui.quit()
