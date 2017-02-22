@@ -1,19 +1,20 @@
 import winsound
 import zmq
-import sys
+import logging
 
 # Constants and stable vars
-AUDIO_PATH = 'audio_files/'
+AUDIO_PATH = '../res/audio/'
 SOCKET_SUB = 'tcp://localhost:5556'
 topic_filter = 'audio'
 
 # Create subscriber socket
 context = zmq.Context()
 sub = context.socket(zmq.SUB)
+sub.connect(SOCKET_SUB)
 
 if isinstance(topic_filter, bytes):
     topic_filter = topic_filter.decode('ascii')
-sub.setsockopt_string(zmq.SUBSCRIBE, topic_filter)
+sub.setsockopt_string(zmq.SUBSCRIBE,topic_filter)
 
 def speak_character(character):
 	if character == 'a:m':
@@ -27,8 +28,12 @@ def speak_character(character):
 	elif character == '<':
 		winsound.PlaySound(AUDIO_PATH+'undo_sound.wav',winsound.SND_FILENAME)
 
+if __name__ == '__main__':
+	logging.basicConfig(level=logging.DEBUG)
+
 while True:  
     string = sub.recv_string()
+    logging.debug(string)
     if 'command=quit' in string:
     	quit()
     else:
