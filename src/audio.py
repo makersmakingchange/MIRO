@@ -1,6 +1,5 @@
 import winsound
 import zmq
-import logging
 
 # Constants and stable vars
 AUDIO_PATH = '../res/audio/'
@@ -28,13 +27,9 @@ def speak_character(character):
 	elif character == '<':
 		winsound.PlaySound(AUDIO_PATH+'undo_sound.wav',winsound.SND_FILENAME)
 
-if __name__ == '__main__':
-	logging.basicConfig(level=logging.DEBUG)
-
 while True:  
     string = sub.recv_string()
-    logging.debug(string)
-    if 'command=quit' in string:
+    if 'cmd=quit' in string:
     	quit()
     else:
 		speak_character(string.split()[1])

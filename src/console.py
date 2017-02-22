@@ -3,6 +3,7 @@
 
 import zmq
 import threading
+import subprocess
 
 # Constants
 SOCKET_PUB = 'tcp://*:5556'
@@ -31,7 +32,11 @@ poll_thread.start()
 
 while True:
 	user_in = raw_input('[$] ')
-	pub.send_string(user_in)
-	if user_in == 'quit':
-		alive = False
-		quit()
+	in_parts = user_in.split()
+	if in_parts[0] == 'start':
+		subprocess.Popen(['python',in_parts[1]+'.py'])
+	else:
+		pub.send_string(user_in)
+		if user_in == 'quit':
+			alive = False
+			quit()

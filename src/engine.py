@@ -1,5 +1,4 @@
 import zmq
-import logging
 
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
@@ -26,7 +25,6 @@ options = [
 ]
 
 def command(cmd_string):
-	logging.debug('Command: '+cmd_string)
 	if cmd_string == 'quit':
 		quit()
 
@@ -34,19 +32,19 @@ def select(sel_string):
 	try:
 		option_sel = options[int(sel_string)]
 		option_msg = topic_audio+' '+option_sel
-		logging.debug('Selection: '+option_msg)
 		push.send_string(option_msg)
 	except IndexError:
 		pass
 	except ValueError:
 		pass
 
-function_dict = {}
-function_dict['command'] = command
-function_dict['select'] = select
+def option(opt_string):
+	pass
 
-if __name__ == '__main__':
-	logging.basicConfig(level=logging.DEBUG)
+function_dict = {}
+function_dict['cmd'] = command
+function_dict['sel'] = select
+function_dict['opt'] = option
 
 while True:
 	string = sub.recv_string()
