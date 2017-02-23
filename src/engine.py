@@ -174,8 +174,3 @@ while True:
 				function_dict[msg_parts[0]](msg_parts[1])
 			except KeyError:
 				pass
-
-
-
-
-
