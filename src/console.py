@@ -45,31 +45,50 @@ def poll():
 			pub.send_string(msg)
 			log_write(msg)
 
+def start_piece(args):
+	if args[1] == 'all':
+		pieces_to_start = all_pieces
+	else:
+		pieces_to_start = [args[1]]
+	for piece in pieces_to_start:
+		if piece == 'face':
+			subprocess.Popen(['../bin/face/face.exe'])
+		elif piece == 'output':
+			subprocess.Popen(['python',piece+'.py'],
+				creationflags=subprocess.CREATE_NEW_CONSOLE)
+		else:
+			subprocess.Popen(['python',piece+'.py'])
+
+def quit_piece(args):
+	global alive
+	if len(args) > 1:
+		if args[1] == 'all':
+			for piece in all_pieces:
+				pub.send_string('@'+piece+' cmd=quit')
+		else:
+			pub.send_string('@'+args[1]+' cmd=quit')
+	else:
+		alive = False
+		quit()
+
+all_pieces = ['gui','audio','engine','face','output']
+
+function_dict = {}
+function_dict['start'] = start_piece
+function_dict['quit'] = quit_piece
+
 alive = True
 poll_thread = threading.Thread(target=poll)
 poll_thread.start()
 
-available_modules = ['gui','audio','engine']
-
 while True:
 	user_in = raw_input('[$] ')
 	in_parts = user_in.split()
-	if len(in_parts) > 0:
-		if in_parts[0] == 'start':
-			if len(in_parts) > 1:
-				if in_parts[1] == 'all':
-					for available_module in available_modules:
-						subprocess.Popen(['python',available_module+'.py'])
-				else:
-					subprocess.Popen(['python',in_parts[1]+'.py'])
-		elif in_parts[0] == 'quit':
-			if len(in_parts) > 1:
-				if in_parts[1] == 'all':
-					for available_module in available_modules:
-						pub.send_string('@'+available_module+' cmd=quit')
-			alive = False
-			log.close()
-			quit()
-		else:
-			pub.send_string(user_in)
-		log_write(user_in)
+	try:
+		function_dict[in_parts[0]](in_parts)
+	except KeyError:
+		pub.send_string(user_in)
+	except IndexError:
+		pass
+	log_write(user_in)
+		

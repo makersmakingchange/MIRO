@@ -21,6 +21,6 @@ while True:
 	string = sub.recv_string()
 	parts = string.split()
 	if len(parts) > 1:
-		if parts[0] == 'output' and parts[1] == 'cmd=quit':
+		if parts[0] == '@output' and parts[1] == 'cmd=quit':
 			quit()
 	print(string)
