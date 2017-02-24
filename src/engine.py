@@ -7,9 +7,9 @@ import zmq
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
 SOCKET_PUSH = 'tcp://localhost:5557'
-topic_filter = 'engine'
-topic_audio = 'audio'
-topic_gui = 'gui opt='
+topic_filter = '@engine'
+topic_audio = '@audio'
+topic_gui = '@gui opt='
 
 # Connect to sockets
 context = zmq.Context()

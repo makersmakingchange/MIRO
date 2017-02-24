@@ -18,7 +18,7 @@ import zmq
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
 SOCKET_PUSH = 'tcp://localhost:5557'
-topic_filter = 'gui'
+topic_filter = '@gui'
 
 # Connect to sockets
 context = zmq.Context()
@@ -43,6 +43,15 @@ function_dict['cmd'] = command
 function_dict['write'] = write
 function_dict['opt'] = write
 
+def on_mouse_move(event):
+	push.send_string('mouse '+str(event.x)+','+str(event.y))
+
+def on_0(event):
+	push.send_string('@engine sel=0')
+
+def on_1(event):
+	push.send_string('@engine sel=1')
+
 class Application(Frame):
 	def __init__(self,master=None,size=(1080, 720)):
 		# Application housekeeping
@@ -55,6 +64,9 @@ class Application(Frame):
 		''' Create the base canvas, menu/selection elements, mouse/key functions '''
 		self.canvas = Canvas(self.master,width=self.size[0],height=self.size[1])
 		self.console = self.canvas.create_text(150,50,font=console_font)
+		self.canvas.bind("<Motion>",on_mouse_move)
+		self.canvas.bind_all("0",on_0)
+		self.canvas.bind_all("1",on_1)
 		self.canvas.pack()
 
 	def _draw_periodic(self):

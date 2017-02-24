@@ -4,7 +4,7 @@ import zmq
 # Constants and stable vars
 AUDIO_PATH = '../res/audio/'
 SOCKET_SUB = 'tcp://localhost:5556'
-topic_filter = 'audio'
+topic_filter = '@audio'
 
 # Create subscriber socket
 context = zmq.Context()
