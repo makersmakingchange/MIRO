@@ -27,7 +27,7 @@ poller = zmq.Poller()
 poller.register(pull,zmq.POLLIN)
 
 # Open log file for appending
-log_name = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')+'.log'
+log_name = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')+'.txt'
 log = open(LOG_PATH+log_name,'w+')
 log_lock = threading.Lock()
 
