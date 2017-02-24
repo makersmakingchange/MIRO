@@ -138,9 +138,10 @@ def process_selection():
 	if len(current_option.children) == 0:
 		push.send_string(topic_audio+' '+current_option.content)
 		current_option = options
-	for option_child in current_option.children:
-		gui_msg += option_child.content
-		gui_msg += ','
+	for i in range(len(current_option.children)):
+		gui_msg += current_option.children[i].content
+		if i < len(current_option.children)-1:
+			gui_msg += ','
 	push.send_string(gui_msg)
 
 def select(sel_string):

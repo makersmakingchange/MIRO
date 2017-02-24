@@ -66,10 +66,10 @@ while True:
 			if len(in_parts) > 1:
 				if in_parts[1] == 'all':
 					for available_module in available_modules:
-						pub.send_string(available_module+' cmd=quit')
+						pub.send_string('@'+available_module+' cmd=quit')
 			alive = False
 			log.close()
 			quit()
 		else:
 			pub.send_string(user_in)
-			log_write(user_in)
+		log_write(user_in)
