@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 # Python imports
 import sys
+import time
 from threading import Thread
 # Dynamic import of tk if python 2 or 3
 try:
@@ -49,10 +50,55 @@ def option(option_msg):
 	gui.canvas.itemconfigure(gui.left,text=parts[0])
 	gui.canvas.itemconfigure(gui.right,text=parts[1])
 
+def process_face_coords(data):
+	global history
+	global t_hist
+	global activated
+
+	d = data.split(',')
+	d = [int(coord) for coord in d]
+	p = ((d[0]+d[2])/2,(d[1]+d[3])/2) #nose_point
+
+	brow_length = 	  ((d[0]-d[2])**2 + (d[1]-d[3])**2)**0.5
+	noseline_length = ((p[0]-d[4])**2 + (p[1]-d[5])**2)**0.5
+	mouth_length = 	  ((d[6]-d[8])**2 + (d[7]-d[9])**2)**0.5
+
+	ratio = noseline_length/brow_length
+	history.append(ratio)
+	t_hist.append(time.clock())
+	if len(history) == 10:
+		history = history[1:len(history)]
+		t_hist = t_hist[1:len(t_hist)]
+
+		metric = (sum(history[5:9]))/4 - sum(history)/9
+		
+		if metric > 0.03:
+			if activated[0] == False:
+				activated[0] = True
+				push.send_string('@engine sel=0')
+		else:
+			activated[0] = False
+
+		if mouth_length > 20:
+			if activated[1] == False:
+				activated[1] = True
+				push.send_string('@engine sel=1')
+		else:
+			activated[1] = False
+		
+
+		write('nose_length '+str(noseline_length)+'\n'
+			+'mouth_length '+str(mouth_length)+'\n'
+			+'metric'+str(int(metric*1000)))
+
+	gui.canvas.coords(gui.eyebrow,  d[0],d[1],d[2],d[3])
+	gui.canvas.coords(gui.noseline, p[0],p[1],d[4],d[5])
+	gui.canvas.coords(gui.mouthline,d[8],d[9],d[6],d[7])
+
 function_dict = {}
 function_dict['cmd'] = command
 function_dict['write'] = write
-function_dict['opt'] = write
+function_dict['face'] = process_face_coords
 
 def on_mouse_move(event):
 	push.send_string('mouse '+str(event.x)+','+str(event.y))
@@ -88,6 +134,9 @@ class Application(Frame):
 			drawable.draw(self.canvas)
 
 		self.console = self.canvas.create_text(0,0,anchor='nw',font=console_font)
+		self.eyebrow = self.canvas.create_line(0,0,0,0,width=3.0)
+		self.noseline = self.canvas.create_line(0,0,0,0,width=3.0)
+		self.mouthline = self.canvas.create_line(0,0,0,0,width=3.0,fill='blue')
 
 		self.canvas.bind("<Motion>",on_mouse_move)
 		self.canvas.bind_all("<Escape>",on_esc)
@@ -98,7 +147,8 @@ class Application(Frame):
 	def _draw_periodic(self):
 		try:
 			string = sub.recv_string(zmq.DONTWAIT)
-			function_dict['opt'](string)
+			parts = string.split()
+			function_dict[parts[0]](parts[1])
 		except zmq.Again:
 			pass
 
@@ -118,6 +168,10 @@ root = Tk()
 #root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
 console_font = font.Font(family='Helvetica',size=20, weight='bold')
+
+history = []
+t_hist = []
+activated = [False,False]
 
 gui = Application(master=root,size=(640,480))
 gui.mainloop()
