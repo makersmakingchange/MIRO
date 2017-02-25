@@ -1,21 +1,7 @@
-# For future compatibility with python 3
-from __future__ import print_function
-from __future__ import unicode_literals
-# Python imports
-import sys
-import time
-from threading import Thread
-# Dynamic import of tk if python 2 or 3
-try:
-	assert sys.version_info[0] == 3
-	from tkinter import *
-	import tkinter.font as font
-except AssertionError as e:
-	from Tkinter import *
-	import tkFont as font
-# Third-party imports
-import zmq
+# See wtfj/__init__.py for full list of imports
 from wtfj import *
+from Tkinter import *
+import tkFont as font
 
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
@@ -146,14 +132,19 @@ class Application(Frame):
 
 	def _draw_periodic(self):
 		try:
-			string = sub.recv_string(zmq.DONTWAIT)
-			parts = string.split()
-			function_dict[parts[0]](parts[1])
+			parts = sub.recv_string(zmq.DONTWAIT).split()
+			if len(parts) > 0:
+				msg_parts = parts[1].split('=')
+				if len(msg_parts) > 0:
+					try:
+						function_dict[msg_parts[0]](msg_parts[1])
+					except KeyError:
+						pass
 		except zmq.Again:
 			pass
 
 		# Call this loop again after some milliseconds
-		self.canvas.after(10, self._draw_periodic)
+		self.canvas.after(10,self._draw_periodic)
 
 	def _quit(self):
 		Frame.quit(self)
@@ -167,7 +158,7 @@ class Application(Frame):
 root = Tk()
 #root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
-console_font = font.Font(family='Helvetica',size=20, weight='bold')
+console_font = font.Font(family='Helvetica',size=20,weight='bold')
 
 history = []
 t_hist = []

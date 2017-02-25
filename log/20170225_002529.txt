@@ -1,0 +1,2 @@
+2.43399303318 start gui
+3.81841700913 gui exiting

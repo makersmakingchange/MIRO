@@ -1,20 +1,7 @@
-# For future compatibility with python 3
-from __future__ import print_function
-from __future__ import unicode_literals
-# Python imports
-import sys
-from threading import Thread
-# Dynamic import of tk if python 2 or 3
-try:
-	assert sys.version_info[0] == 3
-	from tkinter import *
-	import tkinter.font as font
-except AssertionError as e:
-	from Tkinter import *
-	import tkFont as font
-# Third-party imports
-import zmq
+# See wtfj/__init__.py for full list of imports
 from wtfj import *
+from Tkinter import *
+import tkFont as font
 
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
@@ -56,7 +43,7 @@ def on_mouse_move(event):
 
 def on_esc(event):
 	push.send_string('gui exiting')
-	gui.quit()
+	gui._quit()
 
 def on_0(event):
 	push.send_string('@engine sel=0')
@@ -95,8 +82,7 @@ class Application(Frame):
 
 	def _draw_periodic(self):
 		try:
-			string = sub.recv_string(zmq.DONTWAIT)
-			parts = string.split()
+			parts = sub.recv_string(zmq.DONTWAIT).split()
 			if len(parts) > 0:
 				msg_parts = parts[1].split('=')
 				if len(msg_parts) > 0:
