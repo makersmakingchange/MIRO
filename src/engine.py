@@ -19,6 +19,46 @@ if isinstance(topic_filter,bytes):
 	topic_filter = topic_filter.decode('ascii')
 sub.setsockopt_string(zmq.SUBSCRIBE,topic_filter)
 
+choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+
+def build_tree(head, num_keys, choices):
+	if len(choices) == 1:
+		return
+	elif len(choices) < num_keys:
+		for x in range((num_keys - len(choices))):
+			choices.append("#empty")
+		for opt_str in choices:
+			head.add_child(OptionNode(opt_str))
+
+	else:
+		seed_value = int(len(choices)/num_keys) + (len(choices) % num_keys > 0) # Rounds decimal results up to nearest int
+		size_of_nodes = []
+		for x in range(num_keys):
+			size_of_nodes.append(seed_value)
+		index = num_keys - 1
+		while (sum(size_of_nodes) > len(choices)):
+			size_of_nodes[index] = size_of_nodes[index] - 1
+			index = index - 1
+		option_lists = []
+		sum_vals = 0
+		for size in size_of_nodes:
+			option = choices[sum_vals:sum_vals+size]
+			option_lists.append(option)
+			sum_vals = sum_vals + size
+		for opt_list in option_lists:
+			if (len(opt_list) > 1):
+				opt_str = opt_list[0] + "_to_" + opt_list[len(opt_list)-1]
+			else:
+				opt_str = opt_list[0]
+			opt = OptionNode(opt_str)
+			head.add_children(opt)
+			build_tree(opt, num_keys, opt_list)
+
+def print_tree(head):
+	print(head.content)
+	for child in head.children:
+		print_tree(child)
+
 class OptionNode(object):
 	def __init__(self,content=None):
 		self.parent = None
@@ -32,6 +72,7 @@ class OptionNode(object):
 	def add_children(self,*children):
 		for child in children:
 			self.add_child(child)
+
 
 options = OptionNode()
 
