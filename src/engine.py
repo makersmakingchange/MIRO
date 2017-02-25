@@ -53,7 +53,6 @@ def build_tree(head, num_keys, choices):
 				opt_str = opt_list[0] + "_to_" + opt_list[len(opt_list)-1]
 			else:
 				opt_str = opt_list[0]
-			#print(opt_str)
 			opt = OptionNode(opt_str)
 			head.add_children(opt)
 			build_tree(opt, num_keys, opt_list)
