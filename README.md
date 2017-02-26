@@ -1,6 +1,6 @@
 # app
 ## Writing Tech For Jarrod
-![alt text](https://github.com/WritingTechForJarrod/app/blob/master/img/readme.png?raw=true "wtfj")
+![alt text](https://github.com/WritingTechForJarrod/app/blob/master/img/readme.png?raw=true "wtfj")  
 To run the app in console mode start the interpreter  
 `python src/console.py`  
 
@@ -11,9 +11,11 @@ To run the app in console mode start the interpreter
 | incoming | @piece_name | stop | |
 | incoming | @piece_name | marco | |
 ### Each piece must emit these messages
+|:---|:---:|:---:|:---:|
 | outgoing | started | piece_name | |
 | outgoing | stopping | piece_name | | 
 ### Messages must have the format
+|:---|:---:|:---:|:---:|
 | incoming | @piece_name | function | data |
 | outgoing | piece_name | topic | data |
 Space is used as a delimiter between the first three items  
