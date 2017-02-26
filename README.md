@@ -23,11 +23,11 @@ To run the app in console mode start the interpreter
 Space is used as a delimiter between the sections of each message
   
 The console has the following special commands:
-`start piece_name` 
-`start all`
+`start piece_name`  
+`start all`  
 `restart piece_name`  
 `restart all`  
-`stop piece_name` 
+`stop piece_name`  
 `stop all`  
 `quit`  
 `quit!` - _stop all pieces and quit_
