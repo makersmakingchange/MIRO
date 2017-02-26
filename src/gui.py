@@ -92,12 +92,7 @@ class Application(Frame):
 
 	def _draw_periodic(self):
 		try:
-<<<<<<< HEAD
 			parts = sub.recv_string(zmq.DONTWAIT).split()
-=======
-			string = sub.recv_string(zmq.DONTWAIT)
-			parts = string.split()			
->>>>>>> e1b6d03891d0dd0122bc5fcb7b203d2a96aa24e1
 			if len(parts) > 0:
 				msg_parts = parts[1].split('=')
 				if len(msg_parts) > 0:
@@ -130,4 +125,4 @@ console_font = font.Font(family='Helvetica',size=150, weight='bold')
 text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
-gui.quit()
+gui.quit()`
