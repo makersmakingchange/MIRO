@@ -51,9 +51,9 @@ def start_piece(args):
 	else:
 		pieces_to_start = [args[1]]
 	for piece in pieces_to_start:
-		if piece == 'face':
+		if piece == 'face' or piece == 'eyetracker':
 			try:
-				subprocess.Popen(['../bin/face/face.exe'])
+				subprocess.Popen(['../bin/' + piece + '/' + piece + '.exe'])
 			except OSError as e :
 				pub.send_string('@err console '+ str(e))
 				log_write('@err console '+ str(e))
@@ -81,7 +81,7 @@ def quit_piece(args):
 		alive = False
 		quit()
 
-all_pieces = ['gui','audio','engine','face','output','blink']
+all_pieces = ['gui','audio','engine','face','output','blink','eyetracker']
 
 function_dict = {}
 function_dict['start'] = start_piece

@@ -23,9 +23,15 @@ def command(cmd_string):
 	if cmd_string == 'quit':
 		quit()
 
+def size_cmd(size_string):
+	if size_string == 'get':
+		push.send_string('gui size '+str(w)+','+str(h))
+
 def write(console_text):
-	gui.canvas.itemconfigure(gui.left,text=console_text)
-	gui.canvas.itemconfigure(gui.right,text=console_text)
+	#gui.canvas.itemconfigure(gui.left,text=console_text)
+	#gui.canvas.itemconfigure(gui.right,text=console_text)
+	gui.selected_text += console_text
+	gui.canvas.itemconfigure(gui.text_display,text=gui.selected_text)
 
 def option(option_msg):
 	option_msg = option_msg.replace('_to_',':')
@@ -37,6 +43,7 @@ function_dict = {}
 function_dict['cmd'] = command
 function_dict['write'] = write
 function_dict['opt'] = option
+function_dict['size'] = size_cmd
 
 def on_mouse_move(event):
 	push.send_string('mouse '+str(event.x)+','+str(event.y))
@@ -58,6 +65,7 @@ class Application(Frame):
 		self.drawables = []
 		self.size = size
 		self._createWidgets()
+		self.selected_text = ''
 
 	def _createWidgets(self):
 		''' Create the base canvas, menu/selection elements, mouse/key functions '''
@@ -73,6 +81,8 @@ class Application(Frame):
 
 		self.left = self.canvas.create_text(w/6,h/2,justify='center',font=console_font)
 		self.right = self.canvas.create_text(5*w/6,h/2,justify='center',font=console_font)
+		self.text_display = self.canvas.create_text(0,h-150,justify='left',font=text_display_font)
+		self.canvas.itemconfigure(self.text_display, anchor='w')
 
 		self.canvas.bind("<Motion>",on_mouse_move)
 		self.canvas.bind_all("<Escape>",on_esc)
@@ -82,13 +92,20 @@ class Application(Frame):
 
 	def _draw_periodic(self):
 		try:
+<<<<<<< HEAD
 			parts = sub.recv_string(zmq.DONTWAIT).split()
+=======
+			string = sub.recv_string(zmq.DONTWAIT)
+			parts = string.split()			
+>>>>>>> e1b6d03891d0dd0122bc5fcb7b203d2a96aa24e1
 			if len(parts) > 0:
 				msg_parts = parts[1].split('=')
 				if len(msg_parts) > 0:
 					try:
 						function_dict[msg_parts[0]](msg_parts[1])
 					except KeyError:
+						pass
+					except IndexError:
 						pass
 		except zmq.Again:
 			pass
@@ -105,11 +122,12 @@ class Application(Frame):
 		Frame.mainloop(self)
 		go.join()
 
+
 root = Tk()
 root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
 console_font = font.Font(family='Helvetica',size=150, weight='bold')
-
+text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
 gui.quit()

@@ -21,6 +21,7 @@ sub.setsockopt_string(zmq.SUBSCRIBE,topic_filter)
 
 choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 
+# Given root of options tree, build tree such that each node has num_keys child nodes consisting of divided choices list.
 def build_tree(head, num_keys, choices):
 	if len(choices) == 1:
 		return
@@ -29,7 +30,6 @@ def build_tree(head, num_keys, choices):
 			choices.append("#empty")
 		for opt_str in choices:
 			head.add_child(OptionNode(opt_str))
-
 	else:
 		seed_value = int(len(choices)/num_keys) + (len(choices) % num_keys > 0) # Rounds decimal results up to nearest int
 		size_of_nodes = []
@@ -54,6 +54,7 @@ def build_tree(head, num_keys, choices):
 			head.add_children(opt)
 			build_tree(opt, num_keys, opt_list)
 
+# Used to debug
 def print_tree(head):
 	print(head.content)
 	for child in head.children:
@@ -80,6 +81,8 @@ options = OptionNode()
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
 
+build_tree(options, 2, choices)
+'''
 # Single letter nodes
 a = OptionNode('a')
 b = OptionNode('b')
@@ -159,7 +162,7 @@ t_to_v.add_children(t_to_u,v)
 t_to_u.add_children(t,u)
 w_to_z.add_children(w_to_x,y_to_z)
 w_to_x.add_children(w,x)
-y_to_z.add_children(y,z)
+y_to_z.add_children(y,z)'''
 
 def command(cmd_string):
 	if cmd_string == 'quit':
@@ -175,6 +178,7 @@ def process_selection():
 	gui_msg = topic_gui
 	if len(current_option.children) == 0:
 		push.send_string(topic_audio+' '+current_option.content)
+		push.send_string('@gui write=' +current_option.content)
 		current_option = options
 	for i in range(len(current_option.children)):
 		gui_msg += current_option.children[i].content

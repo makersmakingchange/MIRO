@@ -5,9 +5,10 @@ import time
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
 SOCKET_PUSH = 'tcp://localhost:5557'
-BLINK_TIME = .5
+BLINK_TIME = .15
 topic_filter = '@blink'
 interest_filter = 'eyetracker'
+size_filter = 'gui'
 
 # Connect to sockets
 context = zmq.Context()
@@ -29,22 +30,31 @@ if isinstance(interest_filter, bytes):
 	interest_filter = interest_filter.decode('ascii')
 sub.setsockopt_string(zmq.SUBSCRIBE,interest_filter)
 
+# for python3 
+if isinstance(size_filter, bytes):
+	size_filter = size_filter.decode('ascii')
+sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
 
+#send request to grab size of gui 
+push.send_string('@gui size=get')
 
-		
+msg = sub.recv_string().split()
+if msg[1] == 'size':
+	size = [int(n) for n in msg[2].split(',')]	
 last_point = None 
 last_time_unmatched = time.clock()
 coor = ''
 
 blink_detected = False
 
-size = (1080,720)
+
 while True:    
 	if len(poller.poll(1)) > 0:
 		parts = sub.recv_string().split()
 		# we got something
 		if len(parts) > 0:
 			try:
+
 				if 'cmd=quit' in parts[1]:
 					push.send_string('blink quitting')
 					quit()
