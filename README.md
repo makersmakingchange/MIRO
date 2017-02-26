@@ -1,11 +1,13 @@
 # app
-## Integrated application with server, audio, vision, and gui components  
+## Writing Tech For Jarrod
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "
 To run the app in console mode start the interpreter  
 `python console.py`  
 
-Try some commands in the console  
-`start audio`  
-`audio a`  
+Inter-module command format  
+`@module arg1 arg2 ...`  
+`module arg2 arg2 ...`
+
 `start engine`  
 `engine sel=1`  
 `audio cmd=quit`  
