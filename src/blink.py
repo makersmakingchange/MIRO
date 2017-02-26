@@ -5,9 +5,9 @@ import time
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
 SOCKET_PUSH = 'tcp://localhost:5557'
-BLINK_TIME = .5
+BLINK_TIME = .15
 topic_filter = '@blink'
-interest_filter = 'mouse'
+interest_filter = 'eyetracker'
 size_filter = 'gui'
 
 # Connect to sockets

@@ -84,7 +84,8 @@ options = OptionNode()
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
 
-#build_tree(options, 2, choices)
+build_tree(options, 2, choices)
+'''
 # Single letter nodes
 a = OptionNode('a')
 b = OptionNode('b')
@@ -164,7 +165,7 @@ t_to_v.add_children(t_to_u,v)
 t_to_u.add_children(t,u)
 w_to_z.add_children(w_to_x,y_to_z)
 w_to_x.add_children(w,x)
-y_to_z.add_children(y,z)
+y_to_z.add_children(y,z)'''
 
 def command(cmd_string):
 	if cmd_string == 'quit':
