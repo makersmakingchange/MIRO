@@ -2,6 +2,7 @@
 from wtfj import *
 from Tkinter import *
 import tkFont as font
+import time
 
 # Constants and stable vars
 SOCKET_SUB = 'tcp://localhost:5556'
@@ -42,44 +43,24 @@ def process_face_coords(data):
 	global activated
 
 	d = data.split(',')
-	d = [int(coord) for coord in d]
-	p = ((d[0]+d[2])/2,(d[1]+d[3])/2) #nose_point
+	d = [int(float(coord)) for coord in d]
 
-	brow_length = 	  ((d[0]-d[2])**2 + (d[1]-d[3])**2)**0.5
-	noseline_length = ((p[0]-d[4])**2 + (p[1]-d[5])**2)**0.5
-	mouth_length = 	  ((d[6]-d[8])**2 + (d[7]-d[9])**2)**0.5
+	for i in range(len(gui.points)):
+		gui.canvas.coords(gui.points[i],d[2*i],d[(2*i)+1])
 
-	ratio = noseline_length/brow_length
-	history.append(ratio)
-	t_hist.append(time.clock())
-	if len(history) == 10:
-		history = history[1:len(history)]
-		t_hist = t_hist[1:len(t_hist)]
+	['br','bl','er','el','n','mu','ml']
 
-		metric = (sum(history[5:9]))/4 - sum(history)/9
-		
-		if metric > 0.03:
-			if activated[0] == False:
-				activated[0] = True
-				push.send_string('@engine sel=0')
-		else:
-			activated[0] = False
+	brow_eye_r = 	((d[0] -d[4])**2  + (d[1] -d[5])**2)**0.5
+	brow_eye_l = 	((d[2] -d[6])**2  + (d[3] -d[7])**2)**0.5
+	mouth_length =	((d[10]-d[12])**2 + (d[11]-d[13])**2)**0.5
 
-		if mouth_length > 20:
-			if activated[1] == False:
-				activated[1] = True
-				push.send_string('@engine sel=1')
-		else:
-			activated[1] = False
-		
+	write('brow_eye_r '+str(brow_eye_r)+'\n'
+		+'brow_eye_l '+str(brow_eye_l)+'\n'
+		+'mouth_length '+str(mouth_length))
 
-		write('nose_length '+str(noseline_length)+'\n'
-			+'mouth_length '+str(mouth_length)+'\n'
-			+'metric'+str(int(metric*1000)))
-
-	gui.canvas.coords(gui.eyebrow,  d[0],d[1],d[2],d[3])
-	gui.canvas.coords(gui.noseline, p[0],p[1],d[4],d[5])
-	gui.canvas.coords(gui.mouthline,d[8],d[9],d[6],d[7])
+	gui.canvas.coords(gui.brow_eye_r,d[0], d[1], d[4], d[5])
+	gui.canvas.coords(gui.brow_eye_l,d[2], d[3], d[6], d[7])
+	gui.canvas.coords(gui.mouthline, d[10],d[11],d[12],d[13])
 
 function_dict = {}
 function_dict['cmd'] = command
@@ -90,8 +71,8 @@ def on_mouse_move(event):
 	push.send_string('mouse '+str(event.x)+','+str(event.y))
 
 def on_esc(event):
-	push.send_string('gui exiting')
-	gui.quit()
+	push.send_string('quitting face_window')
+	gui._quit()
 
 def on_0(event):
 	push.send_string('@engine sel=0')
@@ -106,6 +87,7 @@ class Application(Frame):
 		self.drawables = []
 		self.size = size
 		self._createWidgets()
+		push.send_string('started face_window')
 
 	def _createWidgets(self):
 		''' Create the base canvas, menu/selection elements, mouse/key functions '''
@@ -120,9 +102,12 @@ class Application(Frame):
 			drawable.draw(self.canvas)
 
 		self.console = self.canvas.create_text(0,0,anchor='nw',font=console_font)
-		self.eyebrow = self.canvas.create_line(0,0,0,0,width=3.0)
-		self.noseline = self.canvas.create_line(0,0,0,0,width=3.0)
+		self.brow_eye_r = self.canvas.create_line(0,0,0,0,width=3.0)
+		self.brow_eye_l = self.canvas.create_line(0,0,0,0,width=3.0)
 		self.mouthline = self.canvas.create_line(0,0,0,0,width=3.0,fill='blue')
+
+		points = ['br','bl','er','el','n','mu','ml']
+		self.points = [self.canvas.create_text(0,0,font=point_font,text=p) for p in points]
 
 		self.canvas.bind("<Motion>",on_mouse_move)
 		self.canvas.bind_all("<Escape>",on_esc)
@@ -133,13 +118,12 @@ class Application(Frame):
 	def _draw_periodic(self):
 		try:
 			parts = sub.recv_string(zmq.DONTWAIT).split()
-			if len(parts) > 0:
-				msg_parts = parts[1].split('=')
-				if len(msg_parts) > 0:
-					try:
-						function_dict[msg_parts[0]](msg_parts[1])
-					except KeyError:
-						pass
+			try:
+				function_dict[parts[0]](parts[1])
+			except KeyError:
+				pass
+			except IndexError:
+				pass
 		except zmq.Again:
 			pass
 
@@ -159,6 +143,7 @@ root = Tk()
 #root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
 console_font = font.Font(family='Helvetica',size=20,weight='bold')
+point_font = font.Font(family='Helvetica',size=8,weight='bold')
 
 history = []
 t_hist = []
