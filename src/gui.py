@@ -37,8 +37,10 @@ def command(cmd_string):
 		quit()
 
 def write(console_text):
-	gui.canvas.itemconfigure(gui.left,text=console_text)
-	gui.canvas.itemconfigure(gui.right,text=console_text)
+	#gui.canvas.itemconfigure(gui.left,text=console_text)
+	#gui.canvas.itemconfigure(gui.right,text=console_text)
+	gui.selected_text += console_text
+	gui.canvas.itemconfigure(gui.text_display,text=gui.selected_text)
 
 def option(option_msg):
 	option_msg = option_msg.replace('_to_',':')
@@ -71,6 +73,7 @@ class Application(Frame):
 		self.drawables = []
 		self.size = size
 		self._createWidgets()
+		self.selected_text = ''
 
 	def _createWidgets(self):
 		''' Create the base canvas, menu/selection elements, mouse/key functions '''
@@ -86,6 +89,8 @@ class Application(Frame):
 
 		self.left = self.canvas.create_text(w/6,h/2,justify='center',font=console_font)
 		self.right = self.canvas.create_text(5*w/6,h/2,justify='center',font=console_font)
+		self.text_display = self.canvas.create_text(0,h-150,justify='left',font=text_display_font)
+		self.canvas.itemconfigure(self.text_display, anchor='w')
 
 		self.canvas.bind("<Motion>",on_mouse_move)
 		self.canvas.bind_all("<Escape>",on_esc)
@@ -123,6 +128,7 @@ root = Tk()
 root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
 console_font = font.Font(family='Helvetica',size=150, weight='bold')
+text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
 
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
