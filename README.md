@@ -6,15 +6,17 @@ To run the app in console mode start the interpreter
 
 ## Required functions
 ### Each piece must implement these functions
-| message type | piece name | | args |
+| message type | id | function |
 |:---|:---:|:---:|:---:|
-| incoming | @piece_name | stop | |
-| incoming | @piece_name | marco | |
+| incoming | @piece_name | stop |
+| incoming | @piece_name | marco |
 ### Each piece must emit these messages
+| message type | message | id |
 |:---|:---:|:---:|:---:|
 | outgoing | started | piece_name | |
 | outgoing | stopping | piece_name | | 
 ### Messages must have the format
+| message type | piece name | description | |
 |:---|:---:|:---:|:---:|
 | incoming | @piece_name | function | data |
 | outgoing | piece_name | topic | data |
