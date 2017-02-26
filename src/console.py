@@ -52,10 +52,18 @@ def start_piece(args):
 		pieces_to_start = [args[1]]
 	for piece in pieces_to_start:
 		if piece == 'face':
-			subprocess.Popen(['../bin/face/face.exe'])
+			try:
+				subprocess.Popen(['../bin/face/face.exe'])
+			except OSError as e :
+				pub.send_string('@err console '+ str(e))
+				log_write('@err console '+ str(e))
 		elif piece == 'output':
-			subprocess.Popen(['python',piece+'.py'],
-				creationflags=subprocess.CREATE_NEW_CONSOLE)
+			try:
+				subprocess.Popen(['python',piece+'.py'],
+					creationflags=subprocess.CREATE_NEW_CONSOLE)
+			except AttributeError as e: 
+				pub.send_string('@err console '+ str(e))
+				log_write('@err console '+ str(e))
 		else:
 			subprocess.Popen(['python',piece+'.py'],
 				shell=True,
@@ -73,7 +81,7 @@ def quit_piece(args):
 		alive = False
 		quit()
 
-all_pieces = ['gui','audio','engine','face','output']
+all_pieces = ['gui','audio','engine','face','output','blink']
 
 function_dict = {}
 function_dict['start'] = start_piece
