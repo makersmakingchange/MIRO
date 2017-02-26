@@ -36,6 +36,10 @@ def command(cmd_string):
 	if cmd_string == 'quit':
 		quit()
 
+def size_cmd(size_string):
+	if size_string == 'get':
+		push.send_string('gui size '+str(w)+','+str(h))
+
 def write(console_text):
 	#gui.canvas.itemconfigure(gui.left,text=console_text)
 	#gui.canvas.itemconfigure(gui.right,text=console_text)
@@ -52,6 +56,7 @@ function_dict = {}
 function_dict['cmd'] = command
 function_dict['write'] = write
 function_dict['opt'] = option
+function_dict['size'] = size_cmd
 
 def on_mouse_move(event):
 	push.send_string('mouse '+str(event.x)+','+str(event.y))
@@ -101,13 +106,15 @@ class Application(Frame):
 	def _draw_periodic(self):
 		try:
 			string = sub.recv_string(zmq.DONTWAIT)
-			parts = string.split()
+			parts = string.split()			
 			if len(parts) > 0:
 				msg_parts = parts[1].split('=')
 				if len(msg_parts) > 0:
 					try:
 						function_dict[msg_parts[0]](msg_parts[1])
 					except KeyError:
+						pass
+					except IndexError:
 						pass
 		except zmq.Again:
 			pass
@@ -124,12 +131,12 @@ class Application(Frame):
 		Frame.mainloop(self)
 		go.join()
 
+
 root = Tk()
 root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
 console_font = font.Font(family='Helvetica',size=150, weight='bold')
 text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
-
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
 gui.quit()
