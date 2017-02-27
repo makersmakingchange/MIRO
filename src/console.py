@@ -1,13 +1,9 @@
-# For future compatibility with python 3
-from __future__ import print_function
-from __future__ import unicode_literals
-# Python imports
-import threading
+# See wtfj/__init__.py for full list of imports
+from wtfj import *
 import subprocess
+import os
 import time
 import datetime
-# Third-party imports
-import zmq
 
 # Start clock
 time.clock()
@@ -29,7 +25,7 @@ poller.register(pull,zmq.POLLIN)
 # Open log file for appending
 log_name = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')+'.txt'
 log = open(LOG_PATH+log_name,'w+')
-log_lock = threading.Lock()
+log_lock = Lock()
 
 def log_write(msg):
 	log_lock.acquire()
@@ -44,6 +40,10 @@ def poll():
 			msg = pull.recv()
 			pub.send_string(msg)
 			log_write(msg)
+
+def restart_piece(args):
+	function_dict['quit'](args)
+	function_dict['start'](args)
 
 def start_piece(args):
 	if args[1] == 'all':
@@ -65,7 +65,9 @@ def start_piece(args):
 				pub.send_string('@err console '+ str(e))
 				log_write('@err console '+ str(e))
 		else:
-			subprocess.Popen(['python',piece+'.py'])
+			subprocess.Popen(['python',piece+'.py'],
+				shell=True,
+				env=dict(os.environ))
 
 def quit_piece(args):
 	global alive
@@ -84,9 +86,10 @@ all_pieces = ['gui','audio','engine','face','output','blink','eyetracker']
 function_dict = {}
 function_dict['start'] = start_piece
 function_dict['quit'] = quit_piece
+function_dict['restart'] = restart_piece
 
 alive = True
-poll_thread = threading.Thread(target=poll)
+poll_thread = Thread(target=poll)
 poll_thread.start()
 
 while True:
