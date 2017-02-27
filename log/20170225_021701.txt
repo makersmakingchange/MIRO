@@ -1,6 +1,0 @@
-8.11621700488 start serial_io
-16.7538208081 @serial_io connect 0 115200
-16.755974382 serial_io port 0 invalid
-24.234512353 start output
-86.6251139859 start output
-153.796673055 quit all

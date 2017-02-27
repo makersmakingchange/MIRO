@@ -171,9 +171,7 @@ def option(option_msg):
 	gui.canvas.itemconfigure(gui.right,text=parts[1])
 
 def process_face_coords(data):
-	global history
-	global t_hist
-	global activated
+	global activation_hist
 	global last_face_pts
 
 	d = [int(float(coord)) for coord in data.split(',')]
@@ -187,9 +185,39 @@ def process_face_coords(data):
 		face_pts.draw_velocities(gui.canvas,320,240)
 		last_face_pts.erase(gui.canvas)
 	last_face_pts = face_pts
+		
+	thresh = last_face_pts.vel_sum / 8 + 15
+	m_thresh = last_face_pts.vel_sum / 8 + 15
+	
+	activated = False
+	m_act = False
+	
+	if last_face_pts.vels[0].y > thresh and last_face_pts.vels[1].y > thresh:
+		if last_face_pts.vels[0].length() > last_face_pts.vel_sum / 7 and  last_face_pts.vels[1].length() > last_face_pts.vel_sum / 7:
+			activated = True
+	if last_face_pts.vels[5].y - last_face_pts.vels[6].y > thresh:
+		if last_face_pts.vels[0].length() > last_face_pts.vel_sum / 7 and  last_face_pts.vels[1].length() > last_face_pts.vel_sum / 7:
+			m_act = True
+	
+	if activation_hist[0][0] == False and activation_hist[1][0] == False and activation_hist[2][0] == False and activation_hist[3][0] == False and activated == True:
+		push.send_string('@engine sel=0')
+	else:
+		activated = False
+	
+	if activation_hist[0][1] == False and activation_hist[1][1] == False and activation_hist[2][1] == False and activation_hist[3][1] == False and m_act == True:
+		push.send_string('@engine sel=1')
+	else:
+		m_act = False
+
+	activation_hist[3] = list(activation_hist[2])
+	activation_hist[2] = list(activation_hist[1])
+	activation_hist[1] = list(activation_hist[0])
+	activation_hist[0][0] = activated
+	activation_hist[0][1] = m_act
 
 	write('vel sum '+str(face_pts.vel_sum)
-		+'\nl_brow '+str(face_pts.vels[1].length()))
+		+'\nl_brow '+str(face_pts.vels[1].length())
+		+'\nraised '+str(activation_hist))
 
 	#for i in range(len(gui.pt_txt)):
 	#	gui.canvas.coords(gui.pt_txt[i],d[2*i],d[(2*i)+1])
@@ -206,12 +234,6 @@ def on_0(event):
 
 def on_1(event):
 	push.send_string('@engine sel=1')
-
-last_face_pts = None
-function_dict = {}
-function_dict['cmd'] = command
-function_dict['write'] = write
-function_dict['face'] = process_face_coords
 
 class Application(Frame,dict):
 	def __init__(self,master=None,size=(1080, 720)):
@@ -249,7 +271,7 @@ class Application(Frame,dict):
 		try:
 			parts = sub.recv_string(zmq.DONTWAIT).split()
 			try:
-				function_dict[parts[0]](parts[1])
+				interpreter[parts[0]](parts[1])
 			except KeyError:
 				pass
 			except IndexError:
@@ -272,8 +294,15 @@ class Application(Frame,dict):
 root = Tk()
 #root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
-console_font = font.Font(family='Helvetica',size=20,weight='bold')
+console_font = font.Font(family='Helvetica',size=12,weight='bold')
 point_font = font.Font(family='Helvetica',size=8,weight='bold')
+
+last_face_pts = None
+activation_hist = [[False,False],[False,False],[False,False],[False,False]]
+interpreter = {}
+interpreter['cmd'] = command
+interpreter['write'] = write
+interpreter['face'] = process_face_coords
 
 history = []
 t_hist = []
