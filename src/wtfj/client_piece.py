@@ -105,6 +105,8 @@ class ClientPiece(object):
 			self.err('exception thrown\n'+traceback.format_exc())
 		return ret
 
+class Uids:
+	GUI = 'gui'
 
 class MyPiece(ClientPiece):
 	def _on_foo(self,data=None):
@@ -115,27 +117,25 @@ class MyPiece(ClientPiece):
 
 	def _after_start(self):
 		self.size = None
-		self.add_interest('gui')
-		self.send_to('gui','get','size')
-		self.send('_after_start','-this function called after successful start of piece')
+		self.add_interest(Uids.GUI)
+		self.send('[_after_start]','-this function called after successful start of piece')
+		self.send_to(Uids.GUI,'get','size')
 
 	def _on_bar(self):
 		self.send('BARDYBARBAR')
 
 	def _before_stop(self):
-		self.send('_before_stop','-this function called before attempting to stop piece')
+		self.send('[_before_stop]','-this function called before attempting to stop piece')
 
 	def _on_gui_size(self,data=None):
-		#self.size = [int(x) for x in data.split[',',2][0:1]]
-		self.send('ack','gui size')
+		self.size = [int(x) for x in data.split(',')]
 
 
 class MockGuiPiece(ClientPiece):
 	def _on_get(self,data=''):
-		if data is not '':
-			if data == 'size':
-				self.send('size','1280,800')
-				return
+		if data == 'size':
+			self.send('size','1280,800')
+			return
 		self.err('get for variable ['+data+'] failed')
 
 
@@ -145,12 +145,14 @@ class ServerPiece(object):
 		self._pub = {}
 		self._echo = echo
 
+	def add_subscriber(self,Uid):
+		self._pub[Uid] = Queue()
+
 	def send_string(self,string):
 		''' Sends a string to this server '''
 		self._pull.put(string)
 		try:
 			Uid = string.split(' ',1)[0]
-			self._pub[Uid].put(string)
 		except KeyError:
 			pass
 
@@ -160,62 +162,83 @@ class ServerPiece(object):
 		try:
 			ret = self._pub['@'+Uid].get(block=(args != DONTWAIT))
 		except Empty:
-			pass
+			pass # No message in queue
 		except KeyError:
-			pass
+			self.publish('server err '+Uid+' subscriber not in list')
 		return ret
 
 	def publish(self,string):
 		''' Puts message in outgoing queue '''
-		Uid = string.split(' ',1)[0]
-		try:
-			found = self._pub[Uid]
-		except KeyError:
-			self._pub[Uid] = Queue()
 		for key in self._pub:
-			self._pub[key].put(string)	
-		print('[sent] '+string)
+			self._pub[key].put(string)
+		print('published> '+string)
 
-	def pull(self,args=None):
+	def pull(self,args=None,timeout_ms=0):
 		''' Returns messages in incoming queue '''
-		ret = self._pull.get(block=(args != DONTWAIT))
-		print('[recvd] '+ret)
+		string = self._pull.get(block=(args != DONTWAIT),timeout=timeout_ms)
+		print('received< '+string)
 		if self._echo == True:
-			self.publish(ret)
-		return ret
+			for key in self._pub:
+				self._pub[key].put(string)
+			print('echoed> '+string)
+		return string
+
+	def poll(self,n=1):
+		if n == 1:
+			return self.pull(timeout_ms=100) 
+		else:
+			msgs = []
+			for i in range(n):
+				msgs.append(self.pull(timeout_ms=100))
+			return msgs
 
 serv = ServerPiece(echo=True)
 
-MockGuiPiece('gui').start(serv,serv)
+def bar(msg):
+	return ''.join(['-' for i in range(len(msg))])
+
+def assert_contains(a):
+	b = serv.poll()
+	if a not in b:
+		msg = 'Tests failed, expected ['+str(a)+'] in ['+str(b)+']'
+		print(bar(msg))
+		print(msg)
+		print(bar(msg))
+		raise Exception
+
+def assert_equals(a):
+	b = serv.poll()
+	if a != b:
+		msg = 'Tests failed, expected ['+str(a)+'] to equal ['+str(b)+']'
+		print(bar(msg))
+		print(msg)
+		print(bar(msg))
+		raise Exception
+
+serv.add_subscriber('@gui')
+serv.add_subscriber('@max')
+
+MockGuiPiece(Uids.GUI).start(serv,serv)
+assert_contains('gui started ')
+
 serv.publish('@gui marco')
-serv.pull()
+assert_contains('gui polo')
+
+serv.publish('@gui get my lunch')
+assert_contains('gui err')
+
+serv.publish('@gui get size')
+assert_contains('gui size')
 
 MyPiece('max').start(serv,serv)
-serv.pull()
-serv.pull()
-serv.pull()
-serv.pull()
-serv.pull()
-
-start = time.clock()
-serv.publish('@max marco')
-serv.pull()
-print('[delta '+str(time.clock() - start)+']')
+assert_contains('max started')
+assert_contains('max')
+assert_equals('@gui get size')
+assert_contains('gui size')
 
 serv.publish('@max stop')
-serv.pull()
-serv.pull()
+assert_contains('max')
+assert_contains('max stopping')
 
 serv.publish('@gui stop')
-serv.pull()
-
-MyPiece('max').start(serv,serv)
-serv.publish('max laz ')
-serv.pull()
-serv.pull()
-serv.pull()
-serv.pull()
-
-serv.publish('@max stop')
-serv.pull()
-serv.pull()
+assert_contains('gui stopping')
