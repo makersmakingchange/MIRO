@@ -107,6 +107,7 @@ class ClientPiece(object):
 
 class Uids:
 	GUI = 'gui'
+	EYETRACKER = 'eyetracker'
 
 class MyPiece(ClientPiece):
 	def _on_foo(self,data=None):
@@ -184,12 +185,13 @@ class ServerPiece(object):
 		return string
 
 	def poll(self,n=1):
+		t_ms = 100
 		if n == 1:
-			return self.pull(timeout_ms=100) 
+			return self.pull(timeout_ms=t_ms) 
 		else:
 			msgs = []
 			for i in range(n):
-				msgs.append(self.pull(timeout_ms=100))
+				msgs.append(self.pull(timeout_ms=t_ms))
 			return msgs
 
 serv = ServerPiece(echo=True)
