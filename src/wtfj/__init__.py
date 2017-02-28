@@ -7,3 +7,6 @@ from threading import Thread,Lock
 # Third-party imports
 import zmq
 from drawable import *
+from client_piece import *
+from server_piece import *
+from wtfj_assert import *

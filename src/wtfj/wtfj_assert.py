@@ -21,7 +21,7 @@ class Assert:
 	def equals(self,a):
 		b = self._b
 		if a != b: 
-			self.fail('Tests failed, expected ['+str(a)+'] to equal ['+str(b)+']')
+			self.fail('Tests failed, expected ['+str(b)+'] to equal ['+str(a)+']')
 		return self
 
 	def has_csv_array_of_size(self,size=2):
