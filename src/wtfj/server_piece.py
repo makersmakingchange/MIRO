@@ -34,9 +34,9 @@ class ServerPiece(object):
 			self._pub[key].put(string)
 		print('published> '+string)
 
-	def pull(self,args=None,timeout_ms=0):
+	def pull(self,args=None,timeout_s=0):
 		''' Returns messages in incoming queue '''
-		string = self._pull.get(block=(args != DONTWAIT),timeout=timeout_ms)
+		string = self._pull.get(block=(args != DONTWAIT),timeout=timeout_s)
 		print('received< '+string)
 		if self._echo == True:
 			for key in self._pub:
@@ -45,11 +45,11 @@ class ServerPiece(object):
 		return string
 
 	def poll(self,n=1):
-		t_ms = 100
+		t_s = 0.100
 		if n == 1:
-			return self.pull(timeout_ms=t_ms) 
+			return self.pull(timeout_s=t_s) 
 		else:
 			msgs = []
 			for i in range(n):
-				msgs.append(self.pull(timeout_ms=t_ms))
+				msgs.append(self.pull(timeout_s=t_s))
 			return msgs
