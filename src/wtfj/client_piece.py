@@ -63,6 +63,9 @@ class ClientPiece(object):
 	def _on_marco(self):
 		self.send('polo',str(self.uptime()))
 
+	#def _on_poll(self):
+
+
 	def _on_stop(self,data=None):
 		try:
 			self._before_stop()

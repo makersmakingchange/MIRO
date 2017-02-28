@@ -1,4 +1,24 @@
 from client_piece import *
+from tcp import Tcp
+
+class ZmqTunnelPiece(object):
+	def __init__(self,echo=False):
+		context = zmq.Context()
+		push = context.socket(zmq.PUSH)
+		sub = context.socket(zmq.SUB)
+		push.connect(Tcp.SOCKET_PUSH)
+		sub.connect(Tcp.SOCKET_SUB)
+
+	def send_string(self,string):
+		push.send_string(string)
+
+	def recv_string(self,args=None,Uid=None):
+		return sub.recv_string(args)
+
+	def add_subscriber(self,Uid):
+		if isinstance(Uid,bytes):
+			Uid = Uid.decode('ascii')
+		sub.setsockopt_string(zmq.SUBSCRIBE,Uid)
 
 class ServerPiece(object):
 	def __init__(self,echo=False):

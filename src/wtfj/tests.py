@@ -62,3 +62,5 @@ if __name__ == '__main__':
 
 	serv.publish('@gui stop')
 	Assert(serv.poll()).contains('gui stopping')
+
+	
