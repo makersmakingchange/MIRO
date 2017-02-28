@@ -1,6 +1,8 @@
 ''' Basically a constants file '''
 ''' Auth: max@embeddedprofessional.com '''
+
 from wtfj_assert import *
+
 
 class Uid:
 	''' List of the different components available at runtime '''
@@ -9,11 +11,13 @@ class Uid:
 	BLINK = 'blink'
 	TEST = 'test'
 
+
 class Req:
 	''' Message topics sent as requests to Pieces '''
 	MARCO = 'marco'
 	STOP = 'stop'
 	GET = 'get'
+
 
 class Msg:
 	''' Message topics output from Pieces '''
@@ -24,6 +28,7 @@ class Msg:
 	SIZE = 'size'
 	ACK = 'ack'
 	UPTIME = 'uptime'
+
 
 class Tcp:
 	''' Networking constants '''

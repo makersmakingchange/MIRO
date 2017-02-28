@@ -17,12 +17,12 @@ class ClientPiece(object):
 		self.flags = {}
 		assert self._Uid in member_names(Uid)
 
-	def start(self,subscriber,pusher,echo=False):
+	def start(self,subscriber,pusher=None,echo=False):
 		self._birthday = time.clock()
 		self._echo = echo
 		self._subscriptions = []
 		self._sub = subscriber
-		self._push = pusher
+		self._push = subscriber if pusher is not None else pusher
 		self._alive = True
 		poll_thread = Thread(target=self._poll)
 		poll_thread.start()
