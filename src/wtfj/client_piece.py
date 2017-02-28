@@ -3,7 +3,7 @@ from threading import Thread
 from Queue import Queue,Empty
 import traceback
 
-from uids import Uids
+from uid import *
 
 try:
 	DONTWAIT = zmq.DONTWAIT
@@ -11,18 +11,16 @@ except Exception:
 	DONTWAIT = 1
 
 class ClientPiece(object):
-	def __init__(self,Uid):
-		self._Uid = Uid
-		self._ERR = 'err'
-		self._STOP_MSG = 'stopping'
-		self._START_MSG = 'started'
+	def __init__(self,id):
+		self._Uid = id
 		self._alive = False
 		self.flags = {}
+		assert self._Uid in member_names(Uid)
 
 	def start(self,subscriber,pusher,echo=False):
 		self._birthday = time.clock()
 		self._echo = echo
-		self._interests = []
+		self._subscriptions = []
 		self._sub = subscriber
 		self._push = pusher
 		self._alive = True
@@ -34,34 +32,44 @@ class ClientPiece(object):
 		except AttributeError:
 			pass
 
+	def stop(self):
+		''' Public access to stop the polling loop '''
+		self._on_stop()
+
 	def send(self,topic,data=''):
 		''' Sends a message string to the server, whether a Python process or tcp '''
-		self._push.send_string(self._Uid+' '+topic+' '+data)
+		if data == '':
+			self._push.send_string(self._Uid+' '+topic)
+		else:
+			self._push.send_string(self._Uid+' '+topic+' '+data)
 
 	def send_to(self,Uid,topic,data=''):
 		''' Constructs messages targeted for a specific client or service '''
-		self._push.send_string('@'+Uid+' '+topic+' '+data)
+		if data == '':
+			self._push.send_string('@'+Uid+' '+topic)
+		else:
+			self._push.send_string('@'+Uid+' '+topic+' '+data)
 
 	def err(self,msg):
-		self.send(self._ERR,msg)
+		self.send(Msg.ERR,msg)
 
-	def uptime(self):
-		return time.clock() - self._birthday
+	def _on_uptime(self):
+		self.send(Msg.UPTIME,str(time.clock() - self._birthday))
 
-	def add_interest(self,interest):
-		self._interests.append(interest)
+	def subscribe(self,topic):
+		self._subscriptions.append(topic)
 
-	def _poll(self):
+	def _poll(self,period_s=0.001):
 		while self._alive == True:
 			msg = self._sub.recv_string(DONTWAIT,self._Uid)
 			if msg is not None:
 				if self._interpret(msg) == False:
 					if self._echo == True:
 						self._push.send_string(msg)
-			time.sleep(0.001)
+			time.sleep(period_s)
 
 	def _on_marco(self):
-		self.send('polo',str(self.uptime()))
+		self.send(Msg.POLO)
 
 	#def _on_poll(self):
 
@@ -72,11 +80,10 @@ class ClientPiece(object):
 		except AttributeError:
 			pass
 		self._alive = False
-		self.send(self._STOP_MSG)
-		quit()
+		self.send(Msg.STOPPING)
 
 	def _on_start(self,data=None):
-		self.send(self._START_MSG)
+		self.send(Msg.STARTED)
 
 	def _interpret(self,msg):
 		self._last_msg_time = time.clock()
@@ -94,7 +101,7 @@ class ClientPiece(object):
 					else:
 						getattr(self,'_on_'+parts[1])()
 					ret = True
-				elif parts[0] in self._interests:
+				elif parts[0] in self._subscriptions:
 					# Fail silently when receiving a message from an interest as most of these
 					# will not be mapped to functions to handle them
 					fail_silent = True
@@ -108,3 +115,17 @@ class ClientPiece(object):
 		except Exception as e:
 			self.err('exception thrown\n'+traceback.format_exc())
 		return ret
+
+if __name__ == '__main__': # Make a test server, start client, quit
+	
+	from server_piece import *
+	serv = ServerPiece()
+	
+	cp = ClientPiece(Uid.TEST)
+	cp.start(serv,serv)
+	cp.stop()
+	response = serv.poll()
+	response = serv.poll()
+
+	Assert.success()
+
