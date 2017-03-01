@@ -1,3 +1,4 @@
+'''
 # See wtfj/__init__.py for full list of imports
 from wtfj import *
 import subprocess
@@ -91,7 +92,35 @@ function_dict['restart'] = restart_piece
 alive = True
 poll_thread = Thread(target=poll)
 poll_thread.start()
+'''
+from wtfj import *
 
+class Console(Piece):
+	def _poll_event(self,data=None):
+		print('hello')
+
+class Armageddon(Piece):
+	def _on_armageddon(self,data=None):
+		import os
+		while True:
+			os.system("taskkill /im python.exe")
+
+if __name__ == '__main__':
+	import time
+
+	armageddon = Armageddon(Uid.SYSTEM,ScriptConnector(['@system armageddon']))
+	#armageddon.start()
+
+	zsc = ZmqServerConnector()
+	console = Console(Uid.CONSOLE,zsc)
+
+	console.start()
+	user_in = raw_input('[$] ')
+	console.send(user_in)
+	console.stop()
+
+
+'''
 while True:
 	user_in = raw_input('[$] ')
 	in_parts = user_in.split()
@@ -102,4 +131,5 @@ while True:
 	except IndexError:
 		pass
 	log_write(user_in)
+'''
 		

@@ -10,7 +10,8 @@ class Connector(object):
 	def send_string(self,string):
 		raise NotImplementedError
 
-	def recv_string(self,wait_ms=1,uid=None):
+	def recv_string(self,wait_s=1,uid=None):
+		''' Must return a list of messages '''
 		raise NotImplementedError
 
 	def subscribe(self,uid):
@@ -32,11 +33,10 @@ class ZmqClientConnector(Connector):
 	def send(self,string):
 		self._push.send_string(string)
 
-	def poll(self,wait_ms=1,uid=None):
+	def poll(self,wait_s=1,uid=None):
+		wait_ms = int(wait_s * 1000)
 		events = self._poller.poll(timeout=wait_ms)
-		if len(events) > 0:
-			return self._sub.recv()
-		return None
+		return [self._sub.recv() for i in range(len(events))]
 
 	def subscribe(self,uid):
 		if isinstance(uid,bytes):
@@ -59,62 +59,70 @@ class ZmqServerConnector(Connector):
 	def send(self,string):
 		self._pub.send_string(string)
 
-	def poll(self,wait_ms=1,uid=None):
+	def poll(self,wait_s=1,uid=None):
+		wait_ms = int(wait_s * 1000)
 		events = self._poller.poll(timeout=wait_ms)
-		if len(events) > 0:
-			return self._pull.recv()
-		return None
+		return [self._pull.recv() for i in range(len(events))]
 
 	def subscribe(self,uid):
 		pass
 
 
-class ScriptConnector(object):
-	def __init__(self):
-		self._msgs = []
+class ScriptConnector(Connector):
+	''' Runs a script passed as a list, default frequency = 1000Hz '''
+	
+	def __init__(self,msgs):
+		self._msgs = msgs
 		self._index = 0
 		self._period = 0.001
 	
 	def send(self,string):
 		''' Send TO this connector '''
 		print('RECV < '+string)
+		return self
 	
-	def poll(self,wait_ms=None,uid=None):
+	def poll(self,wait_s=None,uid=None):
 		''' Poll FROM this connector '''
-		time.sleep(self._period)
+		period = self._period if wait_s is None else wait_s
+		time.sleep(period)
 		try:
 			msg = self._msgs[self._index]
 			print('SCRIPT > '+msg)
 			self._index += 1
-			return msg
+			return [msg]
 		except IndexError:
-			return None
+			return []
 
 	def subscribe(self,topic):
-		pass
+		return self
 
-	def set_frequency(self,f_Hz):
-		self._period = 1.0/float(f_Hz);
+	def load(self,msg_array):
+		self._msgs += msg_array
+		return self
 
-	def set_msgs(self,msg_array):
-		self._msgs = msg_array
+	def set_period(self,period):
+		self._period = period
+		return self
 
 if __name__ == '__main__': # Unit test
 
-	sc = ScriptConnector()
-	sc.set_frequency(3.333)
-	sc.set_msgs([
-		pack(Uid.TEST,Req.MARCO),
-		pack(Uid.TEST,Msg.POLO),
-		pack(Uid.TEST,Req.GET,'var')
-		])
+	sc = ScriptConnector([
+		'test marco',
+		'test polo',
+		'test get var'
+	])
 	
 	start = time.clock()
-	Assert(sc.poll()).equals('test marco')
-	Assert(sc.poll()).equals('test polo')
-	Assert(sc.poll()).equals('test get var')
+	response = sc.poll()[0]
+	Assert(response).equals(pack(Uid.TEST,Req.MARCO))
+
+	response = sc.poll()[0]
+	Assert(response).equals(pack(Uid.TEST,Msg.POLO))
+
+	response = sc.poll()[0]
+	Assert(response).equals(pack(Uid.TEST,Req.GET,'var'))
 	delta = time.clock() - start
-	Assert(delta > 0.9 and delta < 1.11).equals(True)
+	Assert(delta < 0.1).equals(True)
 
 	zcc = ZmqClientConnector()
 	zcc2 = ZmqClientConnector()
@@ -125,16 +133,13 @@ if __name__ == '__main__': # Unit test
 	time.sleep(0.5)
 
 	zcc.send('Hello')
-	time.sleep(0.5)
-	zcc2.send('My')
-	time.sleep(0.5)
-	zcc3.send('Baby')
-
-	response = zsc.poll()
+	response = zsc.poll()[0]
 	Assert(response).contains('Hello')
 
-	response2 = zsc.poll()
-	Assert(response2).equals('My')
-	
-	response3 = zsc.poll()
-	Assert(response3).equals('Baby')
+	zcc2.send('My')
+	response = zsc.poll()[0]
+	Assert(response).equals('My')
+
+	zcc3.send('Baby')
+	response = zsc.poll()[0]
+	Assert(response).equals('Baby')

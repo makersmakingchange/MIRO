@@ -85,7 +85,7 @@ class ServerPiece(object):
 
 	def hit_it_and_quit_it(self,nuclear=False):
 		self.publish('server stopping ATTEMPTING TO STOP ALL PIECES')
-		for key in member_names(Uid):
+		for key in names(Uid):
 			self.send_to(key,Req.STOP)
 			self.await(key,Msg.STOPPING,0.1)
 		if nuclear == True:
@@ -98,8 +98,10 @@ class ServerPiece(object):
 if __name__ == '__main__': # Do some light testing
 	
 	# Create a client and a server 
-	cli = ClientPiece(Uid.TEST)
+	#cli = ClientPiece(Uid.TEST)
 	serv = ServerPiece()
+
+	serv.hit_it_and_quit_it(nuclear=True)
 
 	# Start the client
 	# Client uses the server's [send_string] & [recv_string] methods

@@ -10,6 +10,9 @@ class Uid:
 	EYETRACKER = 'eyetracker'
 	BLINK = 'blink'
 	TEST = 'test'
+	AUDIO = 'audio'
+	CONSOLE = 'console'
+	SYSTEM = 'system'
 
 
 class Req:
@@ -17,10 +20,12 @@ class Req:
 	MARCO = 'marco'
 	STOP = 'stop'
 	GET = 'get'
+	ARMAGEDDON = 'armageddon'
 
 
 class Msg:
 	''' Message topics output from Pieces '''
+	SET_PERIOD = 'set_period'
 	POLO = 'polo'
 	STARTED = 'started'
 	STOPPING = 'stopping'
@@ -39,12 +44,16 @@ class Tcp:
 
 
 def pack(uid,topic,data=None):
+	''' Takes 2 or 3 arguments, the content of the third is unspecified '''
+	assert uid in names(Uid)
+	assert topic in names(Req) or topic in names(Msg)
 	if data is None:
 		return uid+' '+topic
 	else:
 		return uid+' '+topic+' '+str(data)
 
 def unpack(msg):
+	''' Returns a well-formed message or None '''
 	msg_parts = msg.split(' ',2)
 	n = len(msg_parts)
 	if n == 3: return msg_parts
@@ -65,7 +74,7 @@ if __name__ == '__main__': # List class members and assert key messages present
 		for member in names(cls): print(member)
 		print('')
 
-	# These should always be there
+	# These names should always be there
 	Assert(names(Req)).contains('marco')
 	Assert(names(Req)).contains('stop')
 	Assert(names(Msg)).contains('polo')
