@@ -44,15 +44,12 @@ def pack(uid,topic,data=None):
 	else:
 		return uid+' '+topic+' '+str(data)
 
-def unpack2(msg):
+def unpack(msg):
 	msg_parts = msg.split(' ',2)
-	if len(msg_parts) != 2: return None
-	return msg_parts
-
-def unpack3(msg):
-	msg_parts = msg.split(' ',2)
-	if len(msg_parts) != 3: return None
-	return msg_parts
+	n = len(msg_parts)
+	if n == 3: return msg_parts
+	if n == 2: return [msg_parts[0],msg_parts[1],None]
+	return None
 
 def names(class_to_check):
 	''' Returns strings of a class' members '''

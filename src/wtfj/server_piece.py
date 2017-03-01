@@ -8,7 +8,7 @@ class ServerPiece(object):
 		self._pub = {}
 		self._echo = echo
 		self._silent = silent
-		for uid in member_names(Uid):
+		for uid in names(Uid):
 			self._pub[uid] = Queue()
 
 	def send_string(self,string):

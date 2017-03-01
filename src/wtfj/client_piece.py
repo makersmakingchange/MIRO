@@ -4,26 +4,31 @@ from Queue import Queue,Empty
 import traceback
 
 from uid import *
+from connector import *
 
-try:
-	DONTWAIT = zmq.DONTWAIT
-except Exception:
-	DONTWAIT = 1
 
 class ClientPiece(object):
-	def __init__(self,uid):
+	def __init__(self,uid,connector):
+		''' Requires a unique identifier and a connector supplying i/o '''
+		assert uid in names(Uid) # Fail if unique id not in master list
 		self._uid = uid
-		self._alive = False
-		self.flags = {}
-		self._subscriptions = []
-		assert self._uid in member_names(Uid)
+		# Fail if connector does not have required functions
+		members = dir(connector)
+		assert 'send' in members
+		assert 'poll' in members
+		assert 'subscribe' in members
+		self._conn = connector
+		self._alive = False # Controls polling event loop
+		self._period = 0.001 # Update period in seconds
+		self._subscriptions = [] # List of uids to listen to besides own
 
-	def start(self,connector,echo=False):
+	def start(self,echo=False):
+		''' Starts the polling thread '''
 		self._birthday = time.clock()
 		self._echo = echo
-		self._connector = connector
-		self._alive = True
 		self.subscribe('@'+self._uid)
+		# Set thread to live and start
+		self._alive = True
 		poll_thread = Thread(target=self._poll)
 		poll_thread.start()
 		self._on_start()
@@ -36,57 +41,46 @@ class ClientPiece(object):
 		''' Public access to stop the polling loop '''
 		self._on_stop()
 
-	def send(self,topic,data=''):
+	def send(self,topic,data=None):
 		''' Sends a message string to the server, whether a Python process or tcp '''
-		if data == '':
-			msg = self._uid+' '+topic
-		else:
-			msg = self._uid+' '+topic+' '+data
+		msg = pack(self._uid,topic,data)
 		########### INTERFACE ##########
-		self._connector.send_string(msg)
+		self._conn.send(msg)
 		############ OUTPUT ############
 
 	def send_to(self,uid,topic,data=''):
 		''' Constructs messages targeted for a specific client or service '''
-		if data == '':
-			msg = '@'+uid+' '+topic
-		else:
-			msg = '@'+uid+' '+topic+' '+data
+		msg = pack('@'+uid,topic,data)
 		########### INTERFACE ##########
-		self._connector.send_string(msg)
+		self._conn.send(msg)
 		############ OUTPUT ############
+
+	def subscribe(self,topic):
+		''' Keep a list of subscriptions and set in connector'''
+		self._conn.subscribe(topic)
+		self._subscriptions.append(topic)
 
 	def err(self,msg):
 		self.send(Msg.ERR,msg)
 
-	def _on_uptime(self):
+	def _on_uptime(self,data=None):
 		self.send(Msg.UPTIME,str(time.clock() - self._birthday))
 
-	def subscribe(self,topic):
-		''' Keep a list of subscriptions and set in connector'''
-		self._connector.subscribe(topic)
-		self._subscriptions.append(topic)
-
-	def _poll(self,period_s=0.001):
+	def _poll(self):
 		''' Run in its own thread '''
-		''' This is the only network for this Piece '''
 		while self._alive == True:
-			################## INTERFACE ###################
-			msg = self._connector.recv_string(uid=self._uid)
-			#################### INPUT #####################
-			if msg is not None:
+			while True:
+				msg = self._conn.poll(uid=self._uid) # GET ONE INCOMING MESSAGE
+				if msg is None: break
 				if self._interpret(msg) == False:
-					if self._echo == True:
-						########### INTERFACE ##########
-						self._connector.send_string(msg)
-						############ OUTPUT ############
-			time.sleep(0.1)
-		try:
-			self._poll_event()
-		except AttributeError:
-			pass
+					if self._echo == True: self._conn.send(msg) # ECHO OUT
+			time.sleep(self._period)
+			try:
+				self._poll_event()
+			except AttributeError:
+				pass
 
-	def _on_marco(self):
+	def _on_marco(self,data=None):
 		self.send(Msg.POLO)
 
 	def _on_stop(self,data=None):
@@ -101,51 +95,47 @@ class ClientPiece(object):
 		self.send(Msg.STARTED)
 
 	def _interpret(self,msg):
-		self._last_msg_time = time.clock()
-		ret = False
-		fail_silent = False
-		parts = msg.split(' ',2)
+		''' 
+		Attempts to parse the incoming packet 
+		Calls a function based on the msg content
+		'''
+		parts = unpack(msg)
+		if parts is None: 
+			self.err('malformed message ['+msg+'], found '+str(len(parts))+' of minimum 2 arguments')
+			return False
+
+		uid,topic,data = parts # Data may equal None
+
 		try:
-			size = len(parts)
-			if size < 2:
-				self.err('malformed message ['+msg+'], found '+str(size)+' of minimum 2 arguments')
-			else:
-				if parts[0] == '@'+self._uid:
-					if size == 3:
-						getattr(self,'_on_'+parts[1])(parts[2])
-					else:
-						getattr(self,'_on_'+parts[1])()
-					ret = True
-				elif parts[0] in self._subscriptions:
-					# Fail silently when receiving a message from an interest as most of these
-					# will not be mapped to functions to handle them
-					fail_silent = True
-					if size == 3:
-						getattr(self,'_on_'+parts[0]+'_'+parts[1])(parts[2])
-					else:
-						getattr(self,'_on_'+parts[0]+'_'+parts[1])()
-					ret = True
-		except AttributeError as e:
-			if not fail_silent: self.err('no interpretation of message ['+msg+'] available')
+			if uid == '@'+self._uid:
+				try:
+					getattr(self,'_on_'+topic)(data)
+				except AttributeError as e:
+					self.err('no interpretation of message ['+msg+'] available')
+					return False
+			elif uid in self._subscriptions:
+				try:
+					getattr(self,'_on_'+uid+'_'+topic)(data)
+				except AttributeError:
+					return False
 		except Exception as e:
 			self.err('exception thrown\n'+traceback.format_exc())
-		return ret
+			return False
+		return True
 
 if __name__ == '__main__': # Make a test server, start client, quit
 	
-	from server_piece import *
-	serv = ServerPiece(echo=True)
-	
-	cp = ClientPiece(Uid.TEST)
-	cp.start(serv)
-	serv.poll()
+	sc = ScriptConnector()
+	sc.set_frequency(10)
+	sc.set_msgs([
+		'First polling event',
+		pack('@'+Uid.TEST,Req.MARCO),
+		pack('@'+Uid.TEST,Req.MARCO),
+		pack('@'+Uid.TEST,Req.STOP)
+		])
+	sc.poll()
 
-	serv.send_to(Uid.TEST,Req.MARCO)
-	Assert(serv.poll(1)).sent_by(Uid.TEST).topic_is(Msg.POLO)
-	
+	cp = ClientPiece(Uid.TEST,sc)
+	cp.start()
 	time.sleep(1)
-
-	cp.stop()
-
-	serv.poll()
 
