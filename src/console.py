@@ -96,8 +96,15 @@ poll_thread.start()
 from wtfj import *
 
 class Console(Piece):
+	def _after_start(self):
+		self._alert = False
+
 	def _poll_event(self,data=None):
-		print('hello')
+		if self._alert is True:
+			print('hello')
+
+	def _on_set(self,data=None):
+		self._alert = data is 'alert'
 
 class Armageddon(Piece):
 	def _on_armageddon(self,data=None):
@@ -108,16 +115,30 @@ class Armageddon(Piece):
 if __name__ == '__main__':
 	import time
 
-	armageddon = Armageddon(Uid.SYSTEM,ScriptConnector(['@system armageddon']))
-	#armageddon.start()
+	zcc = ZmqClientConnector()
+	armageddon = Armageddon(Uid.SYSTEM,zcc)
 
 	zsc = ZmqServerConnector()
 	console = Console(Uid.CONSOLE,zsc)
+	zsc.subscribe('system')
 
+	#console.send('@system armageddon')
+
+	user_in = None
 	console.start()
-	user_in = raw_input('[$] ')
-	console.send(user_in)
+	zcc.send('@console user What is wrong buddy?')
+	try:
+		while user_in != 'quit':
+			user_in = raw_input('[$] ')
+			console.send(user_in)
+			print(zsc.poll())
+	except EOFError:
+		print('Console can not be read from, try running on command line')
+	except KeyboardInterrupt as e:
+		print(repr(e))
+	
 	console.stop()
+	armageddon.stop()
 
 
 '''

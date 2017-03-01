@@ -129,6 +129,7 @@ if __name__ == '__main__': # Unit test
 	zcc3 = ZmqClientConnector()
 
 	zsc = ZmqServerConnector()
+	zcc.subscribe(Uid.TEST)
 
 	time.sleep(0.5)
 
@@ -136,8 +137,9 @@ if __name__ == '__main__': # Unit test
 	response = zsc.poll()[0]
 	Assert(response).contains('Hello')
 
-	zcc2.send('My')
-	response = zsc.poll()[0]
+	zsc.send('My')
+	time.sleep(0.5)
+	response = zcc.poll()
 	Assert(response).equals('My')
 
 	zcc3.send('Baby')

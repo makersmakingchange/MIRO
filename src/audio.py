@@ -1,5 +1,5 @@
 import winsound
-from wtfj import Piece,ScriptConnector,Uid
+from wtfj import *
 
 AUDIO_PATH = '../res/audio/'
 
@@ -14,12 +14,17 @@ class Audio(Piece):
 if __name__ == '__main__':
 	
 	script = [
+		'@audio uptime',
 		'@audio set_period 1',
 		'@audio marco',
 		'@audio speak a',
-		'@audio speak z',
 		'@audio speak a_to_m',
 		'@audio speak #undo',
+		'@audio set_period 0.2',
+		'@audio speak a',
+		'@audio speak a_to_m',
+		'@audio speak #undo',
+		'@audio uptime',
 		'@audio stop'
 	]
 

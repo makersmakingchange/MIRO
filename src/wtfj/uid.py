@@ -20,12 +20,12 @@ class Req:
 	MARCO = 'marco'
 	STOP = 'stop'
 	GET = 'get'
+	SET = 'set'
 	ARMAGEDDON = 'armageddon'
 
 
 class Msg:
 	''' Message topics output from Pieces '''
-	SET_PERIOD = 'set_period'
 	POLO = 'polo'
 	STARTED = 'started'
 	STOPPING = 'stopping'
@@ -33,6 +33,7 @@ class Msg:
 	SIZE = 'size'
 	ACK = 'ack'
 	UPTIME = 'uptime'
+	USER = 'user'
 
 
 class Tcp:
