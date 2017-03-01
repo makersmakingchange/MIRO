@@ -4,7 +4,7 @@ from Queue import Queue,Empty
 import traceback
 
 from uid import *
-from connector import *
+from script_connector import ScriptConnector
 
 
 class Piece(object):

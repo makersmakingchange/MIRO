@@ -120,7 +120,6 @@ if __name__ == '__main__':
 
 	zsc = ZmqServerConnector()
 	console = Console(Uid.CONSOLE,zsc)
-	zsc.subscribe('system')
 
 	#console.send('@system armageddon')
 

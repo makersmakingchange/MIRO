@@ -1,5 +1,4 @@
-from client_piece import *
-from wtfj_assert import *
+##########333 BROOOOOOOOOKKEN
 import os
 
 class ServerPiece(object):
