@@ -11,19 +11,19 @@ except Exception:
 	DONTWAIT = 1
 
 class ClientPiece(object):
-	def __init__(self,id):
-		self._Uid = id
+	def __init__(self,uid):
+		self._uid = uid
 		self._alive = False
 		self.flags = {}
-		assert self._Uid in member_names(Uid)
+		self._subscriptions = []
+		assert self._uid in member_names(Uid)
 
-	def start(self,subscriber,pusher=None,echo=False):
+	def start(self,connector,echo=False):
 		self._birthday = time.clock()
 		self._echo = echo
-		self._subscriptions = []
-		self._sub = subscriber
-		self._push = subscriber if pusher is not None else pusher
+		self._connector = connector
 		self._alive = True
+		self.subscribe('@'+self._uid)
 		poll_thread = Thread(target=self._poll)
 		poll_thread.start()
 		self._on_start()
@@ -39,16 +39,22 @@ class ClientPiece(object):
 	def send(self,topic,data=''):
 		''' Sends a message string to the server, whether a Python process or tcp '''
 		if data == '':
-			self._push.send_string(self._Uid+' '+topic)
+			msg = self._uid+' '+topic
 		else:
-			self._push.send_string(self._Uid+' '+topic+' '+data)
+			msg = self._uid+' '+topic+' '+data
+		########### INTERFACE ##########
+		self._connector.send_string(msg)
+		############ OUTPUT ############
 
-	def send_to(self,Uid,topic,data=''):
+	def send_to(self,uid,topic,data=''):
 		''' Constructs messages targeted for a specific client or service '''
 		if data == '':
-			self._push.send_string('@'+Uid+' '+topic)
+			msg = '@'+uid+' '+topic
 		else:
-			self._push.send_string('@'+Uid+' '+topic+' '+data)
+			msg = '@'+uid+' '+topic+' '+data
+		########### INTERFACE ##########
+		self._connector.send_string(msg)
+		############ OUTPUT ############
 
 	def err(self,msg):
 		self.send(Msg.ERR,msg)
@@ -57,22 +63,31 @@ class ClientPiece(object):
 		self.send(Msg.UPTIME,str(time.clock() - self._birthday))
 
 	def subscribe(self,topic):
+		''' Keep a list of subscriptions and set in connector'''
+		self._connector.subscribe(topic)
 		self._subscriptions.append(topic)
 
 	def _poll(self,period_s=0.001):
+		''' Run in its own thread '''
+		''' This is the only network for this Piece '''
 		while self._alive == True:
-			msg = self._sub.recv_string(DONTWAIT,self._Uid)
+			################## INTERFACE ###################
+			msg = self._connector.recv_string(uid=self._uid)
+			#################### INPUT #####################
 			if msg is not None:
 				if self._interpret(msg) == False:
 					if self._echo == True:
-						self._push.send_string(msg)
-			time.sleep(period_s)
+						########### INTERFACE ##########
+						self._connector.send_string(msg)
+						############ OUTPUT ############
+			time.sleep(0.1)
+		try:
+			self._poll_event()
+		except AttributeError:
+			pass
 
 	def _on_marco(self):
 		self.send(Msg.POLO)
-
-	#def _on_poll(self):
-
 
 	def _on_stop(self,data=None):
 		try:
@@ -95,7 +110,7 @@ class ClientPiece(object):
 			if size < 2:
 				self.err('malformed message ['+msg+'], found '+str(size)+' of minimum 2 arguments')
 			else:
-				if parts[0] == '@'+self._Uid:
+				if parts[0] == '@'+self._uid:
 					if size == 3:
 						getattr(self,'_on_'+parts[1])(parts[2])
 					else:
@@ -119,13 +134,18 @@ class ClientPiece(object):
 if __name__ == '__main__': # Make a test server, start client, quit
 	
 	from server_piece import *
-	serv = ServerPiece()
+	serv = ServerPiece(echo=True)
 	
 	cp = ClientPiece(Uid.TEST)
-	cp.start(serv,serv)
-	cp.stop()
-	response = serv.poll()
-	response = serv.poll()
+	cp.start(serv)
+	serv.poll()
 
-	Assert.success()
+	serv.send_to(Uid.TEST,Req.MARCO)
+	Assert(serv.poll(1)).sent_by(Uid.TEST).topic_is(Msg.POLO)
+	
+	time.sleep(1)
+
+	cp.stop()
+
+	serv.poll()
 

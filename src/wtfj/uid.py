@@ -34,26 +34,43 @@ class Tcp:
 	''' Networking constants '''
 	SOCKET_SUB = 'tcp://localhost:5556'
 	SOCKET_PUSH = 'tcp://localhost:5557'
+	SOCKET_PUB = 'tcp://*:5556'
+	SOCKET_PULL = 'tcp://*:5557'
 
 
-def member_names(class_to_check):
+def pack(uid,topic,data=None):
+	if data is None:
+		return uid+' '+topic
+	else:
+		return uid+' '+topic+' '+str(data)
+
+def unpack2(msg):
+	msg_parts = msg.split(' ',2)
+	if len(msg_parts) != 2: return None
+	return msg_parts
+
+def unpack3(msg):
+	msg_parts = msg.split(' ',2)
+	if len(msg_parts) != 3: return None
+	return msg_parts
+
+def names(class_to_check):
 	''' Returns strings of a class' members '''
 	return [getattr(class_to_check,member) for member in dir(class_to_check) 
 		if '__' not in member]
+
 
 if __name__ == '__main__': # List class members and assert key messages present
 
 	# Outputs all class members
 	for cls in [Uid,Req,Msg,Tcp]:
 		print('['+repr(cls.__name__)+']')
-		for member in member_names(cls): print(member)
+		for member in names(cls): print(member)
 		print('')
 
 	# These should always be there
-	assert 'marco' in member_names(Req)
-	assert 'stop' in member_names(Req)
-	assert 'polo' in member_names(Msg)
-	assert 'started' in member_names(Msg)
-	assert 'stopping' in member_names(Msg)
-
-	Assert.success()
+	Assert(names(Req)).contains('marco')
+	Assert(names(Req)).contains('stop')
+	Assert(names(Msg)).contains('polo')
+	Assert(names(Msg)).contains('started')
+	Assert(names(Msg)).contains('stopping')

@@ -38,7 +38,6 @@ class SlowPoke(ClientPiece):
 
 
 if __name__ == '__main__': # Test a few different clients 
-
 	# Start a local loopback server
 	serv = ServerPiece(echo=True)
 
