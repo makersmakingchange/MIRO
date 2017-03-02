@@ -49,6 +49,7 @@ class Msg:
 	USER = 'user'
 	SELECT = 'select'
 	IDLE = 'idle'
+	MOUSE = 'mouse'
 
 
 class Tcp:
