@@ -3,6 +3,14 @@ from threading import Thread
 import threading
 from uid import Uid,names
 
+class Printer:
+	''' Opens a new output window and prints messages sent to it '''
+	def __init__(self,header=''):
+		self._header = header
+
+	def send(self,string):
+		print(self._header+string)
+
 class Script:
 	''' Runs a script passed as a list, default frequency = 1000Hz '''
 	def __init__(self,msgs):
@@ -11,13 +19,7 @@ class Script:
 		self._period = 0.001
 		self._pid = 'SCRIPT'
 	
-	def send(self,string):
-		''' Send TO this connector '''
-		print(self._pid+' RECV < '+string)
-		return self
-	
 	def poll(self,wait_s=None,uid=None):
-		''' Poll FROM this connector '''
 		period = self._period if wait_s is None else wait_s
 		time.sleep(period)
 		try:
@@ -51,8 +53,11 @@ class Script:
 	def run_async(self):
 		Thread(target=self.run).start()
 
+
 if __name__ == '__main__':
 	
+	Printer('A simple printer: ').send('Just printing a msg to current_thread')
+
 	script = [
 		'@other_uid topic data',
 		'@other_uid topic',

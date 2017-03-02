@@ -2,7 +2,8 @@
 ''' Auth: max@embeddedprofessional.com '''
 
 from wtfj_assert import *
-
+import subprocess
+import os
 
 class Uid:
 	''' List of the different components available at runtime '''
@@ -20,9 +21,9 @@ class Req:
 	''' Message topics sent as requests to Pieces '''
 	MARCO = 'marco'
 	STOP = 'stop'
-	GET = 'get'
-	SET = 'set'
-	ARMAGEDDON = 'armageddon'
+	SIZE = 'size'
+	UPTIME = 'uptime'
+	PERIOD = 'period'
 
 
 class Msg:
@@ -31,10 +32,10 @@ class Msg:
 	STARTED = 'started'
 	STOPPING = 'stopping'
 	ERR = 'err'
-	SIZE = 'size'
 	ACK = 'ack'
-	UPTIME = 'uptime'
 	USER = 'user'
+	SELECT = 'select'
+	IDLE = 'idle'
 
 
 class Tcp:
@@ -52,7 +53,7 @@ def pack(uid,topic,data=None):
 	if data is None:
 		return uid+' '+topic
 	else:
-		return uid+' '+topic+' '+str(data)
+		return uid+' '+topic+' '+bytes(data)
 
 def unpack(msg):
 	''' Returns a well-formed message or None '''
@@ -62,10 +63,41 @@ def unpack(msg):
 	if n == 2: return [msg_parts[0],msg_parts[1],None]
 	return None
 
+def name(piece):
+	''' Returns id based on class name '''
+	return piece.__class__.__name__.lower()
+
 def names(class_to_check):
 	''' Returns strings of a class' members '''
 	return [getattr(class_to_check,member) for member in dir(class_to_check) 
 		if '__' not in member]
+
+def make_color(r_uint8,g_uint8,b_uint8):
+	''' Color in 24-bit RGB format to '0x#######' string format '''
+	r = '0x{:02x}'.format(r_uint8).replace('0x','')
+	g = '0x{:02x}'.format(g_uint8).replace('0x','')
+	b = '0x{:02x}'.format(b_uint8).replace('0x','')
+	return '#'+r+g+b
+
+def run_exe(uid):
+	try:
+		subprocess.Popen(['../bin/'+uid+'/'+ id+'.exe'])
+	except OSError as e :
+		pub.send_string('@err console '+ str(e))
+		log_write('@err console '+ str(e))
+	
+def run_py_new_window(uid):
+	try:
+		subprocess.Popen(['python',uid+'.py'],
+			creationflags=subprocess.CREATE_NEW_CONSOLE)
+	except AttributeError as e: 
+		pub.send_string('@err console '+ str(e))
+		log_write('@err console '+ str(e))
+
+def run_py(uid):
+	subprocess.Popen(['python',uid+'.py'],
+		shell=True,
+		env=dict(os.environ))
 
 
 if __name__ == '__main__': # List class members and assert key messages present

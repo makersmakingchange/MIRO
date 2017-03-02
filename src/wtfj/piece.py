@@ -4,14 +4,14 @@ from Queue import Queue,Empty
 import traceback
 
 from uid import *
-from connectors_local import Script
+from connectors_local import *
 
 
 class Piece(object):
 	def __init__(self,incoming,outgoing=None,uid=None):
 		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
 		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
-		self._uid = self.__class__.__name__.lower() if uid is None else uid
+		self._uid = name(self) if uid is None else uid
 		self._out = incoming if outgoing is None else outgoing
 		self._in = incoming
 		# Fail if connector does not have required functions
@@ -49,7 +49,7 @@ class Piece(object):
 		try:
 			self._out.send(pack(self._uid,topic,data))
 		except AssertionError as e:
-			self.err('Uid or topic invalid '+repr(e))
+			self.err('Uid or topic invalid for msg ['+str(topic)+']['+str(data)+']\n'+repr(e))
 
 	def send_to(self,uid,topic,data=''):
 		''' Sends a message string targeted for a specific client or service '''
@@ -57,12 +57,12 @@ class Piece(object):
 		try:
 			self._out.send(pack('@'+uid,topic,data))
 		except AssertionError as e:
-			self.err('Uid or topic invalid '+repr(e))
+			self.err('Uid or topic invalid for msg ['+str(topic)+']['+str(data)+']\n'+repr(e))
 		return self
 
 	def subscribe(self,*uids):
 		''' Keep a list of subscriptions and set in connector'''
-		self._in.subscribe(uids)
+		self._in.subscribe(*uids)
 		for uid in uids:
 			self._subscriptions.append(uid)
 		return self
@@ -127,9 +127,9 @@ class Piece(object):
 		self.send(Msg.STOPPING)
 
 	def _on_uptime(self,data=None):
-		self.send(Msg.UPTIME,str(time.clock() - self._birthday))
+		self.send(Req.UPTIME,str(time.clock() - self._birthday))
 
-	def _on_set_period(self,data=None):
+	def _on_period(self,data=None):
 		try:
 			self._period = float(data)
 			return
@@ -144,14 +144,14 @@ if __name__ == '__main__': # Make a test server, start client, quit
 	
 	script = [
 		'@piece marco',
-		'@piece set_period 1',
+		'@piece period 1',
 		'@piece uptime',
 		'@piece uptime',
-		'@piece set_period 0.1',
+		'@piece period 0.1',
 		'@piece uptime',
 		'@piece uptime',
 		'@piece throw error',
 		'@piece stop'
 	]
 
-	Piece(Script(script)).start()
+	Piece(Script(script),Printer('RECV < ')).start()

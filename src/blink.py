@@ -1,86 +1,58 @@
-import zmq
-import time 
+from wtfj import *
+import random
+import time
+random.seed()
 
 
-# Constants and stable vars
-SOCKET_SUB = 'tcp://localhost:5556'
-SOCKET_PUSH = 'tcp://localhost:5557'
-BLINK_TIME = .15
-topic_filter = '@blink'
-interest_filter = 'eyetracker'
-size_filter = 'gui'
+class Blink(Piece):
 
-# Connect to sockets
-context = zmq.Context()
-push = context.socket(zmq.PUSH)
-sub = context.socket(zmq.SUB)
-push.connect(SOCKET_PUSH)
-sub.connect(SOCKET_SUB)
-poller = zmq.Poller()
-poller.register(sub,zmq.POLLIN)
+	def _after_start(self):
+		self._time_last_eye_msg_recvd = None
+		self._blinked = False
+		self._blink_threshold = 0.5
 
+	def _on_eyetracker_gaze(self,data=None):
+		self._time_last_eye_msg_recvd = time.clock()
 
-# for python3 
-if isinstance(topic_filter, bytes):
-	topic_filter = topic_filter.decode('ascii')
-sub.setsockopt_string(zmq.SUBSCRIBE,topic_filter)
-
-# for python3 
-if isinstance(interest_filter, bytes):
-	interest_filter = interest_filter.decode('ascii')
-sub.setsockopt_string(zmq.SUBSCRIBE,interest_filter)
-
-# for python3 
-if isinstance(size_filter, bytes):
-	size_filter = size_filter.decode('ascii')
-sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
-
-#send request to grab size of gui 
-push.send_string('@gui size=get')
-
-msg = sub.recv_string().split()
-if msg[1] == 'size':
-	size = [int(n) for n in msg[2].split(',')]	
-last_point = None 
-last_time_unmatched = time.clock()
-coor = ''
-
-blink_detected = False
-
-
-while True:    
-	if len(poller.poll(1)) > 0:
-		parts = sub.recv_string().split()
-		# we got something
-		if len(parts) > 0:
-			try:
-
-				if 'cmd=quit' in parts[1]:
-					push.send_string('blink quitting')
-					quit()
-				coor = parts[1].split(',')
-				if len(coor) > 0:
-					last_time_unmatched = time.clock()
-			except IndexError:
-				push.send_string('@err blink not enough arguments')            
-	else:
-		try:
-			#push.send_string('not receiving anything')
-			if time.clock() - last_time_unmatched > BLINK_TIME :
-				side = ''
-				if int(coor[0]) < 0.5*size[0]:
-					side = 'left'
-				else:
-					side = 'right'
-				if blink_detected == False:
-					if side == 'left' or side == 'right':
-						blink_detected = True
-						if side == 'left':
-							push.send_string('@engine sel=0')
-						else:
-							push.send_string('@engine sel=1')
+	def _poll_event(self):
+		if self._time_last_eye_msg_recvd is not None:
+			now = time.clock()
+			delta = now - self._time_last_eye_msg_recvd
+			if delta > self._blink_threshold and self._blinked is False:
+				self._blinked = True
+				self.send(Msg.SELECT)
 			else:
-				blink_detected = False
-		except IndexError:
-			pass		 
-			
+				self._blinked = False
+
+
+if __name__ == '__main__':
+
+	eyes = [
+		'@blink marco',
+		'@blink period 0.1',
+		'@blink uptime'
+	]
+
+	for i in range(0,5):
+		x,y = random.randint(0,1280),random.randint(0,720)
+		msg = 'eyetracker gaze '+str(x)+','+str(y)
+		eyes.append(msg)
+
+	eyes.append('@blink period 1')
+
+	for i in range(0,5):
+		x,y = random.randint(0,1280),random.randint(0,720)
+		msg = 'eyetracker gaze '+str(x)+','+str(y)
+		eyes.append(msg)
+		eyes.append(pack(Uid.SYSTEM,Msg.IDLE))
+
+	eyes.append('@blink period 0.1')
+
+	for i in range(0,5):
+		x,y = random.randint(0,1280),random.randint(0,720)
+		msg = 'eyetracker gaze '+str(x)+','+str(y)
+		eyes.append(msg)
+
+	eyes.append('@blink stop')
+
+	Blink(Script(eyes),Printer('RECV < ')).subscribe('eyetracker').start()

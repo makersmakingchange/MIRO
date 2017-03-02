@@ -15,12 +15,12 @@ if __name__ == '__main__':
 	
 	script = [
 		'@audio uptime',
-		'@audio set_period 1',
+		'@audio period 1',
 		'@audio marco',
 		'@audio speak a',
 		'@audio speak a_to_m',
 		'@audio speak #undo',
-		'@audio set_period 0.2',
+		'@audio period 0.2',
 		'@audio speak a',
 		'@audio speak a_to_m',
 		'@audio speak #undo',
@@ -29,12 +29,13 @@ if __name__ == '__main__':
 	]
 
 	s = Script(script)
+	p = Printer()
 
 	# Audio runs asynchronously
-	Audio(s).start()
+	Audio(s,p).start()
 
 	time.sleep(10)
 
 	# Short script creation and invocation
-	Audio(Script(['@audio marco','@audio speak n_to_z','@audio stop'])).start()
+	Audio(Script(['@audio marco','@audio speak n_to_z','@audio stop']),p).start()
 		
