@@ -28,5 +28,13 @@ if __name__ == '__main__':
 		'@audio stop'
 	]
 
-	Audio(Uid.AUDIO,ScriptConnector(script)).start()
+	s = Script(script)
+
+	# Audio runs asynchronously
+	Audio(s).start()
+
+	time.sleep(10)
+
+	# Short script creation and invocation
+	Audio(Script(['@audio marco','@audio speak n_to_z','@audio stop'])).start()
 		

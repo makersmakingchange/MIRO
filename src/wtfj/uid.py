@@ -13,6 +13,7 @@ class Uid:
 	AUDIO = 'audio'
 	CONSOLE = 'console'
 	SYSTEM = 'system'
+	PIECE = 'piece'
 
 
 class Req:

@@ -4,29 +4,31 @@ from Queue import Queue,Empty
 import traceback
 
 from uid import *
-from script_connector import ScriptConnector
+from connectors_local import Script
 
 
 class Piece(object):
-	def __init__(self,uid,connector):
-		''' Requires a unique identifier and a connector supplying i/o '''
-		assert uid in names(Uid) # Fail if unique id not in master list
-		self._uid = uid
+	def __init__(self,incoming,outgoing=None,uid=None):
+		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
+		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
+		self._uid = self.__class__.__name__.lower() if uid is None else uid
+		self._out = incoming if outgoing is None else outgoing
+		self._in = incoming
 		# Fail if connector does not have required functions
-		members = dir(connector)
-		assert 'send' in members
-		assert 'poll' in members
-		assert 'subscribe' in members
-		self._conn = connector
+		assert 'send' in dir(self._out) 
+		assert 'poll' in dir(self._in)
+		assert 'subscribe' in dir(self._in)
+		# Fail if uid not in list
+		assert self._uid in names(Uid)
 		self._alive = False # Controls polling event loop
 		self._period = 0.001 # Update period in seconds
 		self._subscriptions = [] # List of uids to listen to besides own
+		self._in.subscribe('@'+self._uid)
 
 	def start(self,echo=False):
 		''' Starts the polling thread '''
 		self._birthday = time.clock()
 		self._echo = echo
-		self.subscribe('@'+self._uid)
 		# Set thread to live and start
 		self._alive = True
 		poll_thread = Thread(target=self._poll)
@@ -36,6 +38,7 @@ class Piece(object):
 			self._after_start()
 		except AttributeError:
 			pass
+		return self
 
 	def stop(self):
 		''' Public access to stop the polling loop '''
@@ -44,7 +47,7 @@ class Piece(object):
 	def send(self,topic,data=None):
 		''' Sends a message string to the connector '''
 		try:
-			self._conn.send(pack(self._uid,topic,data))
+			self._out.send(pack(self._uid,topic,data))
 		except AssertionError as e:
 			self.err('Uid or topic invalid '+repr(e))
 
@@ -52,17 +55,21 @@ class Piece(object):
 		''' Sends a message string targeted for a specific client or service '''
 		''' The connector bears responsibility for proper routing '''
 		try:
-			self._conn.send(pack('@'+uid,topic,data))
+			self._out.send(pack('@'+uid,topic,data))
 		except AssertionError as e:
 			self.err('Uid or topic invalid '+repr(e))
+		return self
 
-	def subscribe(self,topic):
+	def subscribe(self,*uids):
 		''' Keep a list of subscriptions and set in connector'''
-		self._conn.subscribe(topic)
-		self._subscriptions.append(topic)
+		self._in.subscribe(uids)
+		for uid in uids:
+			self._subscriptions.append(uid)
+		return self
 
 	def err(self,msg):
 		self.send(Msg.ERR,msg)
+		return self
 
 	def _interpret(self,msg):
 		''' 
@@ -97,7 +104,7 @@ class Piece(object):
 		''' Run in its own thread '''
 		while self._alive == True:
 			# Loop through all new available messages
-			msgs = self._conn.poll(uid=self._uid,wait_s=self._period)
+			msgs = self._in.poll(uid=self._uid,wait_s=self._period)
 			for msg in msgs: 
 				# Process each message
 				if self._interpret(msg) == False:
@@ -136,15 +143,15 @@ class Piece(object):
 if __name__ == '__main__': # Make a test server, start client, quit
 	
 	script = [
-		'@test marco',
-		'@test set_period 1',
-		'@test uptime',
-		'@test uptime',
-		'@test set_period 0.1',
-		'@test uptime',
-		'@test uptime',
-		'@test throw error',
-		'@test stop'
+		'@piece marco',
+		'@piece set_period 1',
+		'@piece uptime',
+		'@piece uptime',
+		'@piece set_period 0.1',
+		'@piece uptime',
+		'@piece uptime',
+		'@piece throw error',
+		'@piece stop'
 	]
 
-	Piece(Uid.TEST,ScriptConnector(script)).start()
+	Piece(Script(script)).start()

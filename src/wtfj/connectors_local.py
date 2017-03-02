@@ -1,16 +1,10 @@
-from connector import Connector
 import time
 from threading import Thread
 import threading
-import random
+from uid import Uid,names
 
-
-class ScriptConnector(Connector):
-	''' 
-	Runs a script passed as a list, default frequency = 1000Hz 
-	'''
-	random.seed()
-
+class Script:
+	''' Runs a script passed as a list, default frequency = 1000Hz '''
 	def __init__(self,msgs):
 		self._msgs = msgs
 		self._index = 0
@@ -34,7 +28,11 @@ class ScriptConnector(Connector):
 		except IndexError:
 			return []
 
-	def subscribe(self,topic):
+	def subscribe(self,*uids):
+		for uid in uids:
+			if uid is not None:
+				if uid[0] is '@': assert uid[1:] in names(Uid)
+				else: assert uid in names(Uid)
 		return self
 
 	def load(self,msg_array):
@@ -65,6 +63,6 @@ if __name__ == '__main__':
 	async = ['async topic '+str(n) for n in [1,2,3,4,5,6,7,8,9,0]]
 	async2 = ['async2 topic '+str(n) for n in [1,2,3,4,5,6,7,8,9,0]]
 
-	ScriptConnector(script).set_period(1).run()
-	ScriptConnector(async).set_period(0.15).run_async()
-	ScriptConnector(async2).set_period(0.2).run_async()
+	Script(script).set_period(1).run()
+	Script(async).set_period(0.15).run_async()
+	Script(async2).set_period(0.2).run_async()
