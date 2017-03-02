@@ -36,17 +36,22 @@ class TkPiece(Piece,Frame):
 	def _ON_esc(self,data): self.stop()
 
 	def _ON_console(self,data):
+		#super(Piece,self)._ON_console
 		self._canvas.itemconfigure(self._text[Msg.CONSOLE],text=data)
 
-try:
-	raw_input()
-	incoming = Console('[>] ')
-except EOFError as e: # No console input available
-	incoming = Script([
-		'@tkpiece marco',
-		'@tkpiece period 0.2'
-	])
-outgoing = Printer('[<] ')
-tkp = TkPiece(incoming,outgoing)
-tkp.start()
-tkp.stop()
+
+if __name__ == '__main__':
+
+	try:
+		print('Press enter to start')
+		raw_input()
+		incoming = Console('[>] ')
+	except EOFError as e: # No console input available
+		incoming = Script([
+			'@tkpiece marco',
+			'@tkpiece period 0.2'
+		])
+	outgoing = Printer('[<] ')
+	tkp = TkPiece(incoming,outgoing)
+	tkp.start()
+	tkp.stop()
