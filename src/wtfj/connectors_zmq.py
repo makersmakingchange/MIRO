@@ -3,7 +3,7 @@ from uid import Tcp,Uid,names
 from __init__ import make_color
 
 class ZmqPublisher:
-
+	''' Publisher that acts as server output '''
 	def __init__(self):
 		context = zmq.Context()
 		self._pub = context.socket(zmq.PUB)
@@ -14,7 +14,8 @@ class ZmqPublisher:
 
 
 class ZmqSubscriber:
-
+	''' Client receiver for publisher above '''
+	''' Subcription should really take place in the Piece this connects to '''
 	def __init__(self,*uids):
 		context = zmq.Context()
 		self._sub = context.socket(zmq.SUB)
@@ -46,7 +47,7 @@ class ZmqSubscriber:
 
 
 class ZmqPusher:
-
+	''' Pushes client msgs back to server '''
 	def __init__(self):
 		context = zmq.Context()
 		self._push = context.socket(zmq.PUSH)
@@ -57,7 +58,7 @@ class ZmqPusher:
 
 
 class ZmqPuller:
-
+	''' Pulls messages into server '''
 	def __init__(self):
 		context = zmq.Context()
 		self._pull = context.socket(zmq.PULL)
@@ -81,6 +82,7 @@ class ZmqPuller:
 if __name__ == '__main__': # Set up client and server connections and test
 
 	import time
+	print('Send a test message from client to server and server to client')
 
 	# Server connections
 	zpub = ZmqPublisher() # Publishes messages to all subscribers
@@ -97,9 +99,9 @@ if __name__ == '__main__': # Set up client and server connections and test
 
 	start = time.clock()
 
-	zpush.send('@test marco')
+	zpush.send('test polo')
 	time.sleep(1)
-	assert zpull.poll() == ['@test marco']
+	assert zpull.poll() == ['test polo']
 	delta = time.clock() - start
 
 	print('Success')

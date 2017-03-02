@@ -1,5 +1,6 @@
 from wtfj import *
-from blink import Blink
 
-run_py_new_window(Uid.BLINK)
-run_py_new_window(Uid.AUDIO)
+run_piece(Uid.TKPIECE,Mode.NEW_WINDOW)
+#run_piece(Uid.BLINK,Mode.NEW_WINDOW)
+#run_piece(Uid.AUDIO,Mode.LOCAL)
+#run_piece(Uid.EYETRACKER,Mode.EXE)

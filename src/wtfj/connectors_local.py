@@ -1,7 +1,7 @@
 import time
 from threading import Thread
 import threading
-from uid import Uid,names
+from wtfj_ids import *
 
 class Printer:
 	''' Opens a new output window and prints messages sent to it '''
@@ -10,6 +10,17 @@ class Printer:
 
 	def send(self,string):
 		print(self._header+string)
+
+class Console:
+	''' Allows user to enter commands '''
+	def __init__(self,prompt='[$] '):
+		self._prompt = prompt
+
+	def poll(self,wait_s=None,uid=None):
+		return [raw_input(self._prompt)]
+
+	def subscribe(self,*uids):
+		pass
 
 class Script:
 	''' Runs a script passed as a list, default frequency = 1000Hz '''

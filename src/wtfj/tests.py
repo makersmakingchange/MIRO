@@ -3,6 +3,8 @@ from piece import Piece
 from uid import Uid
 import time
 
+print('[Testing zmq messaging]')
+
 # Server connections
 zpub = ZmqPublisher() # Publishes messages to all subscribers
 zpull = ZmqPuller() # Pulls messages fom all subscribers
@@ -17,12 +19,22 @@ time.sleep(1)
 # Test a Piece over zmq connections
 p = Piece(zsub,zpush)
 p.start()
-zpub.send('@piece marco')
 
-time.sleep(1)
+response = zpull.poll()
+assert response is not []
+print(response[0])
+
+zpub.send('@piece marco')
+time.sleep(0.1)
 
 response = zpull.poll()
 assert response is not []
 print(response[0])
 
 p.stop()
+
+response = zpull.poll()
+assert response is not []
+print(response[0])
+
+print('[Success]')

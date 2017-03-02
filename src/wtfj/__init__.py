@@ -9,3 +9,5 @@ from uid import *
 from piece import *
 from connectors_local import *
 from wtfj_assert import *
+from wtfj_utils import *
+from wtfj_ids import *

@@ -3,11 +3,14 @@ from threading import Thread
 from Queue import Queue,Empty
 import traceback
 
-from uid import *
+from wtfj_ids import *
+from wtfj_utils import *
 from connectors_local import *
 
 
 class Piece(object):
+	''' Pretty much everything in the system that's not a pipe is made of this '''
+	''' Pieces are assigned identifiers based on their class '''
 	def __init__(self,incoming,outgoing=None,uid=None):
 		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
 		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
@@ -19,7 +22,11 @@ class Piece(object):
 		assert 'poll' in dir(self._in)
 		assert 'subscribe' in dir(self._in)
 		# Fail if uid not in list
-		assert self._uid in names(Uid)
+		try:
+			assert self._uid in names(Uid)
+		except AssertionError:
+			print('['+self._uid+'] not in ['+str(names(Uid))+']')
+			raise AssertionError
 		self._alive = False # Controls polling event loop
 		self._period = 0.001 # Update period in seconds
 		self._subscriptions = [] # List of uids to listen to besides own
@@ -35,14 +42,14 @@ class Piece(object):
 		poll_thread.start()
 		self.send(Msg.STARTED)
 		try:
-			self._after_start()
+			self._AFTER_start()
 		except AttributeError:
 			pass
 		return self
 
 	def stop(self):
 		''' Public access to stop the polling loop '''
-		self._on_stop()
+		self._ON_stop()
 
 	def send(self,topic,data=None):
 		''' Sends a message string to the connector '''
@@ -72,27 +79,23 @@ class Piece(object):
 		return self
 
 	def _interpret(self,msg):
-		''' 
-		Attempts to parse the incoming packet 
-		Calls a function based on the msg content
-		'''
+		''' Attempts to parse the incoming packet '''
+		''' Calls a function based on the msg content '''
 		parts = unpack(msg)
 		if parts is None: 
 			self.err('Malformed message ['+msg+'], found '+str(len(parts))+' of minimum 2 arguments')
 			return False
-
 		uid,topic,data = parts # Data may equal None
-
 		try:
 			if uid == '@'+self._uid:
 				try:
-					getattr(self,'_on_'+topic)(data)
+					getattr(self,'_ON_'+topic)(data)
 				except AttributeError as e:
 					self.err('No interpretation of message ['+msg+'] available')
 					return False
 			elif uid in self._subscriptions:
 				try:
-					getattr(self,'_on_'+uid+'_'+topic)(data)
+					getattr(self,'_ON_'+uid+'_'+topic)(data)
 				except AttributeError:
 					return False
 		except Exception as e:
@@ -111,25 +114,25 @@ class Piece(object):
 					# Echo back out if can't consume it and _echo is set
 					if self._echo == True: self._conn.send(msg)
 			try:
-				self._poll_event()
+				self._DURING_poll()
 			except AttributeError:
 				pass
 
-	def _on_marco(self,data=None):
+	def _ON_marco(self,data=None):
 		self.send(Msg.POLO)
 
-	def _on_stop(self,data=None):
+	def _ON_stop(self,data=None):
 		try:
-			self._before_stop()
+			self._BEFORE_stop()
 		except AttributeError:
 			pass
 		self._alive = False
 		self.send(Msg.STOPPING)
 
-	def _on_uptime(self,data=None):
+	def _ON_uptime(self,data=None):
 		self.send(Req.UPTIME,str(time.clock() - self._birthday))
 
-	def _on_period(self,data=None):
+	def _ON_period(self,data=None):
 		try:
 			self._period = float(data)
 			return
