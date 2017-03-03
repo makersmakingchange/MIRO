@@ -16,7 +16,7 @@ class Uid:
 	EYETRACKER = 'eyetracker'
 	BLINK = 'blink'
 	TEST = 'test'
-	AUDIO = 'audio'
+	AUDIO = 'BLARg'
 	CONSOLE = 'console'
 	SYSTEM = 'system'
 	TKPIECE = 'tkpiece'
@@ -25,9 +25,10 @@ class Uid:
 
 class Mode:
 	''' List of different operating conditions '''
-	LOCAL = 1
-	NEW_WINDOW = 2
-	EXE = 4
+	CONSOLE = 1 << 0
+	TEST = 1 << 1
+	EXE = 1 << 2
+	ZMQ = 1 << 3
 
 
 class Req:
@@ -37,6 +38,7 @@ class Req:
 	SIZE = 'size'
 	UPTIME = 'uptime'
 	PERIOD = 'period'
+	FONT = 'font'
 
 
 class Msg:
@@ -51,6 +53,7 @@ class Msg:
 	IDLE = 'idle'
 	MOUSE = 'mouse'
 	CONSOLE = 'console'
+	MODE = 'mode'
 
 
 class Tcp:

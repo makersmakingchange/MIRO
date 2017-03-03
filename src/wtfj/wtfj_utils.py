@@ -49,26 +49,27 @@ def make_color(r_uint8,g_uint8,b_uint8):
 	return '#'+r+g+b
 
 def run_piece(uid,mode=0):
-	if mode & 4 > 0: 
-		args = ['../bin/'+uid+'/'+uid+'.exe']
-	else: 
-		args = ['python',uid+'.py']
-	print(args)
-	if mode & 2 > 0:
+	if mode & Mode.EXE > 0: 
+		args = ['../bin/'+uid+'/'+uid+'.exe',str(Mode.EXE)]
+		subprocess.Popen(args)
+	elif mode & Mode.CONSOLE > 0:
+		args = ['python',uid+'.py',str(Mode.CONSOLE)]
 		subprocess.Popen(args,creationflags=subprocess.CREATE_NEW_CONSOLE)
+	elif mode & Mode.ZMQ > 0:
+		args = ['python',uid+'.py',str(Mode.ZMQ)]
+		subprocess.Popen(args)
 	else:
+		args = ['python',uid+'.py',str(Mode.TEST)]
 		subprocess.Popen(args)
 
-
-if __name__ == '__main__':
+if __name__ == '__main__': # Little bit of testing 
 	
+	# Check the validity of unpacking msg and req signals
 	assert is_valid_req_(unpack('@test stop'))
 	assert is_valid_req_(unpack('@test stop '))
 	assert is_valid_req_(unpack('@test stop  as$#%WT$ saf 3'))
-	assert not is_valid_req_(unpack('@test err'))
-
-	assert not is_valid_msg_(unpack('@test '))
-	assert not is_valid_msg_(unpack('@test'))
-
 	assert is_valid_msg_(unpack('test idle'))
 	assert is_valid_msg_(unpack('test idle adsfjwljlk234asdf asdfA'))
+	assert is_valid_req_(unpack('@test err')) == False
+	assert is_valid_msg_(unpack('@test ')) == False
+	assert is_valid_msg_(unpack('@test')) == False

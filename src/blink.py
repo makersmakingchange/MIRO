@@ -44,7 +44,7 @@ if __name__ == '__main__':
 		x,y = random.randint(0,1280),random.randint(0,720)
 		msg = 'eyetracker gaze '+str(x)+','+str(y)
 		eyes.append(msg)
-		eyes.append(pack(Uid.SYSTEM,Msg.IDLE))
+		eyes.append(pack(Uid.SYSTEM,Msg.IDLE,None))
 
 	eyes.append('@blink period 0.1')
 

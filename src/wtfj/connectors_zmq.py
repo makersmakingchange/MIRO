@@ -1,6 +1,5 @@
 import zmq
-from uid import Tcp,Uid,names
-from __init__ import make_color
+from wtfj_ids import Tcp,Uid,names
 
 class ZmqPublisher:
 	''' Publisher that acts as server output '''
@@ -32,7 +31,8 @@ class ZmqSubscriber:
 	def subscribe(self,*uids):
 		for uid in uids:
 			if uid is not None:
-				if uid[0] is '@': assert uid[1:] in names(Uid)
+				if uid[0] is '@': 
+					assert uid[1:] in names(Uid)
 				else: assert uid in names(Uid)
 				if isinstance(uid,bytes):
 					uid = ''
