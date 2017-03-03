@@ -106,7 +106,9 @@ class Wtfj:
 		script.append('@tkpiece period 0.04')
 		for t in range(100):
 			x,y = motion(t)
+			if t == 25: script.append('@tkpiece image test.jpg')
 			if t == 50:
+				script.append('@tkpiece console  ')
 				script.append('@tkpiece font console,100')
 				script.append('@tkpiece image test.jpg')
 				script.append('@tkpiece console EXITING')
