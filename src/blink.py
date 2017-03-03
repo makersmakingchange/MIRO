@@ -35,6 +35,22 @@ if isinstance(size_filter, bytes):
 	size_filter = size_filter.decode('ascii')
 sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
 
+# diagonal coordinates for selection area
+division = '0,0,540,720,540,0,1280,720' 
+def contain (pos,division) :
+        """assume pos if a pair of coordinates"""
+        x=pos[0]
+        y=pos[1]
+        selection = []
+        division = division.split(',')
+        for e in range(0,len(division)/4):
+                selection.append(e)
+     
+	contain = False 
+        for i in range(0,(len(division)/4)):
+                if x > int(division[4*i]) and x < int(division[4*i+2]) and y >int(division[4*i+1]) and y<int(division[4*i+3]):
+                        sel = selection[i]
+                        contain = True
 #send request to grab size of gui 
 push.send_string('@gui size=get')
 
@@ -67,18 +83,9 @@ while True:
 		try:
 			#push.send_string('not receiving anything')
 			if time.clock() - last_time_unmatched > BLINK_TIME :
-				side = ''
-				if int(coor[0]) < 0.5*size[0]:
-					side = 'left'
-				else:
-					side = 'right'
-				if blink_detected == False:
-					if side == 'left' or side == 'right':
-						blink_detected = True
-						if side == 'left':
-							push.send_string('@engine sel=0')
-						else:
-							push.send_string('@engine sel=1')
+				if blink_detected == False and contain(coor,division):
+					blink_detected = True
+					push.send_string('@engine sel=' + str(sel))
 			else:
 				blink_detected = False
 		except IndexError:
