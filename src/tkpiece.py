@@ -4,6 +4,8 @@ import tkFont as font
 import time
 import math
 
+IMAGE_PATH = '../img/'
+
 import logging
 logging.basicConfig(filename='system.log',
 	filemode='a',
@@ -27,6 +29,7 @@ class TkPiece(Piece,Frame):
 		self._canvas.bind_all("<Escape>",self._ON_esc)
 		self._canvas.pack()
 		self._then = time.clock()
+		self._images = {}
 		self._fonts = {
 			Msg.CONSOLE : font.Font(family='Helvetica',size=36, weight='bold')
 		}
@@ -46,11 +49,20 @@ class TkPiece(Piece,Frame):
 	def _ON_esc(self,data): self.stop()
 
 	def _ON_image(self,data):
-		self.send(Req.IMAGE,filename)
+		import os
+		from PIL import Image, ImageTk
+		image = Image.open(IMAGE_PATH+data)
+		photo = ImageTk.PhotoImage(image)
+		self._images[data] = photo
+		handle = self._canvas.create_image(320,240,image=photo)
+		self._canvas.tag_lower(handle)
+		#self._canvas._create
+		self._canvas.pack()
+		self.send(Msg.ACK)
 
 	def _ON_font(self,data):
 		fontname,size = data.split(',')
-		self._canvas.itemconfigure(self._handles[fontname],font=('',int(size)))
+		img = self._canvas.itemconfigure(self._handles[fontname],font=('',int(size)))
 		self.send(Msg.ACK)
 
 	def _ON_position(self,data):
@@ -61,10 +73,11 @@ class TkPiece(Piece,Frame):
 		self._canvas.itemconfigure(self._handles[Msg.CONSOLE],text=data)
 
 def motion(t):
-	A,B = 20,20
-	x = A*math.sin(t/10.0) + 320
-	y = B*math.sin((t+5)/10.0) + 240
-	return (x,y)
+	f = t**2
+	A,B = 0.1,0.2
+	x = A*t*math.sin(f/10.0) + 320
+	y = B*t*math.sin((f+5)/10.0) + 240
+	return (int(x),int(y))
 
 class Wtfj:
 
@@ -95,11 +108,13 @@ class Wtfj:
 			x,y = motion(t)
 			if t == 50:
 				script.append('@tkpiece font console,100')
+				script.append('@tkpiece image test.jpg')
 				script.append('@tkpiece console EXITING')
 			else:
 				script.append('@tkpiece position console,'+str(x)+','+str(y))	
-
 		script.append('@tkpiece stop')
+
+		image = ['@tkpiece period 2','@tkpiece image test.jpg','system idle','@tkpiece stop']
 
 		tkp = TkPiece(Script(script),Printer('PIECE RECV < ' ))
 		tkp.start()

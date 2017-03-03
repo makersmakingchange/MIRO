@@ -16,7 +16,7 @@ class Uid:
 	EYETRACKER = 'eyetracker'
 	BLINK = 'blink'
 	TEST = 'test'
-	AUDIO = 'BLARg'
+	AUDIO = 'audio'
 	CONSOLE = 'console'
 	SYSTEM = 'system'
 	TKPIECE = 'tkpiece'
@@ -39,6 +39,7 @@ class Req:
 	UPTIME = 'uptime'
 	PERIOD = 'period'
 	FONT = 'font'
+	IMAGE = 'image'
 
 
 class Msg:

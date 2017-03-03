@@ -1,6 +1,6 @@
 from connectors_zmq import *
-from piece import Piece
-from uid import Uid
+from piece import *
+from wtfj_ids import *
 import time
 
 print('[Testing zmq messaging]')

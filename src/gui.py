@@ -125,4 +125,4 @@ console_font = font.Font(family='Helvetica',size=150, weight='bold')
 text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
-gui.quit()`
+gui.quit()
