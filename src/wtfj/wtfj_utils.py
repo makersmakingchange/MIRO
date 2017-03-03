@@ -1,6 +1,14 @@
 from wtfj_ids import Uid,Req,Msg,Mode,name,names
 import subprocess
 
+import logging
+logging.basicConfig(filename='system.log',
+	filemode='a',
+	format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+	datefmt='%H:%M:%S',
+	level=logging.DEBUG)
+logger = logging.getLogger('tkpiece')
+
 def pack(uid,topic,data):
 	''' Takes 3 arguments, the content of the third is data or none '''
 	if data is None:
@@ -47,20 +55,7 @@ def make_color(r_uint8,g_uint8,b_uint8):
 	g = '0x{:02x}'.format(g_uint8).replace('0x','')
 	b = '0x{:02x}'.format(b_uint8).replace('0x','')
 	return '#'+r+g+b
-
-def run_piece(uid,mode=0):
-	if mode & Mode.EXE > 0: 
-		args = ['../bin/'+uid+'/'+uid+'.exe',str(Mode.EXE)]
-		subprocess.Popen(args)
-	elif mode & Mode.CONSOLE > 0:
-		args = ['python',uid+'.py',str(Mode.CONSOLE)]
-		subprocess.Popen(args,creationflags=subprocess.CREATE_NEW_CONSOLE)
-	elif mode & Mode.ZMQ > 0:
-		args = ['python',uid+'.py',str(Mode.ZMQ)]
-		subprocess.Popen(args)
-	else:
-		args = ['python',uid+'.py',str(Mode.TEST)]
-		subprocess.Popen(args)
+	
 
 if __name__ == '__main__': # Little bit of testing 
 	
@@ -73,3 +68,4 @@ if __name__ == '__main__': # Little bit of testing
 	assert is_valid_req_(unpack('@test err')) == False
 	assert is_valid_msg_(unpack('@test ')) == False
 	assert is_valid_msg_(unpack('@test')) == False
+	print('--Tests passed--')

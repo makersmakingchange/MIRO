@@ -5,8 +5,7 @@ import traceback
 
 from wtfj_ids import *
 from wtfj_utils import *
-from connectors_local import *
-
+from wtfj_runner import *
 
 class Piece(object):
 	''' Pretty much everything in the system that's not a pipe is made of this '''
@@ -142,19 +141,24 @@ class Piece(object):
 			pass
 		self.err('Failed to set period, could not interpret ['+repr(data)+'] as float')
 
+	@staticmethod
+	def get_test_script():
 
-if __name__ == '__main__': # Make a test server, start client, quit
-	
-	script = [
-		'@piece marco',
-		'@piece period 1',
-		'@piece uptime',
-		'@piece uptime',
-		'@piece period 0.1',
-		'@piece uptime',
-		'@piece uptime',
-		'@piece throw error',
-		'@piece stop'
-	]
+		script = [
+			'@piece marco',
+			'@piece period 1',
+			'@piece uptime',
+			'@piece uptime',
+			'@piece period 0.1',
+			'@piece uptime',
+			'@piece uptime',
+			'@piece throw error',
+			'@piece stop'
+		]		
 
-	Piece(Script(script),Printer('RECV < ')).start()
+		return script
+
+
+if __name__ == '__main__': 
+	from sys import argv
+	Runner.run_w_cmd_args(Piece,argv)

@@ -25,10 +25,11 @@ class Uid:
 
 class Mode:
 	''' List of different operating conditions '''
-	CONSOLE = 1 << 0
-	TEST = 1 << 1
-	EXE = 1 << 2
-	ZMQ = 1 << 3
+	CONSOLE = 'console'
+	TEST = 'test'
+	EXE = 'exe'
+	SERVER_ZMQ = 'server_zmq'
+	CLIENT_ZMQ = 'client_zmq' 
 
 
 class Req:
@@ -40,6 +41,7 @@ class Req:
 	PERIOD = 'period'
 	FONT = 'font'
 	IMAGE = 'image'
+	SPEAK = 'speak'
 
 
 class Msg:
