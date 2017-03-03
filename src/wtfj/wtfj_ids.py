@@ -20,6 +20,7 @@ class Uid:
 	CONSOLE = 'console'
 	SYSTEM = 'system'
 	TKPIECE = 'tkpiece'
+	LAYOUT = 'layout'
 	PIECE = 'piece'
 
 
