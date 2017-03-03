@@ -69,14 +69,17 @@ def start_piece(args):
 				shell=True,
 				env=dict(os.environ))
 
+def marco_piece(args):
+	pub.send_string('@'+args[1]+' marco')
+
 def quit_piece(args):
 	global alive
 	if len(args) > 1:
 		if args[1] == 'all':
 			for piece in all_pieces:
-				pub.send_string('@'+piece+' cmd=quit')
+				pub.send_string('@'+piece+' stop')
 		else:
-			pub.send_string('@'+args[1]+' cmd=quit')
+			pub.send_string('@'+args[1]+' stop')
 	else:
 		alive = False
 		quit()
@@ -87,6 +90,7 @@ function_dict = {}
 function_dict['start'] = start_piece
 function_dict['quit'] = quit_piece
 function_dict['restart'] = restart_piece
+function_dict['marco'] = marco_piece
 
 alive = True
 poll_thread = Thread(target=poll)
