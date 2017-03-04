@@ -38,25 +38,24 @@ sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
 
 def contain(pos,division,sel) :
 	'''assume pos if a pair of coordinates'''
-	x=int(pos[0])
-	y=int(pos[1])
+	x = int(float(pos[0])/1.5)
+	y = int(float(pos[1])/1.5)
 	selection = []
-	division = division.split(',')
-	contain =  False 
-	for i in range(len(division)/4):
-		if x > int(division[4*i]) and x < int(division[4*i+2]) and y >int(division[4*i+1]) and y<int(division[4*i+3]):
-			sel = i
-			print(sel)
-			contain = True
+	sel_regions = division.split(',')
+	contain =  -1 
+	for i in range(len(sel_regions)/4):
+		if x > int(sel_regions[4*i]) and x < int(sel_regions[4*i+2]) and y >int(sel_regions[4*i+1]) and y<int(sel_regions[4*i+3]):
+			contain = i
 	return contain
+
 #send request to grab size of gui 
 push.send_string('@gui regions=get')
 division = ""
-sel=0
+sel = -1
+
 msg = sub.recv_string().split()
 if msg[1] == 'regions':
 	regions = msg[2].split(",")
-	division = ""
 	for x in range(len(regions)):
 		if (x%5 != 0):
 			division = division + regions[x] + ","
@@ -87,7 +86,8 @@ while True:
 		try:
 			#push.send_string('not receiving anything')
 			if time.clock() - last_time_unmatched > BLINK_TIME:
-				if blink_detected == False and contain(coor,division,sel):
+				sel = contain(coor,division,sel)
+				if blink_detected == False and sel != -1:
 					blink_detected = True
 					push.send_string('@engine sel=' + str(sel))
 			else:

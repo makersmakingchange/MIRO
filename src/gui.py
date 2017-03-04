@@ -62,7 +62,7 @@ class Application(Frame):
 		Frame.__init__(self,master)
 		self.drawables = []
 		self.size = size
-		self._divide_screen(2)
+		self._divide_screen(26)
 		self._createWidgets()
 		self.selected_text = ''
 
