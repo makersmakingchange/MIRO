@@ -31,10 +31,11 @@ class TkPiece(Piece,Frame):
 	def _DURING_poll(self): 
 		now = time.clock()
 		delta = now - self._then
-		self.send(Req.PERIOD,str(delta))
 		self._then = now
 
-	def _BEFORE_stop(self): Frame.quit(self)
+	def _BEFORE_stop(self): # Tk window requires a custom start routine
+		self._alive = False
+		Frame.quit(self)
 
 	def _ON_esc(self,data): self.stop()
 
@@ -58,20 +59,26 @@ class TkPiece(Piece,Frame):
 	def _ON_position(self,data):
 		try:
 			fontname,x,y = data.split(',')
-			self._canvas.coords(self._handles[Msg.CONSOLE],x,y)
+			self._canvas.coords(self._handles[Msg.CONSOLE],int(x),int(y))
 		except ValueError as e:
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
 
 	def _ON_console(self,data):
-		self._canvas.itemconfigure(self._handles[Msg.CONSOLE],text=data)
+		try:
+			self._canvas.itemconfigure(self._handles[Msg.CONSOLE],text=data)
+		except Exception(e):
+			self.err('Function called before canbas initialized\n'+repr(e))
 
 	@staticmethod
 	def ON_mouse(event):
-		TkPiece.tkpiece_ref.send(Msg.MOUSE,str(event.x)+','+str(event.y))
-		TkPiece.tkpiece_ref._interpret('@tkpiece position console,'+str(event.x)+','+str(event.y))
+		try:
+			TkPiece.tkpiece_ref.send(Msg.MOUSE,str(event.x)+','+str(event.y))
+			TkPiece.tkpiece_ref._interpret('@tkpiece position console,'+str(event.x)+','+str(event.y))
+		except Exception as e:
+			with open('tkerr.txt','w') as f: f.write(repr(e))
 
 	@staticmethod
-	def get_test_script():
+	def script():
 		A,c = 10,80
 		sizes = [c + x for x in range(200)]
 
@@ -112,7 +119,7 @@ class TkPiece(Piece,Frame):
 				script.append('@tkpiece position console,'+str(x)+','+str(y))	
 		script.append('@tkpiece stop')
 
-		return script
+		return Script(script)
 
 if __name__ == '__main__': 
 	from sys import argv

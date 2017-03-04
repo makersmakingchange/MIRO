@@ -10,12 +10,13 @@ from wtfj_runner import *
 class Piece(object):
 	''' Pretty much everything in the system that's not a pipe is made of this '''
 	''' Pieces are assigned identifiers based on their class '''
-	def __init__(self,incoming,outgoing=None,uid=None):
+	def __init__(self,incoming,outgoing=None,uid=None,echo=False):
 		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
 		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
 		self._uid = name(self) if uid is None else uid
 		self._out = incoming if outgoing is None else outgoing
 		self._in = incoming
+		self._echo = echo
 		# Fail if connector does not have required functions
 		assert 'send' in dir(self._out) 
 		assert 'poll' in dir(self._in)
@@ -31,10 +32,9 @@ class Piece(object):
 		self._subscriptions = [] # List of uids to listen to besides own
 		self._in.subscribe('@'+self._uid)
 
-	def start(self,echo=False):
+	def start(self):
 		''' Starts the polling thread '''
 		self._birthday = time.clock()
-		self._echo = echo
 		# Set thread to live and start
 		self._alive = True
 		poll_thread = Thread(target=self._poll)
@@ -80,23 +80,25 @@ class Piece(object):
 	def _interpret(self,msg):
 		''' Attempts to parse the incoming packet '''
 		''' Calls a function based on the msg content '''
-		parts = unpack(msg)
-		if parts is None: 
-			self.err('Malformed message ['+msg+'], found '+str(len(parts))+' of minimum 2 arguments')
-			return False
-		uid,topic,data = parts # Data may equal None
 		try:
+			parts = unpack(msg)
+			if parts is None: 
+				self.err('Malformed message ['+msg+'], found '+str(len(parts))+' of minimum 2 arguments')
+				return False
+
+			uid,topic,data = parts # Data may equal None
+		
 			if uid == '@'+self._uid:
 				try:
 					getattr(self,'_ON_'+topic)(data)
 				except AttributeError as e:
 					self.err('No interpretation of message ['+msg+'] available')
-					return False
+					raise e
 			elif uid in self._subscriptions:
 				try:
 					getattr(self,'_ON_'+uid+'_'+topic)(data)
-				except AttributeError:
-					return False
+				except AttributeError as e:
+					raise e
 		except Exception as e:
 			self.err('Exception thrown\n'+traceback.format_exc())
 			return False
@@ -116,6 +118,7 @@ class Piece(object):
 				self._DURING_poll()
 			except AttributeError:
 				pass
+			time.sleep(0.001) # DEal
 
 	def _ON_marco(self,data=None):
 		self.send(Msg.POLO)
@@ -127,6 +130,10 @@ class Piece(object):
 			pass
 		self._alive = False
 		self.send(Msg.STOPPING)
+		try:
+			self._AFTER_stop()
+		except AttributeError:
+			pass
 
 	def _ON_uptime(self,data=None):
 		self.send(Req.UPTIME,str(time.clock() - self._birthday))
@@ -142,7 +149,7 @@ class Piece(object):
 		self.err('Failed to set period, could not interpret ['+repr(data)+'] as float')
 
 	@staticmethod
-	def get_test_script():
+	def script():
 
 		script = [
 			'@piece marco',
@@ -156,7 +163,7 @@ class Piece(object):
 			'@piece stop'
 		]		
 
-		return script
+		return Script(script)
 
 
 if __name__ == '__main__': 

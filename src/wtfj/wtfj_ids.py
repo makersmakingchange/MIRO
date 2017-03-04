@@ -22,15 +22,17 @@ class Uid:
 	TKPIECE = 'tkpiece'
 	LAYOUT = 'layout'
 	PIECE = 'piece'
+	OUTPUT = 'output'
 
 
 class Mode:
 	''' List of different operating conditions '''
-	CONSOLE = 'console'
+	INTERACTIVE = 'interactive'
 	TEST = 'test'
 	EXE = 'exe'
 	SERVER_ZMQ = 'server_zmq'
 	CLIENT_ZMQ = 'client_zmq' 
+	PRINTER_ZMQ = 'printer_zmq'
 
 
 class Req:

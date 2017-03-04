@@ -42,41 +42,16 @@ def poll():
 			log_write(msg)
 
 def restart_piece(args):
-	function_dict['quit'](args)
+	function_dict['stop'](args)
 	function_dict['start'](args)
 
 def start_piece(args):
-	if len(args) == 3:
-		mode = args[2]
-	else:
-		mode = ''
-	if args[1] == 'all':
-		pieces_to_start = all_pieces
-	else:
-		pieces_to_start = [args[1]]
-	for piece in pieces_to_start:
-		if piece == 'face' or piece == 'eyetracker':
-			try:
-				subprocess.Popen(['../bin/' + piece + '/' + piece + '.exe',mode])
-			except OSError as e :
-				pub.send_string('@err console '+ str(e))
-				log_write('@err console '+ str(e))
-		elif piece == 'output':
-			try:
-				subprocess.Popen(['python',piece+'.py',mode],
-					creationflags=subprocess.CREATE_NEW_CONSOLE)
-			except AttributeError as e: 
-				pub.send_string('@err console '+ str(e))
-				log_write('@err console '+ str(e))
-		else:
-			subprocess.Popen(['python',piece+'.py',mode],
-				shell=True,
-				env=dict(os.environ))
+	try:
+		Runner.run(args[1],args[2])
+	except IndexError:
+		print('Bad args '+str(args)+' should be in form ["start piece mode"] e.g. start tkpiece test')
 
-def marco_piece(args):
-	pub.send_string('@'+args[1]+' marco')
-
-def quit_piece(args):
+def stop_piece(args):
 	global alive
 	if len(args) > 1:
 		if args[1] == 'all':
@@ -88,13 +63,10 @@ def quit_piece(args):
 		alive = False
 		quit()
 
-all_pieces = ['gui','audio','engine','face','output','blink','eyetracker']
-
 function_dict = {}
 function_dict['start'] = start_piece
-function_dict['quit'] = quit_piece
+function_dict['stop'] = stop_piece
 function_dict['restart'] = restart_piece
-function_dict['marco'] = marco_piece
 
 alive = True
 poll_thread = Thread(target=poll)
