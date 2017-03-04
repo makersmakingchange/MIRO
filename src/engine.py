@@ -81,7 +81,7 @@ options = OptionNode()
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
 
-build_tree(options, 5, choices)
+build_tree(options, 2, choices)
 '''
 # Single letter nodes
 a = OptionNode('a')

@@ -8,6 +8,7 @@ SOCKET_PUSH = 'tcp://localhost:5557'
 BLINK_TIME = .15
 topic_filter = '@blink'
 interest_filter = 'eyetracker'
+#interest_filter = 'mouse'
 size_filter = 'gui'
 
 # Connect to sockets
@@ -35,34 +36,37 @@ if isinstance(size_filter, bytes):
 	size_filter = size_filter.decode('ascii')
 sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
 
-# diagonal coordinates for selection area
-division = '0,0,540,720,540,0,1280,720' 
-def contain (pos,division) :
-        """assume pos if a pair of coordinates"""
-        x=pos[0]
-        y=pos[1]
-        selection = []
-        division = division.split(',')
-        for e in range(0,len(division)/4):
-                selection.append(e)
-     
-	contain = False 
-        for i in range(0,(len(division)/4)):
-                if x > int(division[4*i]) and x < int(division[4*i+2]) and y >int(division[4*i+1]) and y<int(division[4*i+3]):
-                        sel = selection[i]
-                        contain = True
+def contain(pos,division,sel) :
+	'''assume pos if a pair of coordinates'''
+	x=int(pos[0])
+	y=int(pos[1])
+	selection = []
+	division = division.split(',')
+	contain =  False 
+	for i in range(len(division)/4):
+		if x > int(division[4*i]) and x < int(division[4*i+2]) and y >int(division[4*i+1]) and y<int(division[4*i+3]):
+			sel = i
+			print(sel)
+			contain = True
+	return contain
 #send request to grab size of gui 
-push.send_string('@gui size=get')
-
+push.send_string('@gui regions=get')
+division = ""
+sel=0
 msg = sub.recv_string().split()
-if msg[1] == 'size':
-	size = [int(n) for n in msg[2].split(',')]	
+if msg[1] == 'regions':
+	regions = msg[2].split(",")
+	division = ""
+	for x in range(len(regions)):
+		if (x%5 != 0):
+			division = division + regions[x] + ","
+	division = division[0:len(division)-1]
+
 last_point = None 
 last_time_unmatched = time.clock()
 coor = ''
 
 blink_detected = False
-
 
 while True:    
 	if len(poller.poll(1)) > 0:
@@ -74,7 +78,7 @@ while True:
 				if 'cmd=quit' in parts[1]:
 					push.send_string('blink quitting')
 					quit()
-				coor = parts[1].split(',')
+				coor = parts[2].split(',')
 				if len(coor) > 0:
 					last_time_unmatched = time.clock()
 			except IndexError:
@@ -82,8 +86,8 @@ while True:
 	else:
 		try:
 			#push.send_string('not receiving anything')
-			if time.clock() - last_time_unmatched > BLINK_TIME :
-				if blink_detected == False and contain(coor,division):
+			if time.clock() - last_time_unmatched > BLINK_TIME:
+				if blink_detected == False and contain(coor,division,sel):
 					blink_detected = True
 					push.send_string('@engine sel=' + str(sel))
 			else:

@@ -23,9 +23,9 @@ def command(cmd_string):
 	if cmd_string == 'quit':
 		quit()
 
-def size_cmd(size_string):
-	if size_string == 'get':
-		push.send_string('gui size '+str(w)+','+str(h))
+def region_cmd(region_string):
+	if region_string == 'get':
+		push.send_string('gui regions '+ gui.shape_list)
 
 def write(console_text):
 	gui.selected_text += console_text
@@ -41,7 +41,7 @@ function_dict = {}
 function_dict['cmd'] = command
 function_dict['write'] = write
 function_dict['opt'] = option
-function_dict['size'] = size_cmd
+function_dict['regions'] = region_cmd
 
 def on_mouse_move(event):
 	push.send_string('mouse '+str(event.x)+','+str(event.y))
@@ -62,7 +62,7 @@ class Application(Frame):
 		Frame.__init__(self,master)
 		self.drawables = []
 		self.size = size
-		self._divide_screen(5)
+		self._divide_screen(2)
 		self._createWidgets()
 		self.selected_text = ''
 
@@ -102,6 +102,7 @@ class Application(Frame):
 
 			i+=1
 		self.shape_list = self.shape_list[0:len(self.shape_list)-1]
+
 
 
 	def _draw_text(self):
