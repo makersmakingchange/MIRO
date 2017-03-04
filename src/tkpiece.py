@@ -6,6 +6,10 @@ import math
 
 IMAGE_PATH = '../img/'
 
+def main():
+	from sys import argv
+	Runner.run_w_cmd_args(TkPiece,argv)
+
 class TkPiece(Piece,Frame):
 
 	tkpiece_ref = None # Needed for events like ON_mouse
@@ -121,7 +125,5 @@ class TkPiece(Piece,Frame):
 
 		return Script(script)
 
-if __name__ == '__main__': 
-	from sys import argv
-	Runner.run_w_cmd_args(TkPiece,argv)
-	
+
+if __name__ == '__main__': main()

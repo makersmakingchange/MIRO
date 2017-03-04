@@ -1,9 +1,12 @@
-from wtfj import Uid,Mode,Runner
+from wtfj import *
+from genericpiece import *
 
-#Runner.run(Uid.CONSOLE,Mode.INTERACTIVE)
-Runner.run(Uid.TKPIECE,Mode.CLIENT_ZMQ)
-Runner.run(Uid.OUTPUT,Mode.PRINTER_ZMQ)
-#Runner.run(Uid.AUDIO,Mode.TEST)
-#Runner.run(Uid.BLINK,Mode.TEST)
-#run_piece(Uid.AUDIO,Mode.LOCAL)
-#run_piece(Uid.EYETRACKER,Mode.EXE)
+#wtfj_utils.nuclear_option()
+
+try:
+	Runner.run(Uid.ZSERVER)
+	Runner.run(Uid.ZPRINTER)
+	Runner.run(Uid.TKPIECE,Mode.ZCLIENT)
+	Runner.run(Uid.ZCONSOLE)
+except Exception as e:
+	print(repr(e))

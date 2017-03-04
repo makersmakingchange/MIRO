@@ -9,6 +9,19 @@ logging.basicConfig(filename='system.log',
 	level=logging.DEBUG)
 logger = logging.getLogger('tkpiece')
 
+
+def ensure_delimited(uid):
+	''' Takes a string and adds an @ delimiter if one not there already'''
+	return uid if uid[0] == '@' else '@'+uid
+
+def nuclear_option():
+	''' Attempts to kill all python processes '''
+	import os
+	for i in range(100):
+		print('nuke '+str(i))
+		os.system("taskkill /im python.exe")
+	quit()
+
 def pack(uid,topic,data):
 	''' Takes 3 arguments, the content of the third is data or none '''
 	if data is None:

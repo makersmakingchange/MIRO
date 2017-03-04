@@ -17,12 +17,14 @@ class Uid:
 	BLINK = 'blink'
 	TEST = 'test'
 	AUDIO = 'audio'
-	CONSOLE = 'console'
 	SYSTEM = 'system'
 	TKPIECE = 'tkpiece'
 	LAYOUT = 'layout'
 	PIECE = 'piece'
-	OUTPUT = 'output'
+	ZPRINTER = 'zprinter'
+	ZSERVER = 'zserver'
+	ZCONSOLE = 'zconsole'
+	ZCLIENT = 'zclient'
 
 
 class Mode:
@@ -30,9 +32,10 @@ class Mode:
 	INTERACTIVE = 'interactive'
 	TEST = 'test'
 	EXE = 'exe'
-	SERVER_ZMQ = 'server_zmq'
-	CLIENT_ZMQ = 'client_zmq' 
-	PRINTER_ZMQ = 'printer_zmq'
+	ZPRINTER = 'zprinter'
+	ZSERVER = 'zserver'
+	ZCONSOLE = 'zconsole'
+	ZCLIENT = 'zclient'
 
 
 class Req:
@@ -45,6 +48,7 @@ class Req:
 	FONT = 'font'
 	IMAGE = 'image'
 	SPEAK = 'speak'
+	ECHO = 'echo'
 
 
 class Msg:

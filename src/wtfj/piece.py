@@ -10,15 +10,18 @@ from wtfj_runner import *
 class Piece(object):
 	''' Pretty much everything in the system that's not a pipe is made of this '''
 	''' Pieces are assigned identifiers based on their class '''
-	def __init__(self,incoming,outgoing=None,uid=None,echo=False):
+	def __init__(self,incoming,outgoing,uid=None,echo=False):
 		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
 		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
 		self._uid = name(self) if uid is None else uid
-		self._out = incoming if outgoing is None else outgoing
+		self._out = outgoing
 		self._in = incoming
 		self._echo = echo
 		# Fail if connector does not have required functions
-		assert 'send' in dir(self._out) 
+		try:
+			assert 'send' in dir(self._out) 
+		except AssertionError:
+			print(repr(self._out.__class__.__name__)+' does not define send(self,uid,topic,data) function')
 		assert 'poll' in dir(self._in)
 		assert 'subscribe' in dir(self._in)
 		# Fail if uid not in list
@@ -60,8 +63,9 @@ class Piece(object):
 	def send_to(self,uid,topic,data=''):
 		''' Sends a message string targeted for a specific client or service '''
 		''' The connector bears responsibility for proper routing '''
+		uid = ensure_delimited(uid)
 		try:
-			self._out.send(pack('@'+uid,topic,data))
+			self._out.send(pack(uid,topic,data))
 		except AssertionError as e:
 			self.err('Uid or topic invalid for msg ['+str(topic)+']['+str(data)+']\n'+repr(e))
 		return self
@@ -81,28 +85,31 @@ class Piece(object):
 		''' Attempts to parse the incoming packet '''
 		''' Calls a function based on the msg content '''
 		try:
-			parts = unpack(msg)
-			if parts is None: 
-				self.err('Malformed message ['+msg+'], found '+str(len(parts))+' of minimum 2 arguments')
-				return False
-
-			uid,topic,data = parts # Data may equal None
-		
-			if uid == '@'+self._uid:
+			uid,topic,data = unpack(msg)
+			# These are guaranteed to be in one of three states upon unpacking
+			#
+			# 	empty message 	: (None,None,None)
+			# 	data is None	: (uid,topic,None)
+			# 	full message 	: (uid,topic,None)
+			#
+			if uid[1:] == self._uid:
 				try:
 					getattr(self,'_ON_'+topic)(data)
+					return True
 				except AttributeError as e:
 					self.err('No interpretation of message ['+msg+'] available')
 					raise e
+					return True
 			elif uid in self._subscriptions:
 				try:
 					getattr(self,'_ON_'+uid+'_'+topic)(data)
 				except AttributeError as e:
-					raise e
+					pass
+				return True
 		except Exception as e:
 			self.err('Exception thrown\n'+traceback.format_exc())
-			return False
-		return True
+		return False
+		
 
 	def _poll(self):
 		''' Run in its own thread '''
@@ -113,7 +120,8 @@ class Piece(object):
 				# Process each message
 				if self._interpret(msg) == False:
 					# Echo back out if can't consume it and _echo is set
-					if self._echo == True: self._conn.send(msg)
+					if self._echo == True: 
+						self._out.send(msg)
 			try:
 				self._DURING_poll()
 			except AttributeError:
@@ -135,36 +143,34 @@ class Piece(object):
 		except AttributeError:
 			pass
 
+	def _ON_echo(self,data=None):
+		if data is None:
+			if self._echo == True:
+				self.send(Req.ECHO,'on')
+			else:
+				self.send(Req.ECHO,'off')
+		elif 'on' in data:
+			self._echo = True 
+			self.send(Msg.ACK)
+		elif 'off' in data:
+			self._echo = False
+			self.send(Msg.ACK)
+
 	def _ON_uptime(self,data=None):
 		self.send(Req.UPTIME,str(time.clock() - self._birthday))
 
 	def _ON_period(self,data=None):
+		err_msg = 'Failed to set period, could not interpret ['+repr(data)+'] as float'
 		try:
 			self._period = float(data)
 			return
-		except ValueError:
-			pass
-		except TypeError:
-			pass
-		self.err('Failed to set period, could not interpret ['+repr(data)+'] as float')
+		except ValueError as e:
+			self.err(err_msg+'\n'+repr(e))
+		except TypeError as e:
+			self.err()
 
 	@staticmethod
-	def script():
-
-		script = [
-			'@piece marco',
-			'@piece period 1',
-			'@piece uptime',
-			'@piece uptime',
-			'@piece period 0.1',
-			'@piece uptime',
-			'@piece uptime',
-			'@piece throw error',
-			'@piece stop'
-		]		
-
-		return Script(script)
-
+	def script(): return NotImplementedError
 
 if __name__ == '__main__': 
 	from sys import argv
