@@ -1,89 +1,50 @@
-''' Basically a constants file '''
-''' Auth: max@embeddedprofessional.com '''
+import os
+from os import listdir
+from os.path import isfile, join
 
-def name(piece):
+mypath = os.path.dirname(__file__)+'/..'
+
+onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath,f))]
+
+with open(mypath+'/wtfj/protocol/uid.py','w') as uids:
+	print('-------------------------')
+	print('Generating uids in uid.py')
+	print('-------------------------')
+	for line in onlyfiles:
+		print(line)
+		parts = line.split('.')
+		uid = parts[0]
+		uid_val = uid.upper()+' = \''+uid+'\'\n'
+		uids.write(uid_val)
+
+from protocol import uid as Uid
+from protocol import req as Req
+from protocol import msg as Msg
+from protocol import mode as Mode
+from protocol import tcp as Tcp
+
+def print_bar(msg,top=True):
+	bar = ''
+	for char in msg:
+		bar += '-'
+	if top is True: print(bar)
+	print(msg)
+	print(bar)
+
+def get_uid(piece):
 	''' Returns id based on class name '''
 	return piece.__class__.__name__.lower()
 
-def names(class_to_check):
+def get_attr(class_to_check):
 	''' Returns strings of a class' members '''
 	return [getattr(class_to_check,member) for member in dir(class_to_check) 
 		if '__' not in member]
 
-class Uid:
-	''' List of the different components available at runtime '''
-	GUI = 'gui'
-	EYETRACKER = 'eyetracker'
-	BLINK = 'blink'
-	TEST = 'test'
-	AUDIO = 'audio'
-	SYSTEM = 'system'
-	TKPIECE = 'tkpiece'
-	LAYOUT = 'layout'
-	PIECE = 'piece'
-	ZPRINTER = 'zprinter'
-	ZSERVER = 'zserver'
-	ZCONSOLE = 'zconsole'
-	ZCLIENT = 'zclient'
+print_bar('Importing all identifiers in protocol')
 
-
-class Mode:
-	''' List of different operating conditions '''
-	INTERACTIVE = 'interactive'
-	TEST = 'test'
-	EXE = 'exe'
-	ZPRINTER = 'zprinter'
-	ZSERVER = 'zserver'
-	ZCONSOLE = 'zconsole'
-	ZCLIENT = 'zclient'
-
-
-class Req:
-	''' Message topics sent as requests to Pieces '''
-	MARCO = 'marco'
-	STOP = 'stop'
-	SIZE = 'size'
-	UPTIME = 'uptime'
-	PERIOD = 'period'
-	FONT = 'font'
-	IMAGE = 'image'
-	SPEAK = 'speak'
-	ECHO = 'echo'
-
-
-class Msg:
-	''' Message topics output from Pieces '''
-	POLO = 'polo'
-	STARTED = 'started'
-	STOPPING = 'stopping'
-	ERR = 'err'
-	ACK = 'ack'
-	USER = 'user'
-	SELECT = 'select'
-	IDLE = 'idle'
-	MOUSE = 'mouse'
-	CONSOLE = 'console'
-	MODE = 'mode'
-
-
-class Tcp:
-	''' Networking constants '''
-	SOCKET_SUB = 'tcp://localhost:5556'
-	SOCKET_PUSH = 'tcp://localhost:5557'
-	SOCKET_PUB = 'tcp://*:5556'
-	SOCKET_PULL = 'tcp://*:5557'
-
-
-if __name__ == '__main__': # List class members and assert key messages present
-
-	# Outputs all class members
-	for cls in [Uid,Mode,Req,Msg,Tcp]:
-		print('['+repr(cls.__name__)+']')
-		for member in names(cls): print(member)
-		print('')
-
-	# These names should always be there
-	assert 'marco' in names(Req)
-	assert 'polo' in names(Msg)
-	assert 'started' in names(Msg)
-	assert 'stopping' in names(Msg)
+valid = [Uid,Req,Msg,Mode,Tcp]
+for v in valid:
+	print_bar('Importing ids for ['+v.__name__+']')
+	for name in dir(v):
+		if '__' not in name:
+			print(name)

@@ -35,4 +35,3 @@ class Audio(Piece):
 if __name__ == '__main__':
 	from sys import argv
 	Runner.run_w_cmd_args(Audio,argv)
-		

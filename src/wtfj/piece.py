@@ -13,7 +13,7 @@ class Piece(object):
 	def __init__(self,incoming,outgoing,uid=None,echo=False):
 		''' Requires a unique identifier and incoming, outgoing supplying i/o '''
 		''' Outgoing is set to incoming if None, uid is class name lowercase by default '''
-		self._uid = name(self) if uid is None else uid
+		self._uid = get_uid(self)
 		self._out = outgoing
 		self._in = incoming
 		self._echo = echo
@@ -21,14 +21,20 @@ class Piece(object):
 		try:
 			assert 'send' in dir(self._out) 
 		except AssertionError:
-			print(repr(self._out.__class__.__name__)+' does not define send(self,uid,topic,data) function')
-		assert 'poll' in dir(self._in)
-		assert 'subscribe' in dir(self._in)
+			print(get_uid(self._out)+' does not define send(self,uid,topic,data) function')
+		try:
+			assert 'poll' in dir(self._in)
+		except AssertionError:
+			print(get_uid(self._in)+' does not define poll(self,wait_ms=1,uid=None) function')
+		try:
+			assert 'subscribe' in dir(self._in)
+		except AssertionError:
+			print(get_uid(self._in)+' does not define subscribe(self,*uids) function')
 		# Fail if uid not in list
 		try:
-			assert self._uid in names(Uid)
+			assert self._uid in get_attr(Uid)
 		except AssertionError:
-			print('['+self._uid+'] not in ['+str(names(Uid))+']')
+			print('['+self._uid+'] not in ['+str(get_attr(Uid))+']')
 			raise AssertionError
 		self._alive = False # Controls polling event loop
 		self._period = 0.001 # Update period in seconds

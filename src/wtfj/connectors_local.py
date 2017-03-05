@@ -2,6 +2,7 @@ import time
 from threading import Thread
 import threading
 from wtfj_ids import *
+from wtfj_utils import *
 
 class Printer:
 	''' Opens a new output window and prints messages sent to it '''
@@ -44,8 +45,8 @@ class Script:
 	def subscribe(self,*uids):
 		for uid in uids:
 			if uid is not None:
-				if uid[0] is '@': assert uid[1:] in names(Uid)
-				else: assert uid in names(Uid)
+				if uid[0] is '@': assert uid[1:] in get_attr(Uid)
+				else: assert uid in get_attr(Uid)
 		return self
 
 	def load(self,msg_array):

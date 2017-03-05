@@ -1,4 +1,4 @@
-from wtfj_ids import Uid,Req,Msg,Mode,name,names
+from wtfj_ids import Uid,Req,Msg,Mode
 import subprocess
 
 import logging
@@ -42,10 +42,10 @@ def unpack(msg):
 def is_valid_msg_(well_formed_packet_tuple):
 	''' Checks if a packet represents a vaild outgoing message '''
 	uid,topic,data = well_formed_packet_tuple
-	if uid not in names(Uid):
+	if uid not in get_attr(Uid):
 		print('['+str(uid)+'] not valid Uid in wtfj_ids.py')
 		return False
-	if topic not in names(Msg):
+	if topic not in get_attr(Msg):
 		print('['+str(topic)+'] not valid Msg in wtfj_ids.py')
 		return False
 	return True
@@ -54,10 +54,10 @@ def is_valid_req_(well_formed_packet_tuple):
 	''' Checks if a packet represents a vaild incoming request '''
 	to_uid,topic,data = well_formed_packet_tuple
 	uid = to_uid[1:]
-	if uid not in names(Uid):
+	if uid not in get_attr(Uid):
 		print('['+str(uid)+'] not valid Uid in wtfj_ids.py')
 		return False
-	if topic not in names(Req):
+	if topic not in get_attr(Req):
 		print('['+str(topic)+'] not valid Req in wtfj_ids.py')
 		return False
 	return True
@@ -68,7 +68,6 @@ def make_color(r_uint8,g_uint8,b_uint8):
 	g = '0x{:02x}'.format(g_uint8).replace('0x','')
 	b = '0x{:02x}'.format(b_uint8).replace('0x','')
 	return '#'+r+g+b
-	
 
 if __name__ == '__main__': # Little bit of testing 
 	

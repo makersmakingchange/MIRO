@@ -1,0 +1,7 @@
+INTERACTIVE = 'interactive'
+TEST = 'test'
+EXE = 'exe'
+ZPRINTER = 'zprinter'
+ZSERVER = 'zserver'
+ZCONSOLE = 'zconsole'
+ZCLIENT = 'zclient'
