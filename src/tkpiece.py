@@ -45,13 +45,12 @@ class TkPiece(Piece,Frame):
 
 	def _ON_image(self,data):
 		import os
-		from PIL import Image, ImageTk
+		from PIL import Image,ImageTk
 		image = Image.open(IMAGE_PATH+data)
 		photo = ImageTk.PhotoImage(image)
 		self._images[data] = photo
-		handle = self._canvas.create_image(540,360,image=photo)
+		handle = self._handles[data] = self._canvas.create_image(540,360,image=photo)
 		self._canvas.tag_lower(handle)
-		#self._canvas._create
 		self._canvas.pack()
 		self.send(Msg.ACK)
 
@@ -62,8 +61,8 @@ class TkPiece(Piece,Frame):
 
 	def _ON_position(self,data):
 		try:
-			fontname,x,y = data.split(',')
-			self._canvas.coords(self._handles[Msg.CONSOLE],int(x),int(y))
+			handle,x,y = data.split(',')
+			self._canvas.coords(self._handles[handle],int(x),int(y))
 		except ValueError as e:
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
 
@@ -71,7 +70,11 @@ class TkPiece(Piece,Frame):
 		try:
 			self._canvas.itemconfigure(self._handles[Msg.CONSOLE],text=data)
 		except Exception(e):
-			self.err('Function called before canbas initialized\n'+repr(e))
+			self.err('Function called before canvas initialized\n'+repr(e))
+
+	def _ON_options(self,data):
+		#options = data.split(',')
+		self._ON_console(data)
 
 	@staticmethod
 	def ON_mouse(event):

@@ -16,15 +16,15 @@ class Runner:
 			args = ['python',uid+'.py',mode]
 			if mode in [Mode.INTERACTIVE,Mode.ZCONSOLE,Mode.ZPRINTER]:
 				subprocess.Popen(args,creationflags=subprocess.CREATE_NEW_CONSOLE)
-			subprocess.Popen(args)
+			else:
+				subprocess.Popen(args)
 	
 	@staticmethod
 	def run_w_cmd_args(PieceClass,argv,subscriptions=[]):
-		print('running with args '+repr(argv))
+		print_bar('Running with args '+repr(argv))
 		try:
 			mode = argv[1]
-		except Exception as e:
-			print(repr(e))
+		except IndexError as e:
 			mode = Mode.TEST
 
 		if mode == Mode.TEST:
@@ -49,7 +49,6 @@ class Runner:
 			]
 
 		if mode == Mode.ZCONSOLE:
-			print('SDFA')
 			setup = [ 
 
 				Console('[>] '), # User input
@@ -88,13 +87,10 @@ class Runner:
 		from_piece = setup[1] 
 		local_echo = setup[2]
 
-		print('----')
-		print('Connecting to ['+repr(PieceClass.__name__)+']')
-		print('<---')
-		print('['+repr(to_piece.__class__.__name__)+']')
-		print('--->')
-		print('['+repr(from_piece.__class__.__name__)+']')
-		print('----')
+		cnx_line = '['+repr(to_piece.__class__.__name__)+']--->['+repr(PieceClass.__name__)+']--->['+repr(from_piece.__class__.__name__)+']'
+
+		print_bar('Connecting to '+repr(PieceClass.__name__).lower())
+		print_bar(cnx_line)
 
 		piece = PieceClass(to_piece,from_piece,echo=local_echo)
 		print('Echo is '+str(local_echo))

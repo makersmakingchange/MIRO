@@ -25,7 +25,7 @@ class Blink(Piece):
 				self._blinked = False
 
 	@staticmethod
-	def get_test_script():
+	def script():
 
 		eyes = [
 			'@blink marco',
@@ -55,7 +55,7 @@ class Blink(Piece):
 
 		eyes.append('@blink stop')
 
-		return eyes
+		return Script(eyes)
 
 
 if __name__ == '__main__':

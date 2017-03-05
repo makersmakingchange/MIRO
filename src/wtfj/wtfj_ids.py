@@ -23,13 +23,13 @@ from protocol import msg as Msg
 from protocol import mode as Mode
 from protocol import tcp as Tcp
 
-def print_bar(msg,top=True):
+def print_bar(msg,top=True,bottom=True):
 	bar = ''
 	for char in msg:
 		bar += '-'
 	if top is True: print(bar)
 	print(msg)
-	print(bar)
+	if bottom is True: print(bar)
 
 def get_uid(piece):
 	''' Returns id based on class name '''
