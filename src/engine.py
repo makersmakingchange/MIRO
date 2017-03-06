@@ -19,7 +19,9 @@ if isinstance(topic_filter,bytes):
 	topic_filter = topic_filter.decode('ascii')
 sub.setsockopt_string(zmq.SUBSCRIBE,topic_filter)
 
-choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+letter_choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+number_choices = ['0','1','2','3','4','5','6','7','8','9',]
+formatting_choices = ['spc','.']
 
 # Given root of options tree, build tree such that each node has num_keys child nodes consisting of divided choices list.
 def build_tree(head, num_keys, choices):
@@ -75,13 +77,23 @@ class OptionNode(object):
 			self.add_child(child)
 
 
-options = OptionNode()
-
 # Function nodes
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
+number_of_keys = 4
 
-build_tree(options, 26, choices)
+root = OptionNode()
+letters = OptionNode('a_to_z')
+non_text = OptionNode('#_to_$')
+numbers = OptionNode('0_to_9')
+formatting = OptionNode('spc_to_.')
+
+build_tree(letters, number_of_keys, letter_choices)
+build_tree(numbers, number_of_keys, number_choices)
+build_tree(formatting, number_of_keys, formatting_choices)
+
+root.add_children(letters,non_text)
+non_text.add_children(numbers,formatting)
 
 def command(cmd_string):
 	if cmd_string == 'quit':
@@ -89,16 +101,17 @@ def command(cmd_string):
 	elif cmd_string == 'refresh':
 		process_selection()
 
-current_option = options
+current_option = root
 gui_msg = ''
 
 def process_selection():
 	global current_option
 	gui_msg = topic_gui
 	if len(current_option.children) == 0:
-		push.send_string(topic_audio+' '+current_option.content)
+		if (current_option.content != 'spc'):
+			push.send_string(topic_audio+' '+current_option.content)
 		push.send_string('@gui write=' +current_option.content)
-		current_option = options
+		current_option = root
 	for i in range(len(current_option.children)):
 		gui_msg += current_option.children[i].content
 		if i < len(current_option.children)-1:

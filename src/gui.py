@@ -28,7 +28,10 @@ def region_cmd(region_string):
 		push.send_string('gui regions '+ gui.shape_list)
 
 def write(console_text):
-	gui.selected_text += console_text
+	if (console_text == 'spc'):
+		gui.selected_text += ' '
+	else:
+		gui.selected_text += console_text
 	gui.canvas.itemconfigure(gui.text_display,text=gui.selected_text)
 
 def option(option_msg):
@@ -57,20 +60,20 @@ def on_1(event):
 	push.send_string('@engine sel=1')
 
 class Application(Frame):
-	def __init__(self,master=None,size=(1080, 720)):
+	def __init__(self,master=None,size=None):
 		# Application housekeeping
 		Frame.__init__(self,master)
 		self.drawables = []
 		self.size = size
-		self._divide_screen(26)
+		self._divide_screen(4)
 		self._createWidgets()
 		self.selected_text = ''
 
 	def _divide_screen(self,n):
 		max_rows = 5
 		shape_type = 'rect'
-		screen_width = 1280
-		screen_height = 720
+		screen_width = self.size[0]
+		screen_height = self.size[1]
 		assert(max_rows == 5)
 		if (n > max_rows):
 			cols = n/max_rows + (n%max_rows > 0)
@@ -180,8 +183,8 @@ class Application(Frame):
 root = Tk()
 root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
-console_font = font.Font(family='Helvetica',size=150, weight='bold')
-text_display_font = font.Font(family='Helvetica',size=20, weight='bold')
+console_font = font.Font(family='Helvetica',size=300, weight='bold')
+text_display_font = font.Font(family='Helvetica',size=50, weight='bold')
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
 gui.quit()
