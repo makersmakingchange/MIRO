@@ -35,11 +35,6 @@ class TkPiece(Piece,Frame):
 		}
 		Frame.mainloop(self)
 
-	def _DURING_poll(self): 
-		now = time.clock()
-		delta = now - self._then
-		self._then = now
-
 	def _BEFORE_stop(self): # Tk window requires a custom start routine
 		self._alive = False
 		Frame.quit(self)

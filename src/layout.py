@@ -13,8 +13,6 @@ class Layout(Piece):
 			for i in range(self._n_current_keys):
 				self.send_to(Uid.TKPIECE,Req.DELETE,'key'+str(i))
 			self._n_current_keys = 0
-		n_col = int(n**0.5)
-		n_row = int(n**0.5)
 		for i in range(n):
 			y = str((1.0+i)/(n+1))
 			x = str(1.0/2)

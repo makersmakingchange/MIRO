@@ -6,14 +6,11 @@ def main():
 
 class System(Piece):
 
-	def _DURING_poll(self):
-		time.sleep(0.01)
-
 	def _BEFORE_stop(self):
 		for uid in get_attr(Uid):
 			if uid != self._uid:
 				self.send_to(uid,Req.STOP)
-		time.sleep(1)
+			time.sleep(0.1)
 
 	def _ON_start(self,data):
 		try:
