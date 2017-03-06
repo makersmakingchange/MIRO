@@ -6,16 +6,21 @@ mypath = os.path.dirname(__file__)+'/..'
 
 onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath,f))]
 
+def _print(msg):
+	#print(msg)
+	pass
+
 with open(mypath+'/wtfj/protocol/uid.py','w') as uids:
-	print('-------------------------')
-	print('Generating uids in uid.py')
-	print('-------------------------')
+	_print('-------------------------')
+	_print('Generating uids in uid.py')
+	_print('-------------------------')
 	for line in onlyfiles:
-		print(line)
+		_print(line)
 		parts = line.split('.')
 		uid = parts[0]
 		uid_val = uid.upper()+' = \''+uid+'\'\n'
 		uids.write(uid_val)
+	uids.write('PIECE = \'piece\'')
 
 from protocol import uid as Uid
 from protocol import req as Req
@@ -27,9 +32,9 @@ def print_bar(msg,top=True,bottom=True):
 	bar = ''
 	for char in msg:
 		bar += '-'
-	if top is True: print(bar)
-	print(msg)
-	if bottom is True: print(bar)
+	if top is True: _print(bar)
+	_print(msg)
+	if bottom is True: _print(bar)
 
 def get_uid(piece):
 	''' Returns id based on class name '''
@@ -47,4 +52,4 @@ for v in valid:
 	print_bar('Importing ids for ['+v.__name__+']')
 	for name in dir(v):
 		if '__' not in name:
-			print(name)
+			_print(name)

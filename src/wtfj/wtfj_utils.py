@@ -17,7 +17,7 @@ def ensure_delimited(uid):
 def nuclear_option():
 	''' Attempts to kill all python processes '''
 	import os
-	for i in range(100):
+	for i in range(20):
 		print('nuke '+str(i))
 		os.system("taskkill /im python.exe")
 	quit()

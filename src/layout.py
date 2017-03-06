@@ -2,15 +2,17 @@ from wtfj import*
 
 class Layout(Piece):
 	@staticmethod
-	def get_test_script():
+	
+	def script():
 		script = [
 			"@layout marco",
-			"@layout bs",
+			"@layout build something",
 			"@layout stop"
 		]
-		return script
+		return Script(script)
+
 	def _ON_build(self,data):
-		print(data)
+		self.send(Msg.ACK)
 
 
 if __name__ == '__main__':

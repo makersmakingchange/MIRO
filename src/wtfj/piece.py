@@ -47,6 +47,10 @@ class Piece(object):
 		# Set thread to live and start
 		self._alive = True
 		poll_thread = Thread(target=self._poll)
+		try:
+			self._BEFORE_start()
+		except AttributeError:
+			pass
 		poll_thread.start()
 		self.send(Msg.STARTED)
 		try:
@@ -142,12 +146,15 @@ class Piece(object):
 			self._BEFORE_stop()
 		except AttributeError:
 			pass
-		self._alive = False
 		self.send(Msg.STOPPING)
+		self._alive = False
 		try:
 			self._AFTER_stop()
 		except AttributeError:
 			pass
+
+	def _ON_wait(self,data=None):
+		time.sleep(float(data))
 
 	def _ON_echo(self,data=None):
 		if data is None:
