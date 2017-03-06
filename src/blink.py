@@ -38,8 +38,6 @@ sub.setsockopt_string(zmq.SUBSCRIBE,size_filter)
 
 def contain(pos,division,sel) :
 	'''assume pos if a pair of coordinates'''
-	#x = int(float(pos[0])/1.5)
-	#y = int(float(pos[1])/1.5)
 	x = int(float(pos[0])/1)
 	y = int(float(pos[1])/1)
 	selection = []
