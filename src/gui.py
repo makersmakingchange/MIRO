@@ -31,14 +31,18 @@ def write(console_text):
 	if (console_text == 'spc'):
 		gui.selected_text += ' '
 	else:
-		gui.selected_text += console_text
+		if (console_text != '#empty'):
+			gui.selected_text += console_text
 	gui.canvas.itemconfigure(gui.text_display,text=gui.selected_text)
 
 def option(option_msg):
 	option_msg = option_msg.replace('_to_',':')
 	parts = option_msg.split(',')
 	for i in range(len(parts)):
-		gui.canvas.itemconfigure(gui.text_boxes[i],text=parts[i])
+		if (parts[i] == "#empty"):
+			gui.canvas.itemconfigure(gui.text_boxes[i],text='')
+		else:	
+			gui.canvas.itemconfigure(gui.text_boxes[i],text=parts[i])
 
 function_dict = {}
 function_dict['cmd'] = command
@@ -65,7 +69,7 @@ class Application(Frame):
 		Frame.__init__(self,master)
 		self.drawables = []
 		self.size = size
-		self._divide_screen(4)
+		self._divide_screen(5)
 		self._createWidgets()
 		self.selected_text = ''
 

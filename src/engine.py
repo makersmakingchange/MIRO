@@ -80,7 +80,7 @@ class OptionNode(object):
 # Function nodes
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
-number_of_keys = 4
+number_of_keys = 5
 
 root = OptionNode()
 letters = OptionNode('a_to_z')
@@ -91,8 +91,11 @@ formatting = OptionNode('spc_to_.')
 build_tree(letters, number_of_keys, letter_choices)
 build_tree(numbers, number_of_keys, number_choices)
 build_tree(formatting, number_of_keys, formatting_choices)
-
 root.add_children(letters,non_text)
+
+root_blank_keys = number_of_keys - 2
+for i in range(root_blank_keys):
+	root.add_child(OptionNode("#empty"))
 non_text.add_children(numbers,formatting)
 
 def command(cmd_string):
