@@ -80,7 +80,7 @@ class OptionNode(object):
 # Function nodes
 undo = OptionNode('#undo')
 speak = OptionNode('#speak')
-number_of_keys = 5
+number_of_keys = 2
 
 root = OptionNode()
 letters = OptionNode('a_to_z')

@@ -69,7 +69,7 @@ class Application(Frame):
 		Frame.__init__(self,master)
 		self.drawables = []
 		self.size = size
-		self._divide_screen(5)
+		self._divide_screen(2)
 		self._createWidgets()
 		self.selected_text = ''
 
@@ -77,7 +77,7 @@ class Application(Frame):
 		max_rows = 5
 		shape_type = 'rect'
 		screen_width = self.size[0]
-		screen_height = self.size[1]
+		screen_height = self.size[1] - 150
 		assert(max_rows == 5)
 		if (n > max_rows):
 			cols = n/max_rows + (n%max_rows > 0)
@@ -110,11 +110,10 @@ class Application(Frame):
 			i+=1
 		self.shape_list = self.shape_list[0:len(self.shape_list)-1]
 
-
-
 	def _draw_text(self):
 		for x in range(len(self.shapes)):
 			shape_center = ((self.br_coords[x][0]-self.ul_coords[x][0])/2 + self.ul_coords[x][0],(self.br_coords[x][1]-self.ul_coords[x][1])/2 + self.ul_coords[x][1])
+			console_font = font.Font(family='Helvetica',size=(self.ul_coords[x][1] - self.br_coords[x][1]), weight='bold')
 			self.text_boxes.append(self.canvas.create_text(shape_center[0],shape_center[1],justify='center',font=console_font))
 
 	def _draw_shapes(self):
@@ -147,7 +146,7 @@ class Application(Frame):
 
 		self._draw_text()
 
-		self.text_display = self.canvas.create_text(0,h-150,justify='left',font=text_display_font)
+		self.text_display = self.canvas.create_text(0,h-100,justify='left',font=text_display_font)
 		self.canvas.itemconfigure(self.text_display, anchor='w')
 
 		self.canvas.bind("<Motion>",on_mouse_move)
@@ -187,8 +186,7 @@ class Application(Frame):
 root = Tk()
 root.attributes("-fullscreen", True)
 w,h = (root.winfo_screenwidth(),root.winfo_screenheight())
-console_font = font.Font(family='Helvetica',size=300, weight='bold')
-text_display_font = font.Font(family='Helvetica',size=50, weight='bold')
+text_display_font = font.Font(family='Helvetica',size=100, weight='bold')
 gui = Application(master=root,size=(w,h))
 gui.mainloop()
 gui.quit()
