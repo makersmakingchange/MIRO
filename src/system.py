@@ -29,11 +29,9 @@ class System(Piece):
 		filename = SCRIPT_PATH+data+'.txt'
 		with open(filename) as f:
 			for line in f:
-				parts = line.split(' ',1)
-				if parts[0] == 'start':
-					self._ON_start(parts[1])
-				else:
-					line = line.split('\n')[0]
+				line = line.split('\n')[0]
+				#if self._uid in line.split()[0]:
+				if not self._interpret(line):
 					self._out.send(line)
 
 	@staticmethod

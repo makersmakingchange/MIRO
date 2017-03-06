@@ -1,13 +1,5 @@
-from wtfj_ids import Uid,Req,Msg,Mode
+from wtfj_ids import *
 import subprocess
-
-import logging
-logging.basicConfig(filename='system.log',
-	filemode='a',
-	format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-	datefmt='%H:%M:%S',
-	level=logging.DEBUG)
-logger = logging.getLogger('tkpiece')
 
 
 def ensure_delimited(uid):

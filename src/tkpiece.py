@@ -31,7 +31,7 @@ class TkPiece(Piece,Frame):
 			'feedback' : font.Font(family='Helvetica',size=36, weight='bold')
 		}
 		self._handles = {
-			'feedback' : self._canvas.create_text(540,360,justify='center',font=self._fonts['feedback'])
+			'feedback' : self._canvas.create_text(self._w/2,self._h/2,justify='center',font=self._fonts['feedback'])
 		}
 		Frame.mainloop(self)
 
@@ -109,10 +109,6 @@ class TkPiece(Piece,Frame):
 		except Exception as e:
 			self.err('Function called before canvas initialized')
 			raise e
-
-	def _ON_options(self,data):
-		#options = data.split(',')
-		self._ON_console(data)
 
 	@staticmethod
 	def ON_mouse(event):

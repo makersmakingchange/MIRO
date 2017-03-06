@@ -8,14 +8,13 @@ choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
-	
-	def _AFTER_start(self):
-		self._options = OptionNode()
-		self._current_option = self._options
 
 	def _ON_build(self,data):
+		self._options = OptionNode()
 		num_options = int(data)
 		build_tree(self._options,num_options,choices)
+		self._current_option = self._options
+		self._ON_process(None)
 
 	def _ON_select(self,data):
 		selection = int(data)
@@ -32,7 +31,7 @@ class Engine(Piece):
 			msg += self._current_option.children[i].content
 			if i < len(self._current_option.children)-1:
 				msg += ','
-		self.send_to(Uid.TKPIECE,Req.OPTIONS,msg)
+		self.send(Msg.OPTIONS,msg)
 
 	@staticmethod
 	def script():

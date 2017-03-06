@@ -95,27 +95,29 @@ class Piece(object):
 		''' Attempts to parse the incoming packet '''
 		''' Calls a function based on the msg content '''
 		try:
-			uid,topic,data = unpack(msg)
-			# These are guaranteed to be in one of three states upon unpacking
-			#
-			# 	empty message 	: (None,None,None)
-			# 	data is None	: (uid,topic,None)
-			# 	full message 	: (uid,topic,None)
-			#
-			if uid[1:] == self._uid:
-				try:
-					getattr(self,'_ON_'+topic)(data)
-					return True
-				except AttributeError as e:
-					self.err('No interpretation of message ['+msg+'] available')
-					raise e
-					return True
-			elif uid in self._subscriptions:
-				try:
-					getattr(self,'_ON_'+uid+'_'+topic)(data)
-				except AttributeError as e:
-					pass
-				return True
+			if msg is not None:
+				uid,topic,data = unpack(msg)
+				# These are guaranteed to be in one of three states upon unpacking
+				#
+				# 	empty message 	: (None,None,None)
+				# 	data is None	: (uid,topic,None)
+				# 	full message 	: (uid,topic,None)
+				#
+				if uid[1:] == self._uid:
+					try:
+						getattr(self,'_ON_'+topic)(data)
+						return True
+					except AttributeError as e:
+						self.err('No interpretation of message ['+msg+'] available')
+						raise e
+				elif uid in self._subscriptions:
+					try:
+						getattr(self,'_ON_'+uid+'_'+topic)(data)
+						return True
+					except AttributeError as e:
+						self.err('No interpretation of message ['+msg+'] available')
+						raise e
+		except TypeError: return False
 		except Exception as e:
 			self.err('Exception thrown\n'+traceback.format_exc())
 		return False
