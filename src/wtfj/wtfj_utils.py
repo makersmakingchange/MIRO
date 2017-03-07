@@ -31,6 +31,14 @@ def unpack(msg):
 			return (parts[0],parts[1],None)
 	return (None,None,None)
 
+def pack_csv(*args):
+	''' Returns a string of values seperated by commas '''
+	data = ''
+	for arg in args:
+		data += (str(arg)+',')
+	data = data[:-1]
+	return data
+
 def is_valid_msg_(well_formed_packet_tuple):
 	''' Checks if a packet represents a vaild outgoing message '''
 	uid,topic,data = well_formed_packet_tuple

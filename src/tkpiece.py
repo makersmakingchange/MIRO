@@ -27,8 +27,8 @@ class TkPiece(Piece,Frame):
 		self._then = time.clock()
 		self._images = {}
 		self._fonts = {
-			'default' : font.Font(family='Helvetica',size=72, weight='bold'),
-			'feedback' : font.Font(family='Helvetica',size=36, weight='bold')
+			'default' : font.Font(family='Helvetica',size=200, weight='bold'),
+			'feedback' : font.Font(family='Helvetica',size=50, weight='bold')
 		}
 		self._handles = {
 			'feedback' : self._canvas.create_text(self._w/2,self._h/2,justify='center',font=self._fonts['feedback'])
@@ -70,7 +70,9 @@ class TkPiece(Piece,Frame):
 	def _ON_position(self,data):
 		try:
 			handle,x,y = data.split(',')
-			self._canvas.coords(self._handles[handle],int(x),int(y))
+			x = int(self._w*float(x))
+			y = int(self._h*float(y))
+			self._canvas.coords(self._handles[handle],x,y)
 		except ValueError as e:
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
 

@@ -3,7 +3,7 @@ from tkpiece import TkPiece
 
 def main():
 	from sys import argv
-	Runner.run_w_cmd_args(WFace,argv)
+	Runner.run_w_cmd_args(WFace,argv,[Uid.FACE])
 
 
 def distance(x1,y1,x2,y2):
@@ -140,21 +140,28 @@ class DetectedFace(object):
 
 
 class WFace(TkPiece):
-	def _BEFORE_start(self):
-		TkPiece.subscribe(self,Uid.FACE)
+	def _ON_draw(self,data):
+		self._face_handles = ['rb','lb','re','le','n','um','lm']
+		for handle in self._face_handles:
+			self._ON_create(pack_csv(Msg.TEXT,handle,0.5,0.5))
+			self._ON_text(handle+','+handle)
+		self.send(Msg.ACK)
+
 	def _ON_face_position(self,data):
-		d = DetectedFace(data)
-		TkPiece._ON_console(self,repr(d.right_brow()))
+		vals = [float(n) for n in data.split(',')]
+		for i in range(len(vals)/2):
+			x,y = vals[2*i]/640,vals[(2*i)+1]/480
+			self._ON_position(pack_csv(self._face_handles[i],x,y))
+		self.send(Msg.ACK)
 
 	@staticmethod
 	def script():
 		script = [
 			'@wface marco',
 			'@wface period 1',
-			'@wface console TESTING WFACE',
-			'@wface console Expect this message to change',
-			'face position 1.23123,12.123',
-			'face position 1.23123,12.123',
+			'@wface draw',
+			'@wface text feedback,TESTING WFACE',
+			'face position 1.12131,1231,121,258,433,456,4566,200',
 			'@wface stop'
 		]
 		return Script(script)
