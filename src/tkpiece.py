@@ -18,8 +18,8 @@ class TkPiece(Piece,Frame):
 		self._root = Tk()
 		TkPiece.tkpiece_ref = self
 		Frame.__init__(self,self._root)
-		self._w = 1080 
-		self._h = 720
+		self._root.attributes("-fullscreen", True)
+		self._w,self._h = (self._root.winfo_screenwidth(),self._root.winfo_screenheight()) 
 		self._canvas = Canvas(self._root,width=self._w,height=self._h)
 		self._canvas.bind("<Motion>",TkPiece.ON_mouse)
 		self._canvas.bind_all("<Escape>",self._ON_esc)
@@ -117,7 +117,6 @@ class TkPiece(Piece,Frame):
 
 	@staticmethod
 	def script():
-
 		text_entry = [
 			'@tkpiece marco',
 			'@tkpiece create text,key0,0.25,0.25',
@@ -146,7 +145,6 @@ class TkPiece(Piece,Frame):
 			'@tkpiece text exit_msg,NOT',
 			'@tkpiece stop'
 		]
-
 		return Script(text_entry)
 
 
