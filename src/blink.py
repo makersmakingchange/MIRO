@@ -13,6 +13,10 @@ class Blink(Piece):
 
 	def _ON_eyetracker_gaze(self,data=None):
 		self._time_last_eye_msg_recvd = time.clock()
+#	def _ON_gui_regions(self,data=None):
+#		self.regions = data[2].split(",")
+#		for x in range(len(regions)):
+#			if
 
 	def _DURING_poll(self):
 		if self._time_last_eye_msg_recvd is not None:
@@ -20,7 +24,7 @@ class Blink(Piece):
 			delta = now - self._time_last_eye_msg_recvd
 			if delta > self._blink_threshold and self._blinked is False:
 				self._blinked = True
-				self.send(Msg.SELECT)
+				self.send_to(Uid.ENGINE,Msg.SELECT,'0')
 			else:
 				self._blinked = False
 
