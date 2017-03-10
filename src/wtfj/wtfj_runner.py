@@ -3,6 +3,8 @@ from connectors_zmq import *
 from wtfj_ids import *
 import subprocess
 
+SCRIPT_PATH = '../scripts/'
+
 class Runner:
 
 	@staticmethod
@@ -20,7 +22,7 @@ class Runner:
 				subprocess.Popen(args)
 	
 	@staticmethod
-	def run_w_cmd_args(PieceClass,argv,subscriptions=[]):
+	def run_w_cmd_args(Class,argv,subscriptions=[]):
 		print_bar('Running with args '+repr(argv))
 		try:
 			mode = argv[1]
@@ -30,7 +32,7 @@ class Runner:
 		if mode == Mode.TEST:
 			setup = [ 
 
-				PieceClass.script(), # Executes default test script
+				Class.script(), # Executes default test script
 				Printer('[<] '),
 				False
 
@@ -51,7 +53,7 @@ class Runner:
 		if mode == Mode.ZCONSOLE:
 			setup = [ 
 
-				Console('[>] '), # User input
+				Console('[>] '), # User input in _DURING_poll function of ZConsole
 				ZmqPusher(), # Gets passed to network
 				True # Local echo on
 
@@ -87,12 +89,12 @@ class Runner:
 		from_piece = setup[1] 
 		local_echo = setup[2]
 
-		cnx_line = '['+repr(to_piece.__class__.__name__)+']--->['+repr(PieceClass.__name__)+']--->['+repr(from_piece.__class__.__name__)+']'
+		cnx_line = '['+repr(to_piece.__class__.__name__)+']--->['+repr(Class.__name__)+']--->['+repr(from_piece.__class__.__name__)+']'
 
-		print_bar('Connecting to '+repr(PieceClass.__name__).lower())
+		print_bar('Connecting to '+repr(Class.__name__).lower())
 		print_bar(cnx_line)
 
-		piece = PieceClass(to_piece,from_piece,echo=local_echo)
+		piece = Class(to_piece,from_piece,echo=local_echo)
 		print('Echo is '+str(local_echo))
 
 		for subscription in subscriptions:

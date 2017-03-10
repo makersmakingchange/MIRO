@@ -1,0 +1,8 @@
+@system start tkpiece
+@system start layout
+@system wait 1
+@tkpiece text feedback,Testing layout
+@tkpiece wait 1
+@tkpiece text feedback,
+@tkpiece stop
+@layout stop

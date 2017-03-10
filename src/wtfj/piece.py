@@ -47,6 +47,10 @@ class Piece(object):
 		# Set thread to live and start
 		self._alive = True
 		poll_thread = Thread(target=self._poll)
+		try:
+			self._BEFORE_start()
+		except AttributeError:
+			pass
 		poll_thread.start()
 		self.send(Msg.STARTED)
 		try:
@@ -91,27 +95,29 @@ class Piece(object):
 		''' Attempts to parse the incoming packet '''
 		''' Calls a function based on the msg content '''
 		try:
-			uid,topic,data = unpack(msg)
-			# These are guaranteed to be in one of three states upon unpacking
-			#
-			# 	empty message 	: (None,None,None)
-			# 	data is None	: (uid,topic,None)
-			# 	full message 	: (uid,topic,None)
-			#
-			if uid[1:] == self._uid:
-				try:
-					getattr(self,'_ON_'+topic)(data)
-					return True
-				except AttributeError as e:
-					self.err('No interpretation of message ['+msg+'] available')
-					raise e
-					return True
-			elif uid in self._subscriptions:
-				try:
-					getattr(self,'_ON_'+uid+'_'+topic)(data)
-				except AttributeError as e:
-					pass
-				return True
+			if msg is not None:
+				uid,topic,data = unpack(msg)
+				# These are guaranteed to be in one of three states upon unpacking
+				#
+				# 	empty message 	: (None,None,None)
+				# 	data is None	: (uid,topic,None)
+				# 	full message 	: (uid,topic,None)
+				#
+				if uid[1:] == self._uid:
+					try:
+						getattr(self,'_ON_'+topic)(data)
+						return True
+					except AttributeError as e:
+						self.err('No interpretation of message ['+msg+'] available')
+						raise e
+				elif uid in self._subscriptions:
+					try:
+						getattr(self,'_ON_'+uid+'_'+topic)(data)
+						return True
+					except AttributeError as e:
+						self.err('No interpretation of message ['+msg+'] available')
+						raise e
+		except TypeError: return False
 		except Exception as e:
 			self.err('Exception thrown\n'+traceback.format_exc())
 		return False
@@ -142,12 +148,15 @@ class Piece(object):
 			self._BEFORE_stop()
 		except AttributeError:
 			pass
-		self._alive = False
 		self.send(Msg.STOPPING)
+		self._alive = False
 		try:
 			self._AFTER_stop()
 		except AttributeError:
 			pass
+
+	def _ON_wait(self,data=None):
+		time.sleep(float(data))
 
 	def _ON_echo(self,data=None):
 		if data is None:

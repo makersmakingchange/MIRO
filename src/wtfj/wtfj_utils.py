@@ -1,13 +1,5 @@
-from wtfj_ids import Uid,Req,Msg,Mode
+from wtfj_ids import *
 import subprocess
-
-import logging
-logging.basicConfig(filename='system.log',
-	filemode='a',
-	format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-	datefmt='%H:%M:%S',
-	level=logging.DEBUG)
-logger = logging.getLogger('tkpiece')
 
 
 def ensure_delimited(uid):
@@ -17,7 +9,7 @@ def ensure_delimited(uid):
 def nuclear_option():
 	''' Attempts to kill all python processes '''
 	import os
-	for i in range(100):
+	for i in range(20):
 		print('nuke '+str(i))
 		os.system("taskkill /im python.exe")
 	quit()
@@ -38,6 +30,14 @@ def unpack(msg):
 		elif len(parts) == 2:
 			return (parts[0],parts[1],None)
 	return (None,None,None)
+
+def pack_csv(*args):
+	''' Returns a string of values seperated by commas '''
+	data = ''
+	for arg in args:
+		data += (str(arg)+',')
+	data = data[:-1]
+	return data
 
 def is_valid_msg_(well_formed_packet_tuple):
 	''' Checks if a packet represents a vaild outgoing message '''

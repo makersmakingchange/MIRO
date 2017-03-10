@@ -1,0 +1,35 @@
+@system start tkpiece
+@system wait 1
+@tkpiece marco
+@tkpiece create text,key0,0.25,0.25
+@tkpiece create text,key1,0.75,0.25
+@tkpiece create text,key2,0.25,0.75
+@tkpiece create text,key3,0.75,0.75
+@tkpiece fontsize key0,key1,key2,key3,150
+@tkpiece wait 1
+@tkpiece text key0,M
+@tkpiece text key1,I
+@tkpiece text key2,R
+@tkpiece text key3,O
+@tkpiece wait 1
+@tkpiece text key0,m
+@tkpiece wait 1
+@tkpiece text key1,i
+@tkpiece wait 1
+@tkpiece text key2,r
+@tkpiece wait 1
+@tkpiece text key3,o
+@tkpiece wait 1
+@tkpiece delete key0,key1
+@tkpiece delete key2
+@tkpiece delete key3
+@tkpiece text feedback,That's all folks
+@tkpiece wait 1
+@tkpiece clear
+@tkpiece wait 1
+@tkpiece image test,0.5,0.5
+@tkpiece create text,exit_msg,0.5,0.5
+@tkpiece wait 1
+@tkpiece text exit_msg,NOT
+@tkpiece wait 1
+@tkpiece stop

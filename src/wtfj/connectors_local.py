@@ -16,12 +16,23 @@ class Console:
 	''' Allows user to enter commands '''
 	def __init__(self,prompt='[$] '):
 		self._prompt = prompt
+		self._at = ''
 
 	def poll(self,wait_s=None,uid=None):
-		msg = raw_input(self._prompt)
-		if msg == pack(Uid.SYSTEM,Req.STOP,None):
-			self._alive = False
-		return [msg]
+		try:
+			prompt = str(self._at)+str(self._prompt)
+			msg = raw_input(prompt)
+			if msg == '':
+				self._at = ''
+				return []
+			if msg[0] == '@':
+				self._at = msg.split()[0]+' '
+			else:
+				msg = self._at+msg
+			return [msg]
+		except Exception as e:
+			print(repr(e))
+			return []
 
 	def subscribe(self,*uids):
 		pass
