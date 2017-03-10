@@ -13,12 +13,8 @@ class Blink(Piece):
 		self._select_val = 0
 
 	def _ON_eyetracker_gaze(self,data):
+		# Blink module only needs to detect blink (based on time without coords)
 		self._time_last_eye_msg_recvd = time.clock()
-		eye_pt = [int(x) for x in data.split(',')]
-		if eye_pt[0] > 540:
-			self._select_val = 1
-		else:
-			self._select_val = 0
 
 	def _DURING_poll(self):
 		if self._time_last_eye_msg_recvd is not None:
@@ -27,7 +23,7 @@ class Blink(Piece):
 			if delta > self._blink_threshold:
 				if self._blinked is False:
 					self._blinked = True
-					self.send_to(Uid.ENGINE,Msg.SELECT,str(self._select_val))
+					self.send(Msg.SELECT)
 			else:
 				self._blinked = False
 

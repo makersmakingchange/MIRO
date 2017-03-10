@@ -5,8 +5,36 @@ class Layout(Piece):
 	def _BEFORE_start(self):
 		self.subscribe(Uid.ENGINE)
 		self.subscribe(Uid.EYETRACKER)
+		self.subscribe(Uid.BLINK)
 		self._n_current_keys = 0
+		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
+
+	def _ON_eyetracker_gaze(self,data):
+		'''Only record a single gaze coordinate at a time.'''
+		eye_data = data.split(",")
+		self._last_eye = (float(eye_data[0])/1.5,float(eye_data[1])/1.5)
+
+	def _contains(self,upper_left, bottom_right):
+		'''Helper function to determine if a shape contains the last
+		eyetracker coordinates.'''
+		# Until screen size is dynamic on eyetracker:
+		ul = (float(upper_left[0])*1280,float(upper_left[1])*720)
+		br = (float(bottom_right[0])*1280,float(bottom_right[1])*720)
+		if (ul[0] < self._last_eye[0] and ul[1] < self._last_eye[1] and br[0] > self._last_eye[0] and br[1] > self._last_eye[1]):
+			return True
+		return False
+
+	def _ON_blink_select(self,data):
+		'''When a blink select signal is emitted, check if the last
+		eye coordinate was within any of the keys'''
+		shapes = self.shape_list.split(",")
+		for index in range(0,len(shapes)/5):
+			ul = (shapes[5*index+1],shapes[5*index+2])
+			br = (shapes[5*index+3],shapes[5*index+4])
+			if (self._contains(ul,br) == True):
+				self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
+				return
 
 	def _ON_engine_options(self,data):
 		options = data.split(',')
@@ -88,6 +116,14 @@ class Layout(Piece):
 		text_entry = [
 			'@layout marco',
 			'engine options 1,2,3,4',
+			'eyetracker gaze 110,200',
+			'blink select',
+			'eyetracker gaze 750,600',
+			'blink select',
+			'eyetracker gaze 1005,300',
+			'blink select',
+			'eyetracker gaze 1350,810',
+			'blink select',
 			'@layout stop'
 		]
 		return Script(text_entry)

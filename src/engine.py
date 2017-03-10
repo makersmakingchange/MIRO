@@ -29,8 +29,8 @@ class Engine(Piece):
 	def _ON_build(self,data):
 		self._options = OptionNode()
 		num_options = int(data)
-		build_menu(self._options,num_options,choices)
-		#build_tree(self._options,num_options,choices)
+		#build_menu(self._options,num_options,choices)
+		build_tree(self._options,num_options,choices)
 		self._current_option = self._options
 		self._ON_process(None)
 
@@ -56,7 +56,6 @@ class Engine(Piece):
 		return Script([
 			'@engine marco',
 			'@engine period 1',
-			'@engine process',
 			'@engine build 3',
 			'@engine select 0',
 			'@engine stop'
