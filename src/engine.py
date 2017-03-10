@@ -5,6 +5,23 @@ def main():
 	Runner.run_w_cmd_args(Engine,argv)
 
 choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+menu_options = ['#menu','#keyboard','#undo']
+
+def build_menu(head,num_keys,choices):
+	menu = OptionNode('#menu')
+	next = OptionNode('#next')
+	next2 = OptionNode('#next')
+	next3 = OptionNode('#next')
+	undo = OptionNode('#undo')
+	keyboard = OptionNode('#keyboard')
+	head.add_child(undo)
+	head.add_child(next)
+	next.add_child(keyboard)
+	next.add_child(menu)
+	#next3.add_child(keyboard)
+	#next3.add_child(head)
+	return head
+
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -12,7 +29,8 @@ class Engine(Piece):
 	def _ON_build(self,data):
 		self._options = OptionNode()
 		num_options = int(data)
-		build_tree(self._options,num_options,choices)
+		build_menu(self._options,num_options,choices)
+		#build_tree(self._options,num_options,choices)
 		self._current_option = self._options
 		self._ON_process(None)
 
@@ -45,7 +63,7 @@ class Engine(Piece):
 		])
 
 # Given root of options tree, build tree such that each node has num_keys child nodes consisting of divided choices list.
-def build_tree(head, num_keys, choices):
+def build_tree(head,num_keys,choices):
 	if len(choices) == 1:
 		return
 	elif len(choices) < num_keys:

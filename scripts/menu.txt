@@ -1,0 +1,7 @@
+@system start layout
+@system start engine
+@system start tkpiece
+@system start mouse_to_eye
+@system start audio
+@system wait 1
+@engine build 2

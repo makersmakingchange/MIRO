@@ -1,0 +1,2 @@
+@system start wface
+@system start face exe
