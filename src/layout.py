@@ -105,6 +105,7 @@ class Layout(Piece):
 				if self._n_current_keys == 0:
 					self.send_to(Uid.TKPIECE,Req.CREATE,'text,key'+str(i)+','+x+','+y)
 				# Update the value of the text field
+				options[i] = options[i].replace('_to_',':')
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'key'+str(i)+','+options[i])
 
 		# Save current number of options displayed and send acknowledgement back				
@@ -115,7 +116,7 @@ class Layout(Piece):
 	def script():
 		text_entry = [
 			'@layout marco',
-			'engine options 1,2,3,4',
+			'engine options a_to_b,c_to_d,e_to_f,g_to_h',
 			'eyetracker gaze 110,200',
 			'blink select',
 			'eyetracker gaze 750,600',
