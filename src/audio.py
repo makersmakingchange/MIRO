@@ -13,7 +13,7 @@ class Audio(Piece):
 			self.err('Could not find file for argument ['+str(data)+']')
 
 	@staticmethod
-	def get_test_script():
+	def script():
 
 		script = [
 			'@audio uptime',
@@ -30,7 +30,7 @@ class Audio(Piece):
 			'@audio stop'
 		]
 
-		return script
+		return Script(script)
 
 if __name__ == '__main__':
 	from sys import argv

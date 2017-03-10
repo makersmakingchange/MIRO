@@ -18,7 +18,10 @@ class Console:
 		self._prompt = prompt
 
 	def poll(self,wait_s=None,uid=None):
-		return [raw_input(self._prompt)]
+		msg = raw_input(self._prompt)
+		if msg == pack(Uid.SYSTEM,Req.STOP,None):
+			self._alive = False
+		return [msg]
 
 	def subscribe(self,*uids):
 		pass
