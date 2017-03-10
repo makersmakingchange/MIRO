@@ -18,8 +18,11 @@ with open(mypath+'/wtfj/protocol/uid.py','w') as uids:
 		_print(line)
 		parts = line.split('.')
 		uid = parts[0]
-		uid_val = uid.upper()+' = \''+uid+'\'\n'
-		uids.write(uid_val)
+		if uid is None or uid is '':
+			pass
+		else:
+			uid_val = uid.upper()+' = \''+uid+'\'\n'
+			uids.write(uid_val)
 	uids.write('PIECE = \'piece\'')
 
 from protocol import uid as Uid
