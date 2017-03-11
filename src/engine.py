@@ -29,8 +29,8 @@ class Engine(Piece):
 	def _ON_build(self,data):
 		self._options = OptionNode()
 		num_options = int(data)
-		build_menu(self._options,num_options,choices)
-		#build_tree(self._options,num_options,choices)
+		#build_menu(self._options,num_options,choices)
+		build_tree(self._options,num_options,choices)
 		self._current_option = self._options
 		self._ON_process(None)
 

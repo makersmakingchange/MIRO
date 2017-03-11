@@ -122,7 +122,6 @@ class Piece(object):
 			self.err('Exception thrown\n'+traceback.format_exc())
 		return False
 		
-
 	def _poll(self):
 		''' Run in its own thread '''
 		while self._alive == True:
@@ -138,7 +137,6 @@ class Piece(object):
 				self._DURING_poll()
 			except AttributeError:
 				pass
-			time.sleep(0.001) # DEal
 
 	def _ON_marco(self,data=None):
 		self.send(Msg.POLO)
@@ -185,7 +183,12 @@ class Piece(object):
 			self.err()
 
 	@staticmethod
-	def script(): return NotImplementedError
+	def script(): 
+		script = [
+			'@piece marco',
+			'@piece stop'
+		]
+		return Script(script)
 
 if __name__ == '__main__': 
 	from sys import argv

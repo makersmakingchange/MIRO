@@ -7,7 +7,7 @@ def main():
 
 
 def distance(x1,y1,x2,y2):
-	((x1-x2)**2 + (y1-y2)**2)**0.5
+	return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
 class Pt(object):
 	def __init__ (self,x,y):
@@ -144,6 +144,7 @@ class WFace(TkPiece):
 		self._face_handles = ['rb','lb','re','le','n','um','lm']
 		for handle in self._face_handles:
 			self._ON_create(pack_csv(Msg.TEXT,handle,0.5,0.5))
+			self._ON_fontsize(handle+','+str(20))
 			self._ON_text(handle+','+handle)
 		self.send(Msg.ACK)
 
@@ -152,6 +153,9 @@ class WFace(TkPiece):
 		for i in range(len(vals)/2):
 			x,y = vals[2*i]/640,vals[(2*i)+1]/480
 			self._ON_position(pack_csv(self._face_handles[i],x,y))
+		bdr = distance(vals[0],vals[1],vals[4],vals[5])
+		bdl = distance(vals[2],vals[3],vals[6],vals[7])
+		self.send(Msg.TEXT,pack_csv(bdr,bdl))
 		self.send(Msg.ACK)
 
 	@staticmethod
