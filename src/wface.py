@@ -148,9 +148,13 @@ class WFace(TkPiece):
 			self._ON_create(pack_csv(Msg.TEXT,handle,0.5,0.5))
 			self._ON_fontsize(handle+','+str(20))
 			self._ON_text(handle+','+handle)
-		self._ON_create(pack_csv(Msg.TEXT,'debug,0.2,0.1'))
+		self._ON_create(pack_csv(Msg.TEXT,'debug,0.5,0.1'))
 		self._ON_fontsize('debug,30')
 		self.send(Msg.ACK)
+
+		self._history = []
+		self._score_history = []
+		self._brow = False
 
 	def _ON_face_position(self,data):
 		''' Draw the face on the screen and calculate some things about it '''
@@ -161,25 +165,73 @@ class WFace(TkPiece):
 		face_x,face_y = sum(x_vals)/num_parts,sum(y_vals)/num_parts
 		std_dev_x = (sum([(x - face_x)**2 for x in x_vals])/num_parts)**0.5
 		std_dev_y = (sum([(y - face_y)**2 for y in y_vals])/num_parts)**0.5
-		self._ON_text(pack_csv('debug',std_dev_x,std_dev_y))
+		std_dev = (std_dev_x**2 + std_dev_y**2)**0.5
 		for i in range(num_parts): # Face values must come in pairs of x,y floats
-			x = (x_vals[i] - face_x)/480 + 0.5
-			y = (y_vals[i] - face_y)/640 + 0.5
+			x = (x_vals[i] - face_x)/640 + 0.5
+			y = (y_vals[i] - face_y)/480 + 0.5
 			self._ON_position(pack_csv(self._face_handles[i],x,y))
-		bdr = distance(vals[0],vals[1],vals[4],vals[5])
-		bdl = distance(vals[2],vals[3],vals[6],vals[7])
-		self.send(Msg.TEXT,pack_csv(bdr,bdl))
+		brow_to_eye_distance_r = distance(vals[0],vals[1],vals[4],vals[5])
+		brow_to_eye_distance_l = distance(vals[2],vals[3],vals[6],vals[7])
+		mouth_distance = distance(vals[10],vals[11],vals[12],vals[13])
+		brow_score = (brow_to_eye_distance_r/std_dev + brow_to_eye_distance_l/std_dev)/2
+		mouth_score = (mouth_distance/std_dev)
+		
+		now = time.clock()
+		self._history = self._history[-99:]
+		record = [now,brow_score,mouth_score]
+		self._history.append(record)
+		
+		# Calculate average brow score over the last second
+		i,avg = 0,0
+		while True:
+			if i+1 > len(self._history): 
+				break
+			t = self._history[-(i+1)][0]
+			if now - t > 1.0: 
+				break
+			avg += self._history[-(i+1)][1]
+			i += 1
+		avg /= i
+		
+		brow_score -= avg
+
+		score_record = [now,brow_score]
+		self._score_history = self._score_history[-99:]
+		self._score_history.append(score_record)
+
+		# Calculate area above the average for last second
+		i,area = 0,0
+		while True:
+			if i+2 > len(self._score_history): 
+				break
+			t = self._score_history[-(i+1)][0]
+			if now - t > 1.0: 
+				break
+			delta = t - self._score_history[-(i+2)][0]
+			area += delta*self._score_history[-(i+2)][1]
+			i += 1
+
+		self._ON_text(pack_csv('debug',''))
+		if area > 0.02:
+			if self._brow == False:
+				self._brow = True
+				self._ON_text(pack_csv('debug','brow'))
+		else:
+			self._brow = False
+		self.send(Msg.TEXT,pack_csv(brow_score,area))
 		self.send(Msg.ACK)
 
 	@staticmethod
 	def script():
 		script = [
 			'@wface marco',
-			'@wface period 1',
+			'@wface period 0.2',
 			'@wface draw',
 			'@wface text feedback,TESTING WFACE',
-			'face position 200,200,300,200,200,300,400,200,300,500,800,100',
-			'@wface wait 2',
+			'face position 200,200,300,200,200,300,400,200,300,500,800,100,100,300',
+			'face position 200,200,200,200,200,300,200,200,100,300,300,300,100,200',
+			'face position 300,100,300,200,100,200,400,200,200,200,500,200,200,100',
+			'face position 200,200,200,200,200,300,200,200,100,300,300,300,100,200',
 			'@wface stop'
 		]
 		return Script(script)
