@@ -43,7 +43,6 @@ class Engine(Piece):
 		msg = ''
 		if len(self._current_option.children) == 0:
 			self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
-			#push.send_string('@gui write=' +current_option.content)
 			self._current_option = self._options
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
@@ -56,8 +55,11 @@ class Engine(Piece):
 		return Script([
 			'@engine marco',
 			'@engine period 1',
-			'@engine process',
 			'@engine build 3',
+			'@engine select 0',
+			'@engine select 0',
+			'@engine select 0',
+			'@engine select 0',
 			'@engine select 0',
 			'@engine stop'
 		])
@@ -67,10 +69,10 @@ def build_tree(head,num_keys,choices):
 	if len(choices) == 1:
 		return
 	elif len(choices) < num_keys:
-		for x in range((num_keys - len(choices))):
-			choices.append("#empty")
-		for opt_str in choices:
-			head.add_child(OptionNode(opt_str))
+		for option in choices:
+			opt = OptionNode(option)
+			head.add_child(opt)
+		return
 	else:
 		seed_value = int(len(choices)/num_keys) + (len(choices) % num_keys > 0) # Rounds decimal results up to nearest int
 		size_of_nodes = []

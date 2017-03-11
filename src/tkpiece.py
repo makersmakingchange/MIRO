@@ -77,17 +77,20 @@ class TkPiece(Piece,Frame):
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
 
 	def _ON_create(self,data):
-		item,handle,x,y = data.split(',')
-		x = int(float(x) * self._w)
-		y = int(float(y) * self._h)
-		if item == 'text':
-			try:
-				item_font = self._fonts[handle]
-			except KeyError:
-				self.err('No font specified for ['+handle+'], using default')
-				item_font = self._fonts['default']
-			self._handles[handle] = self._canvas.create_text(x,y,justify='center',font=item_font)
-			self.send(Msg.ACK)
+		try:
+			item,handle,x,y = data.split(',')
+			x = int(float(x) * self._w)
+			y = int(float(y) * self._h)
+			if item == 'text':
+				try:
+					item_font = self._fonts[handle]
+				except KeyError:
+					self.err('No font specified for ['+handle+'], using default')
+					item_font = self._fonts['default']
+				self._handles[handle] = self._canvas.create_text(x,y,justify='center',font=item_font)
+				self.send(Msg.ACK)
+		except TclError as e:
+			self.send(Msg.ERR,'Graphics error\n'+repr(e))
 
 	def _ON_delete(self,data):
 		handles = data.split(',')
@@ -99,7 +102,15 @@ class TkPiece(Piece,Frame):
 			self._canvas.delete(self._handles[handle])
 
 	def _ON_text(self,data):
-		handle,text = data.split(',')
+		parts = data.split(',')
+		handle = parts[0]
+		text = ''
+		if len(parts) > 2:
+			for part in parts[1:]:
+				text += (part + ',')
+			text = text[:-1]
+		else:
+			text = parts[1]
 		try:
 			self._canvas.itemconfigure(self._handles[handle],text=text)
 			self.send(Msg.ACK)

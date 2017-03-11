@@ -141,17 +141,30 @@ class DetectedFace(object):
 
 class WFace(TkPiece):
 	def _ON_draw(self,data):
+		''' Initial drawing of the letters representing face points on canvas '''
+		# Right brow, left brow, right eye, left eye, nose, upper mouth, lower mouth centers
 		self._face_handles = ['rb','lb','re','le','n','um','lm']
 		for handle in self._face_handles:
 			self._ON_create(pack_csv(Msg.TEXT,handle,0.5,0.5))
 			self._ON_fontsize(handle+','+str(20))
 			self._ON_text(handle+','+handle)
+		self._ON_create(pack_csv(Msg.TEXT,'debug,0.2,0.1'))
+		self._ON_fontsize('debug,30')
 		self.send(Msg.ACK)
 
 	def _ON_face_position(self,data):
+		''' Draw the face on the screen and calculate some things about it '''
 		vals = [float(n) for n in data.split(',')]
-		for i in range(len(vals)/2):
-			x,y = vals[2*i]/640,vals[(2*i)+1]/480
+		num_parts = int(len(vals)/2)
+		x_vals = vals[::2]
+		y_vals = vals[1::2]
+		face_x,face_y = sum(x_vals)/num_parts,sum(y_vals)/num_parts
+		std_dev_x = (sum([(x - face_x)**2 for x in x_vals])/num_parts)**0.5
+		std_dev_y = (sum([(y - face_y)**2 for y in y_vals])/num_parts)**0.5
+		self._ON_text(pack_csv('debug',std_dev_x,std_dev_y))
+		for i in range(num_parts): # Face values must come in pairs of x,y floats
+			x = (x_vals[i] - face_x)/480 + 0.5
+			y = (y_vals[i] - face_y)/640 + 0.5
 			self._ON_position(pack_csv(self._face_handles[i],x,y))
 		bdr = distance(vals[0],vals[1],vals[4],vals[5])
 		bdl = distance(vals[2],vals[3],vals[6],vals[7])
@@ -165,7 +178,8 @@ class WFace(TkPiece):
 			'@wface period 1',
 			'@wface draw',
 			'@wface text feedback,TESTING WFACE',
-			'face position 1.12131,1231,121,258,433,456,4566,200',
+			'face position 200,200,300,200,200,300,400,200,300,500,800,100',
+			'@wface wait 2',
 			'@wface stop'
 		]
 		return Script(script)
