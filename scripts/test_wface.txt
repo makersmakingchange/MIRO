@@ -1,2 +1,4 @@
 @system start wface
 @system start face exe
+@system wait 1
+@wface draw
