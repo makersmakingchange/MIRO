@@ -13,14 +13,14 @@ class Layout(Piece):
 	def _ON_eyetracker_gaze(self,data):
 		'''Only record a single gaze coordinate at a time.'''
 		eye_data = data.split(",")
-		self._last_eye = (float(eye_data[0])/1.5,float(eye_data[1])/1.5)
+		self._last_eye = (float(eye_data[0]),float(eye_data[1]))
 
 	def _contains(self,upper_left, bottom_right):
 		'''Helper function to determine if a shape contains the last
 		eyetracker coordinates.'''
 		# Until screen size is dynamic on eyetracker:
-		ul = (float(upper_left[0])*1280,float(upper_left[1])*720)
-		br = (float(bottom_right[0])*1280,float(bottom_right[1])*720)
+		ul = (float(upper_left[0]),float(upper_left[1]))
+		br = (float(bottom_right[0]),float(bottom_right[1]))
 		if (ul[0] < self._last_eye[0] and ul[1] < self._last_eye[1] and br[0] > self._last_eye[0] and br[1] > self._last_eye[1]):
 			return True
 		return False
@@ -117,13 +117,13 @@ class Layout(Piece):
 		text_entry = [
 			'@layout marco',
 			'engine options a_to_b,c_to_d,e_to_f,g_to_h',
-			'eyetracker gaze 110,200',
+			'eyetracker gaze .3,.3',
 			'blink select',
-			'eyetracker gaze 750,600',
+			'eyetracker gaze .3,.7',
 			'blink select',
-			'eyetracker gaze 1005,300',
+			'eyetracker gaze .7,.3',
 			'blink select',
-			'eyetracker gaze 1350,810',
+			'eyetracker gaze .7,.7',
 			'blink select',
 			'@layout stop'
 		]
