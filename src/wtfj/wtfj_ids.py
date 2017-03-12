@@ -2,22 +2,30 @@ import os
 from os import listdir
 from os.path import isfile, join
 
-mypath = os.path.dirname(__file__)+'/..'
+cwd = os.path.dirname(__file__)
+pypath = cwd+'/..'
+exepath = cwd+'/../../bin'
 
-onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath,f))]
+pyfiles = [f for f in listdir(pypath) if isfile(join(pypath,f))]
+exefiles = [f for f in listdir(exepath) if not isfile(join(exepath,f))]
 
 def _print(msg):
-	#print(msg)
+	print(msg)
 	pass
 
-with open(mypath+'/wtfj/protocol/uid.py','w') as uids:
+with open(pypath+'/wtfj/protocol/uid.py','w') as uids:
 	_print('-------------------------')
 	_print('Generating uids in uid.py')
 	_print('-------------------------')
-	for line in onlyfiles:
-		_print(line)
-		parts = line.split('.')
-		uid = parts[0]
+	filenames = pyfiles
+	filenames.extend(exefiles)
+	for piece_filename in filenames:
+		_print(piece_filename)
+		if '.py' in piece_filename:
+			parts = piece_filename.split('.')
+			uid = parts[0]
+		else:
+			uid = piece_filename
 		if uid is None or uid is '':
 			pass
 		else:
