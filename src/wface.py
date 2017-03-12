@@ -3,7 +3,7 @@ from tkpiece import TkPiece
 
 def main():
 	from sys import argv
-	Runner.run_w_cmd_args(WFace,argv,[Uid.FACE])
+	Runner.run_w_cmd_args(WFace,argv)
 
 
 def distance(x1,y1,x2,y2):
@@ -139,26 +139,35 @@ class DetectedFace(object):
 			canvas.delete(line_handle)
 
 
-class WFace(TkPiece):
-	def _ON_draw(self,data):
-		''' Initial drawing of the letters representing face points on canvas '''
-		# Right brow, left brow, right eye, left eye, nose, upper mouth, lower mouth centers
-		self._face_handles = ['rb','lb','re','le','n','um','lm']
-		for handle in self._face_handles:
-			self._ON_create(pack_csv(Msg.TEXT,handle,0.5,0.5))
-			self._ON_fontsize(handle+','+str(20))
-			self._ON_text(handle+','+handle)
-		self._ON_create(pack_csv(Msg.TEXT,'debug,0.5,0.1'))
-		self._ON_fontsize('debug,30')
-		self.send(Msg.ACK)
-
+class WFace(Piece):
+	''' Was a Tk window, now just calculates values '''
+	def _AFTER_start(self):
+		self.subscribe(Uid.FACE)
 		self._history = []
 		self._score_history = []
+		self._face_vel_history = []
 		self._brow = False
 
 	def _ON_face_position(self,data):
-		''' Draw the face on the screen and calculate some things about it '''
+		''' Calculate whether eyebrows have been raised and mouth opened '''
 		vals = [float(n) for n in data.split(',')]
+		now = time.clock()
+
+		avg_face_velocity = 0
+		try:
+			last_time = self._val_history[0]
+			last_vals = self._val_history[1]
+			n = int(len(last_vals)/2)
+			for i in range(n):
+				i_x = 2*i
+				i_y = 2*i+1
+				avg_face_velocity += distance(last_vals[i_x],last_vals[i_y],vals[i_x],vals[i_y])
+			avg_face_velocity /= n
+			avg_face_velocity /= (now - last_time)
+		except AttributeError as e:
+			pass # No last values found
+		self._val_history = [now,vals]
+
 		num_parts = int(len(vals)/2)
 		x_vals = vals[::2]
 		y_vals = vals[1::2]
@@ -166,17 +175,14 @@ class WFace(TkPiece):
 		std_dev_x = (sum([(x - face_x)**2 for x in x_vals])/num_parts)**0.5
 		std_dev_y = (sum([(y - face_y)**2 for y in y_vals])/num_parts)**0.5
 		std_dev = (std_dev_x**2 + std_dev_y**2)**0.5
-		for i in range(num_parts): # Face values must come in pairs of x,y floats
-			x = (x_vals[i] - face_x)/640 + 0.5
-			y = (y_vals[i] - face_y)/480 + 0.5
-			self._ON_position(pack_csv(self._face_handles[i],x,y))
+
 		brow_to_eye_distance_r = distance(vals[0],vals[1],vals[4],vals[5])
 		brow_to_eye_distance_l = distance(vals[2],vals[3],vals[6],vals[7])
 		mouth_distance = distance(vals[10],vals[11],vals[12],vals[13])
+
 		brow_score = (brow_to_eye_distance_r/std_dev + brow_to_eye_distance_l/std_dev)/2
 		mouth_score = (mouth_distance/std_dev)
 		
-		now = time.clock()
 		self._history = self._history[-99:]
 		record = [now,brow_score,mouth_score]
 		self._history.append(record)
@@ -211,14 +217,32 @@ class WFace(TkPiece):
 			area += delta*self._score_history[-(i+2)][1]
 			i += 1
 
-		self._ON_text(pack_csv('debug',''))
-		if area > 0.02:
-			if self._brow == False:
-				self._brow = True
-				self._ON_text(pack_csv('debug','brow'))
-		else:
-			self._brow = False
-		self.send(Msg.TEXT,pack_csv(brow_score,area))
+		face_vel_score = avg_face_velocity/std_dev
+
+		face_vel_record = [now,face_vel_score]
+		self._face_vel_history = self._face_vel_history[-99:]
+		self._face_vel_history.append(face_vel_record)
+
+		# Calculate average face velocity over the last second
+		i,face_vel = 0,0
+		while True:
+			if i+1 > len(self._face_vel_history): 
+				break
+			t = self._face_vel_history[-(i+1)][0]
+			if now - t > 1.0: 
+				break
+			face_vel += self._face_vel_history[-(i+1)][1]
+			i += 1
+		face_vel /= i
+
+		if face_vel < 1.0:
+			if area > 0.02:
+				if self._brow == False:
+					self._brow = True		
+			else:
+				self._brow = False
+
+		self.send_to(Uid.TKPIECE,Msg.TEXT,pack_csv('feedback',self._brow,area,face_vel))
 		self.send(Msg.ACK)
 
 	@staticmethod
@@ -226,8 +250,6 @@ class WFace(TkPiece):
 		script = [
 			'@wface marco',
 			'@wface period 0.2',
-			'@wface draw',
-			'@wface text feedback,TESTING WFACE',
 			'face position 200,200,300,200,200,300,400,200,300,500,800,100,100,300',
 			'face position 200,200,200,200,200,300,200,200,100,300,300,300,100,200',
 			'face position 300,100,300,200,100,200,400,200,200,200,500,200,200,100',
