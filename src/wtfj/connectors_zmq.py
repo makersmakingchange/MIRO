@@ -1,5 +1,6 @@
 import zmq
-from wtfj_ids import Tcp,Uid,names
+from wtfj_ids import *
+from wtfj_utils import *
 
 class ZmqPublisher:
 	''' Publisher that acts as server output '''
@@ -32,8 +33,8 @@ class ZmqSubscriber:
 		for uid in uids:
 			if uid is not None:
 				if uid[0] is '@': 
-					assert uid[1:] in names(Uid)
-				else: assert uid in names(Uid)
+					assert uid[1:] in get_attr(Uid)
+				else: assert uid in get_attr(Uid)
 				if isinstance(uid,bytes):
 					uid = ''
 					uid = uid.decode('ascii')
@@ -74,8 +75,8 @@ class ZmqPuller:
 	def subscribe(self,*uids):
 		for uid in uids:
 			if uid is not None:
-				if uid[0] is '@': assert uid[1:] in names(Uid)
-				else: assert uid in names(Uid)
+				if uid[0] is '@': assert uid[1:] in get_attr(Uid)
+				else: assert uid in get_attr(Uid)
 		return self
 
 

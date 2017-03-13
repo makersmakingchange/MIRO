@@ -1,0 +1,14 @@
+@system start tkpiece
+@system start layout
+@system start engine
+@engine build 2
+@system start blink
+@system start eyetracker exe
+@engine build 2
+@engine build 2
+@engine build 2
+@engine build 2
+@engine build 2
+@engine build 2
+@engine build 2
+@engine build 2

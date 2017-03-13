@@ -1,0 +1,16 @@
+@layout stop
+@engine stop
+@tkpiece stop
+@system wait 1
+@system start tkpiece
+@system start engine
+@system start layout
+@system wait 1
+@tkpiece text feedback,Welcome
+@tkpiece wait 1
+@tkpiece text feedback,
+@engine wait 1
+@engine marco 
+@engine build 2
+
+

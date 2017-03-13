@@ -7,13 +7,13 @@ class Audio(Piece):
 	
 	def _ON_speak(self,data=None):
 		if data[0] is '#': data = data[1:]
-		if data in ['a_to_m','n_to_z','space','undo'] or data in 'abcdefghijklmnopqrstuvwxyz':
+		if data in ['a_to_m','n_to_z','space','undo','next','menu','keyboard'] or data in 'abcdefghijklmnopqrstuvwxyz':
 			winsound.PlaySound(AUDIO_PATH+data+'_sound.wav',winsound.SND_FILENAME)
 		else:
 			self.err('Could not find file for argument ['+str(data)+']')
 
 	@staticmethod
-	def get_test_script():
+	def script():
 
 		script = [
 			'@audio uptime',
@@ -30,9 +30,8 @@ class Audio(Piece):
 			'@audio stop'
 		]
 
-		return script
+		return Script(script)
 
 if __name__ == '__main__':
 	from sys import argv
 	Runner.run_w_cmd_args(Audio,argv)
-		

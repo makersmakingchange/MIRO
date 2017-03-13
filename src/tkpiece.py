@@ -6,6 +6,10 @@ import math
 
 IMAGE_PATH = '../img/'
 
+def main():
+	from sys import argv
+	Runner.run_w_cmd_args(TkPiece,argv)
+
 class TkPiece(Piece,Frame):
 
 	tkpiece_ref = None # Needed for events like ON_mouse
@@ -14,107 +18,149 @@ class TkPiece(Piece,Frame):
 		self._root = Tk()
 		TkPiece.tkpiece_ref = self
 		Frame.__init__(self,self._root)
-		self._canvas = Canvas(self._root,width=1080,height=720)
+		self._root.attributes("-fullscreen", True)
+		self._w,self._h = (self._root.winfo_screenwidth(),self._root.winfo_screenheight()) 
+		self._canvas = Canvas(self._root,width=self._w,height=self._h)
 		self._canvas.bind("<Motion>",TkPiece.ON_mouse)
 		self._canvas.bind_all("<Escape>",self._ON_esc)
 		self._canvas.pack()
 		self._then = time.clock()
 		self._images = {}
 		self._fonts = {
-			Msg.CONSOLE : font.Font(family='Helvetica',size=36, weight='bold')
+			'default' : font.Font(family='Helvetica',size=200, weight='bold'),
+			'feedback' : font.Font(family='Helvetica',size=50, weight='bold')
 		}
 		self._handles = {
-			Msg.CONSOLE : self._canvas.create_text(540,360,justify='center',font=self._fonts['console'])
+			'feedback' : self._canvas.create_text(self._w/2,self._h/2,justify='center',font=self._fonts['feedback'])
 		}
 		Frame.mainloop(self)
 
-	def _DURING_poll(self): 
-		now = time.clock()
-		delta = now - self._then
-		self.send(Req.PERIOD,str(delta))
-		self._then = now
-
-	def _BEFORE_stop(self): Frame.quit(self)
+	def _BEFORE_stop(self): # Tk window requires a custom start routine
+		self._alive = False
+		Frame.quit(self)
 
 	def _ON_esc(self,data): self.stop()
 
 	def _ON_image(self,data):
 		import os
-		from PIL import Image, ImageTk
-		image = Image.open(IMAGE_PATH+data)
+		from PIL import Image,ImageTk
+		image_file,x,y = data.split(',')
+		#TODO This is a lazy and stupid way to load images
+		try:
+			image = Image.open(IMAGE_PATH+image_file+'.png')
+		except IOError:
+			image = Image.open(IMAGE_PATH+image_file+'.jpg')
 		photo = ImageTk.PhotoImage(image)
-		self._images[data] = photo
-		handle = self._canvas.create_image(540,360,image=photo)
+		self._images[image_file] = photo
+		x = int(self._w*float(x))
+		y = int(self._h*float(y))
+		handle = self._handles[image_file] = self._canvas.create_image(x,y,image=photo)
 		self._canvas.tag_lower(handle)
-		#self._canvas._create
 		self._canvas.pack()
 		self.send(Msg.ACK)
 
-	def _ON_font(self,data):
-		fontname,size = data.split(',')
-		img = self._canvas.itemconfigure(self._handles[fontname],font=('',int(size)))
+	def _ON_fontsize(self,data):
+		parts = data.split(',')
+		font_handles = parts[:-1]
+		size = parts[-1]
+		for font_handle in font_handles:
+			self._canvas.itemconfigure(self._handles[font_handle],font=('',int(size)))
 		self.send(Msg.ACK)
 
 	def _ON_position(self,data):
 		try:
-			fontname,x,y = data.split(',')
-			self._canvas.coords(self._handles[Msg.CONSOLE],x,y)
+			handle,x,y = data.split(',')
+			x = int(self._w*float(x))
+			y = int(self._h*float(y))
+			self._canvas.coords(self._handles[handle],x,y)
 		except ValueError as e:
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
 
-	def _ON_console(self,data):
-		self._canvas.itemconfigure(self._handles[Msg.CONSOLE],text=data)
+	def _ON_create(self,data):
+		try:
+			item,handle,x,y = data.split(',')
+			x = int(float(x) * self._w)
+			y = int(float(y) * self._h)
+			if item == 'text':
+				try:
+					item_font = self._fonts[handle]
+				except KeyError:
+					self.err('No font specified for ['+handle+'], using default')
+					item_font = self._fonts['default']
+				self._handles[handle] = self._canvas.create_text(x,y,justify='center',font=item_font)
+				self.send(Msg.ACK)
+		except TclError as e:
+			self.send(Msg.ERR,'Graphics error\n'+repr(e))
+
+	def _ON_delete(self,data):
+		handles = data.split(',')
+		for handle in handles:
+			self._canvas.delete(self._handles[handle])
+
+	def _ON_clear(self,data):
+		for handle in self._handles:
+			self._canvas.delete(self._handles[handle])
+
+	def _ON_text(self,data):
+		parts = data.split(',')
+		handle = parts[0]
+		text = ''
+		if len(parts) > 2:
+			for part in parts[1:]:
+				text += (part + ',')
+			text = text[:-1]
+		else:
+			text = parts[1]
+		try:
+			self._canvas.itemconfigure(self._handles[handle],text=text)
+			self.send(Msg.ACK)
+		except Exception as e:
+			self.err('Function called before canvas initialized')
+			raise e
 
 	@staticmethod
 	def ON_mouse(event):
-		TkPiece.tkpiece_ref.send(Msg.MOUSE,str(event.x)+','+str(event.y))
-		TkPiece.tkpiece_ref._interpret('@tkpiece position console,'+str(event.x)+','+str(event.y))
+		try:
+			TkPiece.tkpiece_ref.send(Msg.MOUSE,str(event.x)+','+str(event.y))
+			#TkPiece.tkpiece_ref._interpret('@tkpiece position feedback,'+str(event.x)+','+str(event.y))
+		except Exception as e:
+			with open('tkerr.txt','w') as f: f.write(repr(e))
 
 	@staticmethod
-	def get_test_script():
-		A,c = 10,80
-		sizes = [c + x for x in range(200)]
-
-		def motion(t):
-			f = t**1.6
-			A,B = 0.1,0.2
-			x = A*t*math.sin(f/10.0) + 540
-			y = B*t*math.sin((1.1*f+5)/10.0) + 360
-			return (int(x),int(y))
-
-		script = [
+	def script():
+		text_entry = [
 			'@tkpiece marco',
-			'@tkpiece console WELCOME',
-			'@tkpiece period 0.04'
+			'@tkpiece create text,key0,0.25,0.25',
+			'@tkpiece create text,key1,0.25,0.75',
+			'@tkpiece create text,key2,0.75,0.25',
+			'@tkpiece create text,key3,0.75,0.75',
+			'@tkpiece fontsize key0,key1,key2,key3,150',
+			'@tkpiece period 1',
+			'@tkpiece text key0,M',
+			'@tkpiece text key1,I',
+			'@tkpiece text key2,R',
+			'@tkpiece text key3,O',
+			'@tkpiece period 0.5',
+			'@tkpiece text key0,m',
+			'@tkpiece text key1,i',
+			'@tkpiece text key2,r',
+			'@tkpiece text key3,o',
+			'@tkpiece delete key0,key1',
+			'@tkpiece delete key2',
+			'@tkpiece delete key3',
+			'@tkpiece text feedback,That\'s all folks',
+			'@tkpiece clear',
+			'@tkpiece period 1',
+			'@tkpiece image test,0.5,0.5',
+			'@tkpiece create text,exit_msg,0.5,0.5',
+			'@tkpiece text exit_msg,NOT',
+			'@tkpiece stop'
 		]
-		for fontsize in sizes[:50]:
-			msg = '@tkpiece font console,'+str(fontsize)
-			script.append(msg)
-		script.append('@tkpiece console TO')
-		for fontsize in sizes[:50]:
-			msg = '@tkpiece font console,'+str(fontsize)
-			script.append(msg)
-		script.append('@tkpiece console wtfj')
-		script.append('@tkpiece font console,300')
-		script.append('@tkpiece period 2')
-		script.append('@tkpiece period 0.04')
-		for t in range(150):
-			x,y = motion(t)
-			if t == 25: script.append('@tkpiece image test.jpg')
-			if t == 50:
-				script.append('@tkpiece period 0.001')
-				script.append('@tkpiece console  ')
-				script.append('@tkpiece font console,100')
-				script.append('@tkpiece image test.jpg')
-				script.append('@tkpiece console EXITING')
-				script.append('@tkpiece period 0.004')
-			else:
-				script.append('@tkpiece position console,'+str(x)+','+str(y))	
-		script.append('@tkpiece stop')
+		return Script(text_entry)
 
-		return script
 
-if __name__ == '__main__': 
-	from sys import argv
-	Runner.run_w_cmd_args(TkPiece,argv)
-	
+if __name__ == '__main__': main()
+
+#root = Tk()
+#root.attributes("-fullscreen", True)
+#w,h = (root.winfo_screenwidth(),root.winfo_screenheight())

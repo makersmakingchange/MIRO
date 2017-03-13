@@ -1,0 +1,4 @@
+@system start tkpiece
+@system wait 1
+@tkpiece fontsize feedback,150
+@tkpiece text feedback,WELCOME

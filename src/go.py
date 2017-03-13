@@ -1,7 +1,5 @@
-from wtfj import Uid,Mode,Runner
+from wtfj import *
 
-Runner.run(Uid.TKPIECE,Mode.TEST)
-Runner.run(Uid.AUDIO,Mode.TEST)
-Runner.run(Uid.BLINK,Mode.TEST)
-#run_piece(Uid.AUDIO,Mode.LOCAL)
-#run_piece(Uid.EYETRACKER,Mode.EXE)
+Runner.run(Uid.SYSTEM,Mode.ZSERVER)
+Runner.run(Uid.ZCONSOLE)
+Runner.run(Uid.ZPRINTER)

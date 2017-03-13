@@ -2,6 +2,7 @@ import time
 from threading import Thread
 import threading
 from wtfj_ids import *
+from wtfj_utils import *
 
 class Printer:
 	''' Opens a new output window and prints messages sent to it '''
@@ -15,9 +16,23 @@ class Console:
 	''' Allows user to enter commands '''
 	def __init__(self,prompt='[$] '):
 		self._prompt = prompt
+		self._at = ''
 
 	def poll(self,wait_s=None,uid=None):
-		return [raw_input(self._prompt)]
+		try:
+			prompt = str(self._at)+str(self._prompt)
+			msg = raw_input(prompt)
+			if msg == '':
+				self._at = ''
+				return []
+			if msg[0] == '@':
+				self._at = msg.split()[0]+' '
+			else:
+				msg = self._at+msg
+			return [msg]
+		except Exception as e:
+			print(repr(e))
+			return []
 
 	def subscribe(self,*uids):
 		pass
@@ -44,8 +59,8 @@ class Script:
 	def subscribe(self,*uids):
 		for uid in uids:
 			if uid is not None:
-				if uid[0] is '@': assert uid[1:] in names(Uid)
-				else: assert uid in names(Uid)
+				if uid[0] is '@': assert uid[1:] in get_attr(Uid)
+				else: assert uid in get_attr(Uid)
 		return self
 
 	def load(self,msg_array):

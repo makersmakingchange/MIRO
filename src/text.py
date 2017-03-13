@@ -2,6 +2,7 @@ from wtfj import*
 
 class Text(Piece):
 
+
 		def _BEFORE_start(self):
 			self.subscribe(Uid.ENGINE)
 			self._text_buffer = ''
@@ -120,3 +121,4 @@ class Text(Piece):
 if __name__ == '__main__':
 	from sys import argv
 	Runner.run_w_cmd_args(Text,argv)
+
