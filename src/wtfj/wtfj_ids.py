@@ -24,7 +24,7 @@ with open(pypath+'/wtfj/protocol/uid.py','w') as uids:
 		if '.py' in piece_filename:
 			parts = piece_filename.split('.')
 			uid = parts[0]
-		else:
+		elif '.' not in piece_filename:
 			uid = piece_filename
 		if uid is None or uid is '':
 			pass

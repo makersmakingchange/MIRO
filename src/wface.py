@@ -235,8 +235,8 @@ class WFace(Piece):
 			i += 1
 		face_vel /= i
 
-		if face_vel < 1.0:
-			if area > 0.02:
+		if face_vel < 0.5:
+			if area > 0.01:
 				if self._brow == False:
 					self._brow = True		
 			else:
