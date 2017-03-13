@@ -1,4 +1,5 @@
 @system start tkpiece
+@system start text
 @system start layout
 @system start engine
 @engine build 2

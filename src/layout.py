@@ -6,9 +6,16 @@ class Layout(Piece):
 		self.subscribe(Uid.ENGINE)
 		self.subscribe(Uid.EYETRACKER)
 		self.subscribe(Uid.BLINK)
+		self.subscribe(Uid.TEXT)
 		self._n_current_keys = 0
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
+		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(.5)+','+str(.5))
+
+	def _ON_text_buffer(self,data):
+		self.send_to(Uid.TKPIECE,Req.DELETE,'feedback')
+		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(.5)+','+str(.5))
+		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
 
 	def _ON_eyetracker_gaze(self,data):
 		'''Only record a single gaze coordinate at a time.'''
@@ -119,10 +126,14 @@ class Layout(Piece):
 			'engine options a_to_b,c_to_d,e_to_f,g_to_h',
 			'eyetracker gaze .3,.3',
 			'blink select',
+			'text buffer a',
 			'eyetracker gaze .3,.7',
 			'blink select',
 			'eyetracker gaze .7,.3',
 			'blink select',
+			'text buffer a',
+			'text buffer b',
+			'text buffer c',
 			'eyetracker gaze .7,.7',
 			'blink select',
 			'@layout stop'

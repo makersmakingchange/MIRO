@@ -3,3 +3,4 @@
 @blink stop
 @layout stop
 @engine stop
+@text stop
