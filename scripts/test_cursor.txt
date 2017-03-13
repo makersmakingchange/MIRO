@@ -1,0 +1,4 @@
+@system start tkpiece
+@system start position_cursor
+@system start mouse_to_eye
+@system wait 1
