@@ -2,16 +2,14 @@ from wtfj import*
 
 class Text(Piece):
 
-
 		def _BEFORE_start(self):
 			self.subscribe(Uid.ENGINE)
+			self.subscribe(Uid.BLINK)
 			self._text_buffer = ''
-			self.filename = 'book2.txt'
+			self.filename = '../output/book2.txt'
 			self._edit_mode = False
 			self.i = 0
 			self._edit_buffer = ''
-			self.subscribe(Uid.BLINK)
-			
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last
@@ -33,14 +31,15 @@ class Text(Piece):
 				if (self._contains(ul,br) == True):
 					self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
 					return
+
 		def _ON_engine_chose(self,data):
 			'''Receive currently chosen letter'''
-			if data!= None and str(self._edit_mode) == 'True' :
+			if data!= None and str(self._edit_mode) == 'True':
 				self._edit_buffer = self._edit_buffer + data
 				#self.send(Msg.TEXT,'the editor buffer has', + self._edit_buffer)
-			else :
+			else:
 				self._text_buffer = self._text_buffer + data
-				#self.send(Msg.TEXT, 'the text buffer has', + str(self._text_buffer))
+				self.send(Msg.BUFFER,self._text_buffer)
 
 
 		def _ON_engine_commit(self,data):
@@ -61,7 +60,7 @@ class Text(Piece):
 				self.send(Msg.TEXT,'saving file')
 				self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
 				with open(self.filename, 'a+') as f:
-					self._text_buffer = self._text_buffer + '\n'
+					self._text_buffer = self._text_buffer
 					f.write(self._text_buffer)
 					f.close()
 				self._text_buffer = ''
@@ -104,7 +103,7 @@ class Text(Piece):
 								'engine chose g',
 								'engine commit True',
 								'engine edit True',
-								'engine edit select1',
+								'engine edit select0',
 								'engine chose A',
 								'engine chose B',
 								'engine chose  ',

@@ -43,6 +43,7 @@ class Engine(Piece):
 		msg = ''
 		if len(self._current_option.children) == 0:
 			self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
+			self.send(Msg.CHOSE, self._current_option.content)
 			self._current_option = self._options
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
@@ -61,6 +62,12 @@ class Engine(Piece):
 			'@engine select 0',
 			'@engine select 0',
 			'@engine select 0',
+			'@engine select 0',
+			'@engine select 1',
+			'@engine select 1',
+			'@engine select 1',
+			'@engine select 1',
+			'@engine select 1',
 			'@engine stop'
 		])
 
