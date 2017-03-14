@@ -7,10 +7,11 @@ class Layout(Piece):
 		self.subscribe(Uid.EYETRACKER)
 		self.subscribe(Uid.BLINK)
 		self.subscribe(Uid.TEXT)
+		self._horizontal_division = False
 		self._n_current_keys = 0
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
-		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(.5)+','+str(.5))
+		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(0)+','+str(0))
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Req.DELETE,'feedback')
@@ -60,7 +61,10 @@ class Layout(Piece):
 			elif(n == max_rows):
 				cols = n/(max_rows/2) + (n%(max_rows/2) > 0) - 1
 			else:
-				cols = n/2 + (n%2 > 0)
+				if (self._horizontal_division == False and n == 2):
+					cols = 2;
+				else:
+					cols = n/2 + (n%2 > 0)
 			col_keys = []
 			for x in range(cols):
 				col_keys.append(1)
