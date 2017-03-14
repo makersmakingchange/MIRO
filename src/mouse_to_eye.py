@@ -13,7 +13,7 @@ class Mouse_to_Eye(Piece):
 	def script():
 		script = [
 			'@mouse_to_eye marco',
-			'tkpiece mouse 100,200',
+			'tkpiece mouse 0.3,0.5',
 			'@mouse_to_eye stop'
 		]
 		return Script(script)
