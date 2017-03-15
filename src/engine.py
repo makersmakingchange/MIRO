@@ -4,24 +4,13 @@ def main():
 	from sys import argv
 	Runner.run_w_cmd_args(Engine,argv)
 
-choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-menu_options = ['#menu','#keyboard','#undo']
-
-def build_menu(head,num_keys,choices):
-	menu = OptionNode('#menu')
-	next = OptionNode('#next')
-	next2 = OptionNode('#next')
-	next3 = OptionNode('#next')
-	undo = OptionNode('#undo')
-	keyboard = OptionNode('#keyboard')
-	head.add_child(undo)
-	head.add_child(next)
-	next.add_child(keyboard)
-	next.add_child(menu)
-	#next3.add_child(keyboard)
-	#next3.add_child(head)
-	return head
-
+letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+numbers = ['0','1','2','3','4','5','6','7','8','9']
+punctuation = [',','.','?','!','\'','\"',':',';','-','/','\\','$','(',')','[',']','{','}','#']
+menu_options = ['#keyboard','#menu','#undo']
+menu_handles = {}
+keyboard_options = ['a_to_z','0_to_9','...']
+keyboard_handles = {}
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -29,8 +18,11 @@ class Engine(Piece):
 	def _ON_build(self,data):
 		self._options = OptionNode()
 		num_options = int(data)
-		#build_menu(self._options,num_options,choices)
-		build_tree(self._options,num_options,choices)
+		build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
+		build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
+		build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
+		#build_ordered_tree(keyboard_handles.get('0_to_9'),num_options,numbers)
+		#build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
 		self._current_option = self._options
 		self._ON_process(None)
 
@@ -41,7 +33,7 @@ class Engine(Piece):
 
 	def _ON_process(self,data):
 		msg = ''
-		if len(self._current_option.children) == 0:
+		if len(self._current_option.children) == 0 and self._current_option.content[0] != '#':
 			self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
 			self.send(Msg.CHOSE, self._current_option.content)
 			self._current_option = self._options
@@ -71,8 +63,9 @@ class Engine(Piece):
 			'@engine stop'
 		])
 
-# Given root of options tree, build tree such that each node has num_keys child nodes consisting of divided choices list.
-def build_tree(head,num_keys,choices):
+def build_ordered_tree(head,num_keys,choices):
+	'''Given root of options tree, build tree such that each node has num_keys child nodes consisting of divided choices list.
+	Use this function for choices with logical ordering Ex: alphabet or number keys'''
 	if len(choices) == 1:
 		return
 	elif len(choices) < num_keys:
@@ -102,7 +95,31 @@ def build_tree(head,num_keys,choices):
 				opt_str = opt_list[0]
 			opt = OptionNode(opt_str)
 			head.add_children(opt)
-			build_tree(opt, num_keys, opt_list)
+			build_ordered_tree(opt, num_keys, opt_list)
+
+# Builds tree for choices that do not follow a logical order. Example: punctuation, menu options
+def build_non_ordered_tree(head,num_keys,choices,handles):
+	original_head = head
+	keys_to_place = len(choices)
+	key_index = 0
+	while(keys_to_place != 0):
+		if (keys_to_place > num_keys):
+			for j in range(num_keys-1):
+				node = OptionNode(choices[key_index])
+				head.add_child(node)
+				handles[node.content] = node
+				keys_to_place-=1
+				key_index+=1
+			next_node = OptionNode('#next')
+			head.add_child(next_node)
+			head = next_node
+		else:
+			node = OptionNode(choices[key_index])
+			head.add_child(node)
+			handles[node.content] = node
+			keys_to_place-=1
+			key_index+=1
+	return original_head
 
 # Used to debug
 def print_tree(head):
