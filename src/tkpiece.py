@@ -31,15 +31,16 @@ class TkPiece(Piece,Frame):
 		self._canvas.pack()
 		self._then = time.clock()
 		self._images = {}
+		self._text_size = 200
 		self._fonts = {
-			'default' : font.Font(family='Helvetica',size=200, weight='bold'),
-			'feedback' : font.Font(family='Helvetica',size=100, weight='bold')
+			'default' : font.Font(family='Helvetica',size=self._text_size, weight='bold'),
+			'feedback' : font.Font(family='Helvetica',size=self._text_size, weight='bold')
 		}
 		self._handles = {
-			'feedback' : self._canvas.create_text(self._w/2,self._h/2,justify='left',font=self._fonts['feedback'])
+			'feedback' : self._canvas.create_text(self._w-(self._text_size/2),self._h - (self._text_size/2),justify='right',font=self._fonts['feedback'])
 		}
+		self._canvas.itemconfigure(self._handles['feedback'],anchor='e')
 		Frame.mainloop(self)
-		self._canvas.itemconfigure(self._handles['feedback'],anchor='w')
 
 	def _BEFORE_stop(self): # Tk window requires a custom start routine
 		self._alive = False

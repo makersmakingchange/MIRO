@@ -11,11 +11,8 @@ class Layout(Piece):
 		self._n_current_keys = 0
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
-		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(0)+','+str(0))
 
 	def _ON_text_buffer(self,data):
-		self.send_to(Uid.TKPIECE,Req.DELETE,'feedback')
-		self.send_to(Uid.TKPIECE,Req.CREATE,'text,feedback'+','+str(.5)+','+str(.5))
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
 
 	def _ON_eyetracker_gaze(self,data):
@@ -86,7 +83,7 @@ class Layout(Piece):
 		i = 0
 		key_counter = 0
 		for val in reversed(col_keys):
-			dy = 1.0 / (val)
+			dy = .85 / (val)
 			j = 1
 			for x in range(0,val):
 				ul = (i*dx,x*dy)
