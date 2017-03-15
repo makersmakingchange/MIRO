@@ -6,7 +6,8 @@ def main():
 
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
-punctuation = [',','.','?','!','\'','\"',':',';','-','/','\\','$','(',')','[',']','{','}','#']
+#punctuation = [',','.','?','!','\'','\"',':',';','-','/','\\','$','(',')','[',']','{','}','#']
+punctuation = ['!','.','?']
 menu_options = ['#keyboard','#menu','#undo']
 menu_handles = {}
 keyboard_options = ['a_to_z','0_to_9','...']
@@ -18,9 +19,10 @@ class Engine(Piece):
 	def _ON_build(self,data):
 		self._options = OptionNode()
 		num_options = int(data)
-		build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
-		build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
-		build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
+		#build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
+		#build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
+		#build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
+		build_ordered_tree(self._options,num_options,letters_lc)
 		#build_ordered_tree(keyboard_handles.get('0_to_9'),num_options,numbers)
 		#build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
 		self._current_option = self._options
@@ -50,16 +52,7 @@ class Engine(Piece):
 			'@engine period 1',
 			'@engine build 3',
 			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 1',
-			'@engine select 1',
-			'@engine select 1',
-			'@engine select 1',
-			'@engine select 1',
+			'@engine select 2',
 			'@engine stop'
 		])
 
@@ -97,8 +90,9 @@ def build_ordered_tree(head,num_keys,choices):
 			head.add_children(opt)
 			build_ordered_tree(opt, num_keys, opt_list)
 
-# Builds tree for choices that do not follow a logical order. Example: punctuation, menu options
-def build_non_ordered_tree(head,num_keys,choices,handles):
+def build_non_ordered_tree(head,num_keys,choices,handles=None):
+	''' Builds tree for choices that do not follow a logical order. Example: punctuation, menu options.
+	An optional paramater 'handles' can be passed to make building subsequent trees easier. '''
 	original_head = head
 	keys_to_place = len(choices)
 	key_index = 0
@@ -107,7 +101,8 @@ def build_non_ordered_tree(head,num_keys,choices,handles):
 			for j in range(num_keys-1):
 				node = OptionNode(choices[key_index])
 				head.add_child(node)
-				handles[node.content] = node
+				if (handles != None):
+					handles[node.content] = node
 				keys_to_place-=1
 				key_index+=1
 			next_node = OptionNode('#next')
@@ -116,7 +111,8 @@ def build_non_ordered_tree(head,num_keys,choices,handles):
 		else:
 			node = OptionNode(choices[key_index])
 			head.add_child(node)
-			handles[node.content] = node
+			if (handles != None):
+				handles[node.content] = node
 			keys_to_place-=1
 			key_index+=1
 	return original_head

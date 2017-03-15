@@ -103,8 +103,7 @@ class Layout(Piece):
 					# Create and draw the image
 					self.send_to(Uid.TKPIECE,Req.IMAGE,option+','+str(x)+','+str(y))
 				# Handle Text
-				else:
-					self.send(Msg.TEXT, "HERE")				
+				else:			
 					self.send_to(Uid.TKPIECE,Req.CREATE,'text,key'+str(key_counter)+','+str(x)+','+str(y))
 					# Update the value of the text field
 					options[key_counter] = options[key_counter].replace('_to_',':')
@@ -130,14 +129,8 @@ class Layout(Piece):
 	def script():
 		text_entry = [
 			'@layout marco',
-			'engine options #keyboard,#menu,#undo',
-			'eyetracker gaze .3, .75',
-			'blink select',
-			'engine options a_to_z,0_to_9,...',
-			'eyetracker gaze .3, .75',
-			'blink select',
-			'engine options a_to_c,b_to_d,d_to_g',
-			'@layout stop',
+			'engine options a_to_i,j_to_r,s_to_z',
+			'@engine stop'
 		]
 		return Script(text_entry)
 
