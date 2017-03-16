@@ -1,4 +1,3 @@
-
 MARCO = 'marco'
 STOP = 'stop'
 SIZE = 'size'
@@ -13,3 +12,5 @@ WAIT = 'wait'
 CREATE = 'create'
 DELETE = 'delete'
 DRAW = 'draw'
+POSITION = 'position'
+TO_BACKGROUND = 'to_background'

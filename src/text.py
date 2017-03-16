@@ -1,5 +1,12 @@
 from wtfj import*
 
+'''Translation table must be updated in both tkpiece and text'''
+translation_table = {
+	'com': ',',
+	'spc': ' ',
+	'num': '#'
+}
+
 class Text(Piece):
 
 		def _BEFORE_start(self):
@@ -37,6 +44,10 @@ class Text(Piece):
 
 		def _ON_engine_chose(self,data):
 			'''Receive currently chosen letter'''
+			try:
+				data = translation_table[data]
+			except KeyError:
+				pass
 			if data!= None and str(self._edit_mode) == 'True':
 				self._edit_buffer = self._edit_buffer + data
 			else:
@@ -137,7 +148,6 @@ class Text(Piece):
 								#'engine chose n',
 								#'engine chose #undo',
 								#'engine chose g',
-								'engine commit True',
 								#'engine edit True',
 								#'engine openFile',
 								#'engine edit select0',
