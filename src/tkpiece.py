@@ -37,10 +37,15 @@ class TkPiece(Piece,Frame):
 			'feedback' : font.Font(family='Helvetica',size=self._text_size, weight='bold')
 		}
 		self._handles = {
-			'feedback' : self._canvas.create_text(self._w-(self._text_size/2),self._h - (self._text_size/2),justify='right',font=self._fonts['feedback'])
+			'feedback' : self._canvas.create_text(self._w-(self._text_size/2),self._h - (self._text_size/1.5),justify='right',font=self._fonts['feedback'])
 		}
 		self._canvas.itemconfigure(self._handles['feedback'],anchor='e')
+		self._translation_table = {
+			'num': '#',
+			'com': ','
+		}
 		Frame.mainloop(self)
+		'''Translation table must be updated in both tkpiece and text'''
 
 	def _BEFORE_stop(self): # Tk window requires a custom start routine
 		self._alive = False
@@ -125,8 +130,19 @@ class TkPiece(Piece,Frame):
 		for handle in self._handles:
 			self._canvas.delete(self._handles[handle])
 
+	def _translate(self,symbol):
+		'''Translates special character to what needs to be displayed''' 
+		translation = symbol
+		try:
+			translation = self._translation_table[symbol]
+		except KeyError:
+			pass
+		return translation
+
 	def _ON_text(self,data):
 		parts = data.split(',')
+		for x in range(len(parts)):
+			parts[x] = self._translate(parts[x])
 		handle = parts[0]
 		text = ''
 		if len(parts) > 2:

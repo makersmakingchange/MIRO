@@ -6,9 +6,9 @@ def main():
 
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
-#punctuation = [',','.','?','!','\'','\"',':',';','-','/','\\','$','(',')','[',']','{','}','#']
-punctuation = ['!','.','?']
-menu_options = ['#keyboard','#menu','#undo']
+punctuation = ['spc','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
+#menu_options = ['#keyboard','#menu','#undo']
+menu_options = ['#keyboard']
 menu_handles = {}
 keyboard_options = ['a_to_z','0_to_9','...']
 keyboard_handles = {}
@@ -17,16 +17,21 @@ class Engine(Piece):
 	''' Letter and menu selection engine '''
 
 	def _ON_build(self,data):
-		self._options = OptionNode()
+		#self._options = OptionNode()
 		num_options = int(data)
-		#build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
-		#build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
-		#build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
-		build_ordered_tree(self._options,num_options,letters_lc)
-		#build_ordered_tree(keyboard_handles.get('0_to_9'),num_options,numbers)
-		#build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
-		self._current_option = self._options
-		self._ON_process(None)
+		if (num_options == 1):
+			self.send(Msg.ERR,'1 key layout invalid\n')
+		else:
+			#build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
+			#build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
+			#build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
+			self._options = OptionNode('#keyboard')
+			build_non_ordered_tree(self._options,num_options,keyboard_options,keyboard_handles)
+			build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
+			build_ordered_tree(keyboard_handles.get('0_to_9'),num_options,numbers)
+			build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
+			self._current_option = self._options
+			self._ON_process(None)
 
 	def _ON_select(self,data):
 		selection = int(data)
@@ -50,9 +55,14 @@ class Engine(Piece):
 		return Script([
 			'@engine marco',
 			'@engine period 1',
-			'@engine build 3',
-			'@engine select 0',
+			'@engine build 1',
 			'@engine select 2',
+			'@engine select 2',
+			'@engine select 0',
+			'@engine build 3',
+			'@engine select 2',
+			'@engine select 2',
+			'@engine select 0',
 			'@engine stop'
 		])
 

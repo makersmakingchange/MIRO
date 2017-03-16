@@ -135,6 +135,7 @@ class Layout(Piece):
 		text_entry = [
 			'@layout marco',
 			'engine options a_to_i,j_to_r,s_to_z',
+			'engine options spc,com,.',
 			'@engine stop'
 		]
 		return Script(text_entry)
