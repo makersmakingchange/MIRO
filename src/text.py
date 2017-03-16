@@ -10,6 +10,9 @@ class Text(Piece):
 			self._edit_mode = False
 			self.i = 0
 			self._edit_buffer = ''
+			self._file_buffer = ''
+			self.choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+			self.menu_options = ['#menu','#keyboard','#undo']
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last
@@ -36,17 +39,34 @@ class Text(Piece):
 			'''Receive currently chosen letter'''
 			if data!= None and str(self._edit_mode) == 'True':
 				self._edit_buffer = self._edit_buffer + data
-				#self.send(Msg.TEXT,'the editor buffer has', + self._edit_buffer)
 			else:
-				self._text_buffer = self._text_buffer + data
-				self.send(Msg.BUFFER,self._text_buffer)
-
+				if data in self.choices :
+					self._text_buffer = self._text_buffer + data
+					self.send(Msg.BUFFER,self._text_buffer)
+					#self.send(Msg.TEXT,'The text_buffer is'+self._text_buffer)
+					#self.send(Msg.TEXT,'The last character is ' + self._text_buffer[-1])
+				elif data in self.menu_options:
+					if data == '#undo':
+						self._text_buffer = list(self._text_buffer)
+						self._text_buffer[-1] = ''
+						#self.send(Msg.TEXT,'Hi The last character is '+ self._text_buffer[-1])
+						self._text_buffer = ''.join(self._text_buffer)
+						self.send(Msg.BUFFER,self._text_buffer)
+						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
 
 		def _ON_engine_commit(self,data):
 			'''Receive a boolean variable.If evaluated to be true, this function will
 			save the contents in buffer in a file '''
 			if data == 'True' and self._edit_mode == False :
 					self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
+					self.send(Msg.TEXT,'saving file')
+					self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
+					with open(self.filename, 'a+') as f:
+						self._text_buffer = self._text_buffer
+						f.write(self._text_buffer)
+						f.close()
+					self._text_buffer = ''
+					self.send(Msg.BUFFER,self._text_buffer)
 			if self._edit_mode == True :
 					self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
 					self._text_buffer[self.i] = str(self._edit_buffer)
@@ -55,31 +75,46 @@ class Text(Piece):
 					self._edit_mode = False
 					
 		
-		def _ON_engine_save(self,data):
-			if data == 'True':
-				self.send(Msg.TEXT,'saving file')
-				self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
-				with open(self.filename, 'a+') as f:
-					self._text_buffer = self._text_buffer
-					f.write(self._text_buffer)
-					f.close()
-				self._text_buffer = ''
+#		def _ON_engine_save(self,data):
+#			if data == 'True':
+#				self.send(Msg.TEXT,'saving file')
+#				self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
+#				with open(self.filename, 'a+') as f:
+#					self._text_buffer = self._text_buffer
+#					f.write(self._text_buffer)
+#					f.close()
+#				self._text_buffer = ''
 
 		def _ON_engine_edit(self,data):
 			'''This function operates when user wants to see what he/she has typed out '''
 			if data == 'True':
 				self._edit_mode = True
+				self._file_buffer=self._openFile()
+
+				self.send(Msg.TEXT,'the file last line is '+ str(self._file_buffer))
 				self.length = len(self._text_buffer)
 				self.i = 0
-				self._text_buffer = self._text_buffer.split()
-				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._text_buffer[self.i])
+				self._file_buffer = self._file_buffer.split()
+				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
 				self.send_to(Msg.TEXT,'THE edit mode is ' + str(self._edit_mode))
 			if data == 'select0':
-				self._text_buffer[self.i] = ''
-				self.send(Msg.TEXT,'the new string is '+ str(self._text_buffer))
+				self._file_buffer[self.i] = ''
+				self.send(Msg.TEXT,'the new string is '+ str(self._file_buffer))
 			elif data == 'select1' and self.i < self.length :
 				self.i = self.i+1
-				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._text_buffer[self.i])
+				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
+		def _openFile(self):
+			self.send(Msg.TEXT,'Hi i am here')
+			f = open(self.filename,'r')
+			line_counter = 0
+			for line in f :
+						line_counter += 1	
+			f.seek(0)
+			self.send(Msg.TEXT,'There is total'+str(line_counter)+'lines')	
+			for i, line in enumerate(f):
+				if i == line_counter-1:
+						self.send(Msg.TEXT,'the last line is '+line)
+						return str(line) 
 			
 				
 
@@ -95,23 +130,28 @@ class Text(Piece):
 								'engine chose v',
 								'engine chose e',
 								'engine chose y',
-								'engine chose  ',
-								'engine chose J',
-								'engine chose i',
-								'engine chose a',
-								'engine chose n',
-								'engine chose g',
+								#'engine chose  ',
+								#'engine chose J',
+								#'engine chose i',
+								#'engine chose a',
+								#'engine chose n',
+								#'engine chose #undo',
+								#'engine chose g',
 								'engine commit True',
-								'engine edit True',
-								'engine edit select0',
-								'engine chose A',
-								'engine chose B',
-								'engine chose  ',
-								'engine commit True',
-								'engine save True',
-								'engine chose Hi',
-								'engine commit True',
-								'engine save True',
+								#'engine edit True',
+								#'engine openFile',
+								#'engine edit select0',
+								#'engine chose A',
+								#'engine chose B',
+								#'engine chose  ',
+								#'engine commit True',
+								#'engine save True',
+								#'engine chose Hi',
+								#'engine commit True',
+								#'engine save True',
+								#'engine chose A',
+								#'engine chose B',
+								#'engine commit True',
 								'@text stop'
 
 						]
