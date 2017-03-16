@@ -8,10 +8,11 @@ letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q
 numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 #menu_options = ['#keyboard','#menu','#undo']
-menu_options = ['#keyboard']
+menu_options = ['#keyboard','edit']
 menu_handles = {}
 keyboard_options = ['a_to_z','0_to_9','...']
 keyboard_handles = {}
+edit_options = ['save']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -25,11 +26,13 @@ class Engine(Piece):
 			#build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
 			#build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
 			#build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
-			self._options = OptionNode('#keyboard')
-			build_non_ordered_tree(self._options,num_options,keyboard_options,keyboard_handles)
+			self._options = OptionNode()
+			build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
+			build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
 			build_ordered_tree(keyboard_handles.get('a_to_z'),num_options,letters_lc)
 			build_ordered_tree(keyboard_handles.get('0_to_9'),num_options,numbers)
 			build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
+			build_non_ordered_tree(menu_handles.get('edit'),num_options,edit_options)
 			self._current_option = self._options
 			self._ON_process(None)
 
@@ -41,8 +44,11 @@ class Engine(Piece):
 	def _ON_process(self,data):
 		msg = ''
 		if len(self._current_option.children) == 0 and self._current_option.content[0] != '#':
-			self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
-			self.send(Msg.CHOSE, self._current_option.content)
+			if (self._current_option.content == 'save'):
+				self.send(Msg.COMMIT, 'True')
+			else:	
+				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
+				self.send(Msg.CHOSE, self._current_option.content)
 			self._current_option = self._options
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
@@ -55,14 +61,11 @@ class Engine(Piece):
 		return Script([
 			'@engine marco',
 			'@engine period 1',
-			'@engine build 1',
-			'@engine select 2',
-			'@engine select 2',
-			'@engine select 0',
 			'@engine build 3',
-			'@engine select 2',
-			'@engine select 2',
 			'@engine select 0',
+			'@engine select 1',
+			'@engine select 1',
+			'@engine select 1',
 			'@engine stop'
 		])
 

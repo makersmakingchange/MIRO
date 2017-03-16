@@ -18,7 +18,7 @@ class Text(Piece):
 			self.i = 0
 			self._edit_buffer = ''
 			self._file_buffer = ''
-			self.choices = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+			self.choices = ['1','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#undo']
 
 		def _contains(self,upper_left, bottom_right):
@@ -51,19 +51,16 @@ class Text(Piece):
 			if data!= None and str(self._edit_mode) == 'True':
 				self._edit_buffer = self._edit_buffer + data
 			else:
-				if data in self.choices :
-					self._text_buffer = self._text_buffer + data
-					self.send(Msg.BUFFER,self._text_buffer)
-					#self.send(Msg.TEXT,'The text_buffer is'+self._text_buffer)
-					#self.send(Msg.TEXT,'The last character is ' + self._text_buffer[-1])
-				elif data in self.menu_options:
+				if data in self.menu_options:
 					if data == '#undo':
 						self._text_buffer = list(self._text_buffer)
 						self._text_buffer[-1] = ''
-						#self.send(Msg.TEXT,'Hi The last character is '+ self._text_buffer[-1])
 						self._text_buffer = ''.join(self._text_buffer)
 						self.send(Msg.BUFFER,self._text_buffer)
 						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
+				else:
+					self._text_buffer = self._text_buffer + data
+					self.send(Msg.BUFFER,self._text_buffer)
 
 		def _ON_engine_commit(self,data):
 			'''Receive a boolean variable.If evaluated to be true, this function will
@@ -141,6 +138,11 @@ class Text(Piece):
 								'engine chose v',
 								'engine chose e',
 								'engine chose y',
+								'engine chose 1',
+								'engine chose .',
+								'engine chose com',
+								'engine chose spc',
+								'engine chose num',
 								#'engine chose  ',
 								#'engine chose J',
 								#'engine chose i',
