@@ -50,14 +50,15 @@ class Text(Piece):
 				pass
 			if data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
 				self._edit_buffer = self._edit_buffer + data
+
 			elif data not in self.menu_options:
 				self._text_buffer = self._text_buffer + data
 				self.send(Msg.BUFFER,self._text_buffer)
-			if data in self.menu_options:
+			else:
+				if data in self.menu_options:
 					if data == '#undo':
 						self._text_buffer = list(self._text_buffer)
 						self._text_buffer[-1] = ''
-						#self.send(Msg.TEXT,'Hi The last character is '+ self._text_buffer[-1])
 						self._text_buffer = ''.join(self._text_buffer)
 						self.send(Msg.BUFFER,self._text_buffer)
 						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
@@ -86,6 +87,29 @@ class Text(Piece):
 								f.write(self._file_buffer)
 								f.close()
 							self._edit_mode = False
+				else:
+					self._text_buffer = self._text_buffer + data
+					self.send(Msg.BUFFER,self._text_buffer)
+
+		def _ON_engine_commit(self,data):
+			'''Receive a boolean variable.If evaluated to be true, this function will
+			save the contents in buffer in a file '''
+			if data == 'True' and self._edit_mode == False :
+					self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
+					self.send(Msg.TEXT,'saving file')
+					self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
+					with open(self.filename, 'a+') as f:
+						self._text_buffer = self._text_buffer
+						f.write(self._text_buffer)
+						f.close()
+					self._text_buffer = ''
+					self.send(Msg.BUFFER,self._text_buffer)
+			if self._edit_mode == True :
+					self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
+					self._text_buffer[self.i] = str(self._edit_buffer)
+					self._text_buffer = ''.join(self._text_buffer)
+					self.send(Msg.TEXT,'the new changed text buffer is '+ self._text_buffer)
+					self._edit_mode = False
 
 		def _ON_engine_edit(self,data):
 			'''This function operates when user wants to edit what he/she has typed out in the file '''
@@ -137,6 +161,16 @@ class Text(Piece):
 								'engine chose a',
 								'engine chose n',
 								#'engine chose #clear',
+								'engine chose 1',
+								'engine chose .',
+								'engine chose com',
+								'engine chose spc',
+								'engine chose num',
+								#'engine chose  ',
+								#'engine chose J',
+								#'engine chose i',
+								#'engine chose a',
+								#'engine chose n',
 								#'engine chose #undo',
 								'engine chose #commit',
 								#'engine chose g',
