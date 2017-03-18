@@ -106,14 +106,14 @@ class WFace(Piece):
 			i += 1
 		face_vel /= i
 
-		if face_vel < 0.5:
-			if area > 0.01:
+		if face_vel < 0.3:
+			if area > 0.015:
 				if self._brow == False:
 					self._brow = True		
 					self.send(Msg.SELECT)
 			else:
 				self._brow = False
-
+				
 	@staticmethod
 	def script():
 		script = [

@@ -26,19 +26,28 @@ class TkPiece(Piece,Frame):
 		self._root.attributes("-fullscreen", True)
 		self._w,self._h = (self._root.winfo_screenwidth(),self._root.winfo_screenheight()) 
 		self._canvas = Canvas(self._root,width=self._w,height=self._h)
-		self._canvas.bind("<Motion>",TkPiece.ON_mouse)
+		self._canvas.bind("<Motion>",TkPiece.on_mouse_move)
+		self._canvas.bind("<ButtonPress-1>",TkPiece.on_left_click)
+		self._canvas.bind("<ButtonPress-3>",TkPiece.on_right_click)
 		self._canvas.bind_all("<Escape>",self._ON_esc)
 		self._canvas.pack()
 		self._then = time.clock()
 		self._images = {}
+		self._text_size = 200
 		self._fonts = {
-			'default' : font.Font(family='Helvetica',size=200, weight='bold'),
-			'feedback' : font.Font(family='Helvetica',size=50, weight='bold')
+			'default' : font.Font(family='Helvetica',size=self._text_size, weight='bold'),
+			'feedback' : font.Font(family='Helvetica',size=self._text_size, weight='bold')
 		}
 		self._handles = {
-			'feedback' : self._canvas.create_text(self._w/2,self._h/2,justify='center',font=self._fonts['feedback'])
+			'feedback' : self._canvas.create_text(self._w-(self._text_size/2),self._h - (self._text_size/1.5),justify='right',font=self._fonts['feedback'])
+		}
+		self._canvas.itemconfigure(self._handles['feedback'],anchor='e')
+		self._translation_table = {
+			'num': '#',
+			'com': ','
 		}
 		Frame.mainloop(self)
+		'''Translation table must be updated in both tkpiece and text'''
 
 	def _BEFORE_stop(self): # Tk window requires a custom start routine
 		self._alive = False
@@ -123,8 +132,19 @@ class TkPiece(Piece,Frame):
 		for handle in self._handles:
 			self._canvas.delete(self._handles[handle])
 
+	def _translate(self,symbol):
+		'''Translates special character to what needs to be displayed''' 
+		translation = symbol
+		try:
+			translation = self._translation_table[symbol]
+		except KeyError:
+			pass
+		return translation
+
 	def _ON_text(self,data):
 		parts = data.split(',')
+		for x in range(len(parts)):
+			parts[x] = self._translate(parts[x])
 		handle = parts[0]
 		text = ''
 		if len(parts) > 2:
@@ -141,13 +161,26 @@ class TkPiece(Piece,Frame):
 			raise e
 
 	@staticmethod
-	def ON_mouse(event):
+	def on_mouse_move(event):
 		try:
 			float_x,float_y = TkPiece.tkpiece_ref.scale(event.x,event.y)
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,str(float_x)+','+str(float_y))
-			#TkPiece.tkpiece_ref._interpret('@tkpiece position feedback,'+str(event.x)+','+str(event.y))
 		except Exception as e:
-			with open('tkerr.txt','w') as f: f.write(repr(e))
+			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
+
+	@staticmethod
+	def on_left_click(event):
+		try:
+			TkPiece.tkpiece_ref.send(Msg.MOUSE,'left_click')
+		except Exception as e:
+			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
+
+	@staticmethod
+	def on_right_click(event):
+		try:
+			TkPiece.tkpiece_ref.send(Msg.MOUSE,'right_click')
+		except Exception as e:
+			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
 
 	@staticmethod
 	def script():
