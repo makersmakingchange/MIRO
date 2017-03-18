@@ -7,6 +7,7 @@ class Layout(Piece):
 		self.subscribe(Uid.EYETRACKER)
 		self.subscribe(Uid.BLINK)
 		self.subscribe(Uid.TEXT)
+		self.subscribe(Uid.WFACE)
 		self._n_current_keys = 0
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
@@ -32,9 +33,7 @@ class Layout(Piece):
 			return True
 		return False
 
-	def _ON_blink_select(self,data):
-		'''When a blink select signal is emitted, check if the last
-		eye coordinate was within any of the keys'''
+	def _check_selection(self):
 		shapes = self.shape_list.split(",")
 		for index in range(0,len(shapes)/5):
 			ul = (shapes[5*index+1],shapes[5*index+2])
@@ -43,6 +42,16 @@ class Layout(Piece):
 				self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
 				return
 
+	def _ON_blink_select(self,data):
+		'''When a blink select signal is emitted, check if the last
+		eye coordinate was within any of the keys'''
+		self._check_selection()
+
+	def _ON_wface_select(self,data):
+		'''When a face (eyebrow) select signal is emitted, check if the last
+		eye coordinate was within any of the keys'''
+		self._check_selection()
+		
 	def _ON_engine_options(self,data):
 		options = data.split(',')
 		# Find neumber of options emitted by engine

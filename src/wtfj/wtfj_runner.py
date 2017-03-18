@@ -52,7 +52,6 @@ class Runner:
 
 		if mode == Mode.ZCONSOLE:
 			setup = [ 
-
 				Console('[>] '), # User input in _DURING_poll function of ZConsole
 				ZmqPusher(), # Gets passed to network
 				True # Local echo on
