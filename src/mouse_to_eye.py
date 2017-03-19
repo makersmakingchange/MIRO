@@ -7,7 +7,12 @@ def main():
 class Mouse_to_Eye(Piece):
 
 	def _ON_tkpiece_mouse(self,data):
-		self._out.send('eyetracker gaze '+data)
+		if 'left_click' in data:
+			self._out.send('blink select')
+		elif 'right_click' in data:
+			self._out.send('wface select')
+		else:
+			self._out.send('eyetracker gaze '+data)
 
 	@staticmethod
 	def script():
