@@ -10,7 +10,7 @@ class Mouse_to_Eye(Piece):
 		if 'left_click' in data:
 			self._out.send('blink select')
 		elif 'right_click' in data:
-			self._out.send('face select')
+			self._out.send('wface select')
 		else:
 			self._out.send('eyetracker gaze '+data)
 

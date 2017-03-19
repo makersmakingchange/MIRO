@@ -53,22 +53,30 @@ class TkPiece(Piece,Frame):
 		self._alive = False
 		Frame.quit(self)
 
+	def _interpret(self,msg):
+		try:
+			Piece._interpret(self,msg)
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
+
 	def _ON_esc(self,data): self.stop()
 
 	def _ON_image(self,data):
-		image_file,x,y = data.split(',')
-		#TODO This is a lazy and stupid way to load images
 		try:
-			image = Image.open(IMAGE_PATH+image_file+'.png')
-		except IOError:
-			image = Image.open(IMAGE_PATH+image_file+'.jpg')
-		photo = ImageTk.PhotoImage(image)
-		self._images[image_file] = photo
-		x = int(self._w*float(x))
-		y = int(self._h*float(y))
-		handle = self._handles[image_file] = self._canvas.create_image(x,y,image=photo)
-		self._canvas.pack()
-		self.send(Msg.ACK)
+			image_file,x,y = data.split(',')
+			#TODO This is a lazy and stupid way to load images
+			try:
+				image = Image.open(IMAGE_PATH+image_file+'.png')
+			except IOError:
+				image = Image.open(IMAGE_PATH+image_file+'.jpg')
+			photo = ImageTk.PhotoImage(image)
+			self._images[image_file] = photo
+			x = int(self._w*float(x))
+			y = int(self._h*float(y))
+			handle = self._handles[image_file] = self._canvas.create_image(x,y,image=photo)
+			self._canvas.pack()
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
 
 	def _ON_to_background(self,data):
 		# TODO make this work
@@ -81,7 +89,6 @@ class TkPiece(Piece,Frame):
 		size = parts[-1]
 		for font_handle in font_handles:
 			self._canvas.itemconfigure(self._handles[font_handle],font=('',int(size)))
-		self.send(Msg.ACK)
 
 	def _ON_position(self,data):
 		try:
@@ -99,6 +106,8 @@ class TkPiece(Piece,Frame):
 				self._canvas.coords(self._handles[handle],x-r,y-r,x+r,y+r)
 		except ValueError as e:
 			self.err('Position ['+str(data)+'] not valid\n'+repr(e))
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
 
 	def _ON_create(self,data):
 		try:
@@ -115,22 +124,27 @@ class TkPiece(Piece,Frame):
 					self.err('No font specified for ['+handle+'], using default')
 					item_font = self._fonts['default']
 				self._handles[handle] = self._canvas.create_text(x,y,justify='center',font=item_font)
-				self.send(Msg.ACK)
 			elif item == 'circle':
 				r = int(parts[4])
 				color = parts[5]
 				self._handles[handle] = self._canvas.create_oval(x-r,y-r,x+r,y+r,fill=color,outline=color)
 		except TclError as e:
-			self.send(Msg.ERR,'Graphics error\n'+repr(e))
+			self.err('Graphics error\n'+repr(e))
 
 	def _ON_delete(self,data):
-		handles = data.split(',')
-		for handle in handles:
-			self._canvas.delete(self._handles[handle])
+		try:
+			handles = data.split(',')
+			for handle in handles:
+				self._canvas.delete(self._handles[handle])
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
 
 	def _ON_clear(self,data):
-		for handle in self._handles:
-			self._canvas.delete(self._handles[handle])
+		try:
+			for handle in self._handles:
+				self._canvas.delete(self._handles[handle])
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
 
 	def _translate(self,symbol):
 		'''Translates special character to what needs to be displayed''' 
@@ -155,10 +169,8 @@ class TkPiece(Piece,Frame):
 			text = parts[1]
 		try:
 			self._canvas.itemconfigure(self._handles[handle],text=text)
-			self.send(Msg.ACK)
-		except Exception as e:
-			self.err('Function called before canvas initialized')
-			raise e
+		except TclError as e:
+			self.err('Graphics error\n'+repr(e))
 
 	@staticmethod
 	def on_mouse_move(event):
@@ -166,21 +178,27 @@ class TkPiece(Piece,Frame):
 			float_x,float_y = TkPiece.tkpiece_ref.scale(event.x,event.y)
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,str(float_x)+','+str(float_y))
 		except Exception as e:
-			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
+			TkPiece.tkpiece_ref.err(repr(e))
+		except TclError as e:
+			TkPiece.tkpiece_ref.err(repr(e))
 
 	@staticmethod
 	def on_left_click(event):
 		try:
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,'left_click')
 		except Exception as e:
-			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
+			TkPiece.tkpiece_ref.err(repr(e))
+		except TclError as e:
+			TkPiece.tkpiece_ref.err(repr(e))
 
 	@staticmethod
 	def on_right_click(event):
 		try:
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,'right_click')
 		except Exception as e:
-			TkPiece.tkpiece_ref.send(Msg.ERR,repr(e))
+			TkPiece.tkpiece_ref.err(repr(e))
+		except TclError as e:
+			TkPiece.tkpiece_ref.err(repr(e))
 
 	@staticmethod
 	def script():
