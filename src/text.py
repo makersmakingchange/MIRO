@@ -63,8 +63,9 @@ class Text(Piece):
 						self.send(Msg.BUFFER,self._text_buffer)
 						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
 					elif data == '#clear':
-						self._text_buffer = None
+						self._text_buffer = ''
 						self.send(Msg.TEXT,'The text buffer has been cleared')
+						self.send(Msg.BUFFER,self._text_buffer)
 					elif data == '#commit':	
 						if self._edit_mode == False :
 							self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
@@ -166,21 +167,22 @@ class Text(Piece):
 								'engine chose com',
 								'engine chose spc',
 								'engine chose num',
+								'engine chose #clear',
 								#'engine chose  ',
 								#'engine chose J',
 								#'engine chose i',
 								#'engine chose a',
 								#'engine chose n',
 								#'engine chose #undo',
-								'engine chose #commit',
+								#'engine chose #commit',
 								#'engine chose g',
-								'engine edit True',
+								#'engine edit True',
 								#'engine openFile',
-								'engine edit select0',
-								'engine chose A',
-								'engine chose B',
+								#'engine edit select0',
+								#'engine chose A',
+								#'engine chose B',
 								#'engine chose  ',
-								'engine chose #commit',
+								#'engine chose #commit',
 								#'engine save True',
 								#'engine chose Hi',
 								#'engine commit True',

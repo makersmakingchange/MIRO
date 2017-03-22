@@ -10,6 +10,8 @@ class Layout(Piece):
 		self.subscribe(Uid.WFACE)
 		self._horizontal_division = False
 		self._n_current_keys = 0
+		self._last_eye2 = (0,0,0.0)
+		self._last_eye1 = (0,0,0.0)
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
 
@@ -20,6 +22,10 @@ class Layout(Piece):
 		'''Only record a single gaze coordinate at a time.'''
 		eye_data = data.split(",")
 		self._last_eye = (float(eye_data[0]),float(eye_data[1]))
+		self._last_eye2 = self._last_eye1
+		self._last_eye1 = self._last_eye
+		self._last_eye = ((self._last_eye1[0]+self._last_eye2[0])/2, (self._last_eye1[1] + self._last_eye2[1])/2)
+		
 
 	def _contains(self,upper_left, bottom_right):
 		'''Helper function to determine if a shape contains the last
