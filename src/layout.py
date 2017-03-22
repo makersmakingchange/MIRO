@@ -14,7 +14,7 @@ class Layout(Piece):
 		self._last_eye1 = (0,0,0.0)
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
-		self._last_feedback_key = -1
+		self._last_feedback_key = '-1,-1,-1,-1'
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -34,13 +34,14 @@ class Layout(Piece):
 		for index in range(0,len(shapes)/5):
 			ul = (shapes[5*index+1],shapes[5*index+2])
 			br = (shapes[5*index+3],shapes[5*index+4])
+			coord_string = str(ul[0]) + ',' + str(ul[1]) + ',' + str(br[0]) + ',' + str(br[1])
 			if (self._contains(ul,br) == True):
-				if (index != self._last_feedback_key):
+				if (coord_string != self._last_feedback_key):
 					# Visual feedback goes directly to tkpiece
-					self.send_to(Uid.TKPIECE,Msg.FEEDBACK, str(ul[0]) + ',' + str(ul[1]) + ',' + str(br[0]) + ',' + str(br[1]))
+					self.send_to(Uid.TKPIECE,Msg.FEEDBACK, coord_string)
 					# Audio feedback is routed through engine to audio
 					self.send_to(Uid.ENGINE,Msg.FEEDBACK, str(index))
-					self._last_feedback_key = index
+					self._last_feedback_key = coord_string
 
 	def _contains(self,upper_left, bottom_right):
 		'''Helper function to determine if a shape contains the last

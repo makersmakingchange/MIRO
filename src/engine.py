@@ -6,12 +6,12 @@ def main():
 
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
-punctuation = ['spc','del','clr','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
+punctuation = ['spc','#delete','#clear','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','edit']
 menu_handles = {}
-keyboard_options = ['#alphabet','#numbers','...']
+keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
-edit_options = ['#save','#undo','edit']
+edit_options = ['#save']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -22,13 +22,13 @@ class Engine(Piece):
 			self.send(Msg.ERR,'1 key layout invalid\n')
 		else:
 			self._options = OptionNode()
-			#build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
-			build_non_ordered_tree(self._options,num_options,keyboard_options,keyboard_handles)
-			#build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
+			build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
+			#build_non_ordered_tree(self._options,num_options,keyboard_options,keyboard_handles)
+			build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
 			build_ordered_tree(keyboard_handles.get('#alphabet'),num_options,letters_lc)
 			build_ordered_tree(keyboard_handles.get('#numbers'),num_options,numbers)
-			build_non_ordered_tree(keyboard_handles.get('...'),num_options,punctuation)
-			#build_non_ordered_tree(menu_handles.get('edit'),num_options,edit_options)
+			build_non_ordered_tree(keyboard_handles.get('#nontext'),num_options,punctuation)
+			build_non_ordered_tree(menu_handles.get('edit'),num_options,edit_options)
 			self._current_option = self._options
 			self._ON_process(None)
 
@@ -48,12 +48,7 @@ class Engine(Piece):
 		if len(self._current_option.children) == 0:
 			if (self._current_option.content[0] != '#'):
 				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
-			if (self._current_option.content == "clr"):
-				self.send(Msg.CHOSE, "#clear")
-			elif (self._current_option.content == 'del'):
-				self.send(Msg.CHOSE, "#undo")
-			else:
-				self.send(Msg.CHOSE, self._current_option.content)
+			self.send(Msg.CHOSE, self._current_option.content)
 			self._current_option = self._options
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
