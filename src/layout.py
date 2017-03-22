@@ -14,6 +14,7 @@ class Layout(Piece):
 		self._last_eye1 = (0,0,0.0)
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
+		self._last_feedback_key = -1
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -24,8 +25,22 @@ class Layout(Piece):
 		self._last_eye = (float(eye_data[0]),float(eye_data[1]))
 		self._last_eye2 = self._last_eye1
 		self._last_eye1 = self._last_eye
-		self._last_eye = ((self._last_eye1[0]+self._last_eye2[0])/2, (self._last_eye1[1] + self._last_eye2[1])/2)
-		
+		self._last_eye = ((self._last_eye1[0]+self._last_eye2[0])/2, (self._last_eye1[1] + self._last_eye2[1])/2) # Average of last two gaze points
+		self._generate_feedback()
+	
+	def _generate_feedback(self):
+		'''Provides audio and visual feedback when the user has entered a new selectiona area.'''
+		shapes = self.shape_list.split(",")
+		for index in range(0,len(shapes)/5):
+			ul = (shapes[5*index+1],shapes[5*index+2])
+			br = (shapes[5*index+3],shapes[5*index+4])
+			if (self._contains(ul,br) == True):
+				if (index != self._last_feedback_key):
+					# Visual feedback goes directly to tkpiece
+					self.send_to(Uid.TKPIECE,Msg.FEEDBACK, str(ul[0]) + ',' + str(ul[1]) + ',' + str(br[0]) + ',' + str(br[1]))
+					# Audio feedback is routed through engine to audio
+					self.send_to(Uid.ENGINE,Msg.FEEDBACK, str(index))
+					self._last_feedback_key = index
 
 	def _contains(self,upper_left, bottom_right):
 		'''Helper function to determine if a shape contains the last
@@ -141,7 +156,10 @@ class Layout(Piece):
 		text_entry = [
 			'@layout marco',
 			'engine options a_to_i,j_to_r,s_to_z',
+			'eyetracker gaze .4,.5',
 			'engine options spc,com,.',
+			'eyetracker gaze .4,.5',
+			'eyetracker gaze .75,.3',
 			'@engine stop'
 		]
 		return Script(text_entry)

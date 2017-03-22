@@ -131,6 +131,16 @@ class TkPiece(Piece,Frame):
 		except TclError as e:
 			self.err('Graphics error\n'+repr(e))
 
+	def _ON_feedback(self,data):
+		parts = data.split(',')
+		try:
+			self._canvas.delete(self._handles['selection_feedback'])
+		except KeyError:
+			pass
+		self._handles['selection_feedback'] = self._canvas.create_rectangle(float(parts[0])*self._w,float(parts[1])*self._h,float(parts[2])*self._w,float(parts[3])*self._h,fill='yellow',outline='black')
+		self._canvas.tag_lower(self._handles['selection_feedback'])
+
+
 	def _ON_delete(self,data):
 		try:
 			handles = data.split(',')
@@ -202,7 +212,7 @@ class TkPiece(Piece,Frame):
 
 	@staticmethod
 	def script():
-		text_entry = [
+		'''text_entry = [
 			'@tkpiece marco',
 			'@tkpiece wait 1',
 			'@tkpiece create text,key0,0.25,0.25',
@@ -236,6 +246,26 @@ class TkPiece(Piece,Frame):
 			'@tkpiece to_background test',
 			'@tkpiece create text,exit_msg,0.5,0.5',
 			'@tkpiece text exit_msg,NOT',
+			'@tkpiece stop'
+		]'''
+		text_entry = [
+			'@tkpiece marco',
+			'@tkpiece wait 1',
+			'@tkpiece create text,key0,0.25,0.25',
+			'@tkpiece create text,key1,0.25,0.75',
+			'@tkpiece create text,key2,0.75,0.25',
+			'@tkpiece create text,key3,0.75,0.75',
+			'@tkpiece period 0.5',
+			'@tkpiece text key0,M',
+			'@tkpiece feedback 0,0,1,1',
+			'@tkpiece text key1,I',
+			'@tkpiece text key2,R',
+			'@tkpiece text key3,O',
+			'@tkpiece text key0,m',
+			'@tkpiece feedback .5,.5,.75,.75',
+			'@tkpiece text key1,i',
+			'@tkpiece text key2,r',
+			'@tkpiece text key3,o',
 			'@tkpiece stop'
 		]
 		return Script(text_entry)

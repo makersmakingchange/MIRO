@@ -32,6 +32,12 @@ class Engine(Piece):
 			self._current_option = self._options
 			self._ON_process(None)
 
+	def _ON_feedback(self,data):
+		#self.send(Msg.TEXT, "HERE SUP " + self._current_option.children[].content)
+		parts = self._current_option.children[int(data)].content.split('_')
+		for word in parts:
+			self.send_to(Uid.AUDIO,Req.SPEAK,word)
+
 	def _ON_select(self,data):
 		selection = int(data)
 		self._current_option = self._current_option.children[selection]
@@ -61,9 +67,11 @@ class Engine(Piece):
 			'@engine marco',
 			'@engine period 1',
 			'@engine build 3',
-			'@engine select 1',
 			'@engine select 0',
 			'@engine select 0',
+			'@engine feedback 1',
+			'@engine select 0',
+			'@engine feedback 0',
 			'@engine select 0',
 			'@engine select 0',
 			'@engine select 0',

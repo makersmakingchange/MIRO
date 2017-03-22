@@ -9,7 +9,7 @@ class Blink(Piece):
 	def _AFTER_start(self):
 		self._time_last_eye_msg_recvd = None
 		self._blinked = False
-		self._blink_threshold = .5
+		self._blink_threshold = .2
 		self._select_val = 0
 
 	def _ON_eyetracker_gaze(self,data):
