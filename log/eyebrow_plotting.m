@@ -1,2 +1,4 @@
 A = csvread('eyebrows1.csv')
-plot(A(:,1),A(:,2))
+hold on
+B = A(:,1)
+plot(B(:,1))

@@ -13,10 +13,27 @@ def _print(msg):
 	print(msg)
 	pass
 
+def print_bar(msg,top=True,bottom=True):
+	bar = ''
+	for char in msg:
+		bar += '-'
+	if top is True: _print(bar)
+	_print(msg)
+	if bottom is True: _print(bar)
+
+def get_uid(piece):
+	''' Returns id based on class name '''
+	return piece.__class__.__name__.lower()
+
+def get_attr(class_to_check):
+	''' Returns strings of a class' members '''
+	return [getattr(class_to_check,member) for member in dir(class_to_check) 
+		if '__' not in member]
+
+
 with open(pypath+'/wtfj/protocol/uid.py','w') as uids:
-	_print('-------------------------')
-	_print('Generating uids in uid.py')
-	_print('-------------------------')
+	''' Open file which will contain list of universal ids when script completes '''
+	print_bar('Generating uids in uid.py')
 	filenames = pyfiles
 	filenames.extend(exefiles)
 	for piece_filename in filenames:
@@ -38,23 +55,6 @@ from protocol import req as Req
 from protocol import msg as Msg
 from protocol import mode as Mode
 from protocol import tcp as Tcp
-
-def print_bar(msg,top=True,bottom=True):
-	bar = ''
-	for char in msg:
-		bar += '-'
-	if top is True: _print(bar)
-	_print(msg)
-	if bottom is True: _print(bar)
-
-def get_uid(piece):
-	''' Returns id based on class name '''
-	return piece.__class__.__name__.lower()
-
-def get_attr(class_to_check):
-	''' Returns strings of a class' members '''
-	return [getattr(class_to_check,member) for member in dir(class_to_check) 
-		if '__' not in member]
 
 print_bar('Importing all identifiers in protocol')
 
