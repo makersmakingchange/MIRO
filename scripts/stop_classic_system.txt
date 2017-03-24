@@ -5,3 +5,4 @@
 @engine stop
 @text stop
 @audio stop
+@configure stop

@@ -20,6 +20,7 @@ class Text(Piece):
 			self._file_buffer = ''
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#redbluegreen']
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last
@@ -48,7 +49,10 @@ class Text(Piece):
 				data = translation_table[data]
 			except KeyError:
 				pass
-			if data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
+
+			if(data in self._ignore):
+				pass
+			elif data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
 				self._edit_buffer = self._edit_buffer + data
 
 			elif data not in self.menu_options:
