@@ -20,7 +20,7 @@ class Text(Piece):
 			self._file_buffer = ''
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save']
-			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#redbluegreen']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last

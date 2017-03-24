@@ -101,6 +101,9 @@ class RecordKeeper(object):
 		''' Returns mean of record values over _record_timeout seconds '''
 		return map(lambda x: sum(x)/len(x), zip(*self._history))
 
+	def get_history(self):
+		return self._history
+
 	def first_derivative(self,normalized=False):
 		''' Returns change in record vector over change in time 
 		If normalized, returns a vector of length '''
@@ -118,6 +121,12 @@ class RecordKeeper(object):
 			length **= 0.5
 			ret[1:-1] = [val/length for val in ret][1:-1]
 		return ret
+
+	def set_history(self, *values):
+		'''Sets all of the values in the history to a provided values'''
+		for record in self._history:
+			for x in range(0,len(values)):
+				record[x+1] = values[x]
 
 
 if __name__ == '__main__': # Little bit of testing 

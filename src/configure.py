@@ -4,13 +4,13 @@ class Configure(Piece):
 
 	def _BEFORE_start(self):
 		self.subscribe(Uid.ENGINE)
-		self._num_keys = 2 # default start with 2 keys
+		self._num_keys = 26 # default start with 2 keys
 		self._engine_built = False
 		self._last_msg = time.clock()
 		# color schemes denoted [<text color>, <background color>, <preselect color>]
 		self._color_schemes = {
 			'#blackwhiteyellow' : ['#000000','#ffffff','#ffff00'],
-			'#redbluegreen' : ['red','blue','green']
+			'#blackbluegreen' : ['black','blue','green'],
 		}
 
 	def _ON_engine_built(self,data):
@@ -51,7 +51,7 @@ class Configure(Piece):
 		'engine chose #plus',
 		'engine chose #plus',
 		'engine chose #plus',
-		'engine chose #yellowblackmaroon',
+		'engine chose #blackbluegreen',
 		'engine chose #minus',
 		'engine chose #minus',
 		'engine chose #minus',

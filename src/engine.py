@@ -6,16 +6,16 @@ def main():
 
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
-punctuation = ['spc','#delete','#clear','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
+punctuation = ['spc','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
-edit_options = ['#save']
+edit_options = ['#delete','#clear','#save']
 configuration_options = ['#numberkeys','#colorscheme']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
-colorscheme_options = ['#blackwhiteyellow','#redbluegreen']
+colorscheme_options = ['#blackwhiteyellow','#blackbluegreen']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
