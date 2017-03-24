@@ -34,6 +34,7 @@ class TkPiece(Piece,Frame):
 		self._then = time.clock()
 		self._images = {}
 		self._text_size = 200
+		self._select_fb_color = 'yellow';
 		self._fonts = {
 			'default' : font.Font(family='Helvetica',size=self._text_size, weight='bold'),
 			'feedback' : font.Font(family='Helvetica',size=self._text_size, weight='bold')
@@ -137,7 +138,7 @@ class TkPiece(Piece,Frame):
 			self._canvas.delete(self._handles['selection_feedback'])
 		except KeyError:
 			pass
-		self._handles['selection_feedback'] = self._canvas.create_rectangle(float(parts[0])*self._w,float(parts[1])*self._h,float(parts[2])*self._w,float(parts[3])*self._h,fill='yellow',outline='black')
+		self._handles['selection_feedback'] = self._canvas.create_rectangle(float(parts[0])*self._w,float(parts[1])*self._h,float(parts[2])*self._w,float(parts[3])*self._h,fill=self._select_fb_color,outline='black')
 		self._canvas.tag_lower(self._handles['selection_feedback'])
 
 
@@ -181,6 +182,16 @@ class TkPiece(Piece,Frame):
 			self._canvas.itemconfigure(self._handles[handle],text=text)
 		except TclError as e:
 			self.err('Graphics error\n'+repr(e))
+
+	def _ON_changecolor(self,data):
+		# data in format: text,background,preselect
+		parts = data.split(',')
+		self._canvas.configure(background=parts[1])
+		self._select_fb_color = parts[2]
+		'''for handle in self._handles:
+			self.send(Msg.TEXT, "HERE " + handle)
+			if ('key' in str(handle)):
+				self._canvas.itemconfigure(fill=parts[0])'''
 
 	@staticmethod
 	def on_mouse_move(event):
@@ -261,6 +272,7 @@ class TkPiece(Piece,Frame):
 			'@tkpiece text key1,I',
 			'@tkpiece text key2,R',
 			'@tkpiece text key3,O',
+			'@tkpiece changecolor red,black,green',
 			'@tkpiece text key0,m',
 			'@tkpiece feedback .5,.5,.75,.75',
 			'@tkpiece text key1,i',

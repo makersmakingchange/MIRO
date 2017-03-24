@@ -12,9 +12,10 @@ menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
 edit_options = ['#save']
-configuration_options = ['#numberkeys']
+configuration_options = ['#numberkeys','#colorscheme']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
+colorscheme_options = ['#blackwhiteyellow','#redbluegreen']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -34,6 +35,7 @@ class Engine(Piece):
 			build_non_ordered_tree(menu_handles.get('#revise'),num_options,edit_options)
 			build_non_ordered_tree(menu_handles.get('#configure'),num_options,configuration_options,configuration_options_handles)
 			build_non_ordered_tree(configuration_options_handles.get('#numberkeys'),num_options,numkeys_options)
+			build_non_ordered_tree(configuration_options_handles.get('#colorscheme'),num_options,colorscheme_options)
 			self._current_option = self._options
 			self._ON_process(None)
 			self.send(Msg.BUILT)
@@ -67,8 +69,9 @@ class Engine(Piece):
 			'@engine marco',
 			'@engine period 1',
 			'@engine build 3',
-			'@engine select 0',
-			'@engine select 0',
+			'@engine select 2',
+			'@engine select 1',
+			'@engine select 1',
 			'@engine feedback 1',
 			'@engine select 0',
 			'@engine feedback 0',
