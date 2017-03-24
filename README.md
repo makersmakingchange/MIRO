@@ -1,33 +1,15 @@
 # app
 ## Writing Tech For Jarrod
-![alt text](https://github.com/WritingTechForJarrod/app/blob/master/img/readme.png?raw=true "wtfj")  
-To run the app in console mode start the interpreter  
-`python src/console.py`  
 
-## Message format
-### Each piece must execute these functions upon receiving these messages
-| id | function |
-|:---|:---:|
-| @piece_name | stop |
-| @piece_name | marco | -- respond with `piece_name polo` 
-### Each piece must emit these messages upon startup and exit
-| message | id |
-|:---|:---:|:---:|
-| started | piece_name | |
-| stopping | piece_name | | 
-### Other messages must have the format
-| message type | piece name | description | |
-|:---|:---:|:---:|:---:|
-| _incoming_ | @piece_name | function | data |
-| _outgoing_ | piece_name | topic | data |
-Space is used as a delimiter between the sections of each message
+![Jarrod](https://github.com/WritingTechForJarrod/app/blob/master/img/readme1.jpg?raw=true "wtfj")  
+### This is Jarrod
+Jarrod is an incredibly determined, charismatic individual who happens to suffer from Multiple Sclerosis(MS). The damage it has done to his body has been so profound it renders him unable to use any form of off-the-shelf technology to communicate independently. He suffers from quadriplegia, blindness, and cannot speak clearly enough to use speech-to-text converters.  
+
+![Miro](https://github.com/WritingTechForJarrod/app/blob/master/img/readme2.jpg?raw=true "wtfj")  
+### This is Miro  
+Miro is a flexible program our team is developing for our capstone engineering project, which will hopefully be useful for Jarrod and many other people with extensive and unique disabilities. Miro allows multiple inputs and outputs to be seamlessly connected to maximize the number of signals available for communication.   
   
-The console has the following special commands:
-`start piece_name`  
-`start all`  
-`restart piece_name`  
-`restart all`  
-`stop piece_name`  
-`stop all`  
-`quit`  
-`quit!` - _stop all pieces and quit_
+## Design Documentation
+[Design document available here](https://docs.google.com/document/d/1l9wp3MV8gngEhaP4Npji1a92KYDKru8GvrS5jWQIPqg/edit?usp=sharing "Design document")
+  
+More details and tutorials will be coming in April 2017, for now please contact max.prokopenko _at_ gmail.com with any questions.  
