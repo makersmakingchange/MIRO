@@ -7,11 +7,14 @@ def main():
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','#delete','#clear','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
-menu_options = ['#keyboard','edit']
+menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
 edit_options = ['#save']
+configuration_options = ['#numberkeys']
+configuration_options_handles = {}
+numkeys_options = ['#plus','#minus']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -28,12 +31,14 @@ class Engine(Piece):
 			build_ordered_tree(keyboard_handles.get('#alphabet'),num_options,letters_lc)
 			build_ordered_tree(keyboard_handles.get('#numbers'),num_options,numbers)
 			build_non_ordered_tree(keyboard_handles.get('#nontext'),num_options,punctuation)
-			build_non_ordered_tree(menu_handles.get('edit'),num_options,edit_options)
+			build_non_ordered_tree(menu_handles.get('#revise'),num_options,edit_options)
+			build_non_ordered_tree(menu_handles.get('#configure'),num_options,configuration_options,configuration_options_handles)
+			build_non_ordered_tree(configuration_options_handles.get('#numberkeys'),num_options,numkeys_options)
 			self._current_option = self._options
 			self._ON_process(None)
+			self.send(Msg.BUILT)
 
 	def _ON_feedback(self,data):
-		#self.send(Msg.TEXT, "HERE SUP " + self._current_option.children[].content)
 		parts = self._current_option.children[int(data)].content.split('_')
 		for word in parts:
 			self.send_to(Uid.AUDIO,Req.SPEAK,word)

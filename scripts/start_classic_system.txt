@@ -5,3 +5,4 @@
 @system start eyetracker exe
 @system start blink
 @system start audio
+@system start configure
