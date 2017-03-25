@@ -7,6 +7,14 @@ def distance(x1,y1,x2,y2):
 	''' Returns float representing 2D Euclidean distance '''
 	return ((x1-x2)**2 + (y1-y2)**2)**0.5
 
+def normalize(*vector_components):
+	''' Returns a vector of len(vector_components) size normalized to 1 '''
+	l = length(*vector_components)
+	return [x/l for x in vector_components]
+
+def length(*vector_components):
+	return sum([x**2 for x in vector_components])**0.5
+
 def ensure_delimited(uid):
 	''' Takes a string and adds an @ delimiter if one not there already'''
 	return uid if uid[0] == '@' else '@'+uid
@@ -101,23 +109,23 @@ class RecordKeeper(object):
 		''' Returns mean of record values over _record_timeout seconds '''
 		return map(lambda x: sum(x)/len(x), zip(*self._history))
 
-	def first_derivative(self,normalized=False):
-		''' Returns change in record vector over change in time 
-		If normalized, returns a vector of length '''
-		start = self._history[0]
-		end = self._history[-1]
-		dt = end[0]-start[0]
-		ret = []
-		length = 0
-		ret.append(end[0])
-		for i in range(1,len(start)):
-			val = (end[i]-start[i])/dt
-			length += val**2
-			ret.append(val)
-		if normalized:
-			length **= 0.5
-			ret[1:-1] = [val/length for val in ret][1:-1]
-		return ret
+	def one_norm(self):
+		''' Returns mean of record values over _record_timeout seconds '''
+		return map(lambda x: sum([abs(val) for val in x])/len(x), zip(*self._history))
+
+	def first_derivative(self):
+		''' Returns list of records of change in record vector over change in time '''
+		dh_dt = []
+		for i in range(1,len(self._history)):
+			t = self._history[i][0]
+			dt = t-self._history[i-1][0]
+			d_record = []
+			d_record.append(t)
+			for j in range(1,len(self._history[i])):
+				dv_dt = (self._history[i][j]-self._history[i-1][j])/dt
+				d_record.append(dv_dt)
+			dh_dt.append(d_record)
+		return dh_dt
 
 
 if __name__ == '__main__': # Little bit of testing 
@@ -132,6 +140,12 @@ if __name__ == '__main__': # Little bit of testing
 	assert is_valid_msg_(unpack('@piece ')) == False
 	assert is_valid_msg_(unpack('@piece')) == False
 	
+	# Check that vector normalization works
+	v = [3,4]
+	v_norm = normalize(*v)
+	assert v_norm[0] == 0.6
+	assert v_norm[1] == 0.8
+
 	# Check that the recordkeeper correctly stores values and performs functions
 	r = RecordKeeper(1.0)
 	r.add_record(-1000,1000)
@@ -144,6 +158,6 @@ if __name__ == '__main__': # Little bit of testing
 	mean = r.mean()
 	assert mean[1] == -2.0
 	assert mean[2] == 2.0
-	print(r.first_derivative(), "Record derivative should be around 1.0,-8.0,2.0")
+	print(r.first_derivative()[0], "Record derivative should be around 2.0,-8.0,8.0")
 
 	print('[Tests passed]')
