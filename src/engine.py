@@ -6,19 +6,23 @@ def main():
 
 letters_lc = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 numbers = ['0','1','2','3','4','5','6','7','8','9']
-punctuation = ['spc','#delete','#clear','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
+punctuation = ['spc','#delete','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
-edit_options = ['#save']
+edit_options = ['#clear','#save']
 configuration_options = ['#numberkeys','#colorscheme']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
-colorscheme_options = ['#blackwhiteyellow','#redbluegreen']
+colorscheme_options = ['#blackwhiteyellow','#blackbluegreen']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
+
+	def _BEFORE_start(self):
+		self._last_selection = None
+		self._first_build = True
 
 	def _ON_build(self,data):
 		num_options = int(data)
@@ -46,22 +50,37 @@ class Engine(Piece):
 			self.send_to(Uid.AUDIO,Req.SPEAK,word)
 
 	def _ON_select(self,data):
-		selection = int(data)
-		self._current_option = self._current_option.children[selection]
-		self._ON_process(None)
-
-	def _ON_process(self,data):
-		msg = ''
-		if len(self._current_option.children) == 0:
-			if (self._current_option.content[0] != '#'):
-				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
-			self.send(Msg.CHOSE, self._current_option.content)
+		'''Process blink data. If blink is short (else condition), act as standard select and work down tree.
+		If blink is medium, undo last action, if blink is long, travel back to root'''
+		if (data == 'medium'):
+			pass
+		elif (data == 'long'):
 			self._current_option = self._options
+			self._send_options()
+		else:
+			selection = int(data)
+			self._current_option = self._current_option.children[selection]
+			self._ON_process(None)
+
+	def _send_options(self):
+		msg = ''
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
 			if i < len(self._current_option.children)-1:
 				msg += ','
-		self.send(Msg.OPTIONS,msg)
+		self.send(Msg.OPTIONS,msg)		
+
+	def _ON_process(self,data):
+		if len(self._current_option.children) == 0:
+			if (self._current_option.content[0] != '#'):
+				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
+			self.send(Msg.CHOSE, self._current_option.content)
+			self._last_selection = self._current_option.content
+			if (self._last_selection in letters_lc or self._last_selection in numbers or self._last_selection in punctuation):
+				self._current_option = menu_handles.get('#keyboard')
+			else:
+				self._current_option = self._options
+		self._send_options()
 
 	@staticmethod
 	def script():
@@ -69,16 +88,12 @@ class Engine(Piece):
 			'@engine marco',
 			'@engine period 1',
 			'@engine build 3',
-			'@engine select 2',
+			'@engine select 0',
 			'@engine select 1',
 			'@engine select 1',
-			'@engine feedback 1',
 			'@engine select 0',
-			'@engine feedback 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
-			'@engine select 0',
+			'@engine select 1',
+			'@engine select long',
 			'@engine stop'
 		])
 

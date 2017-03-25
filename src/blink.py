@@ -8,24 +8,34 @@ class Blink(Piece):
 
 	def _AFTER_start(self):
 		self._time_last_eye_msg_recvd = None
+		self._delta = 0
 		self._blinked = False
-		self._blink_threshold = .2
+		self._blink_threshold_short = .2
+		self._blink_threshold_med = .5
+		self._blink_threshold_long = 1
+		self._blink_threshold_offscreen = 3
 		self._select_val = 0
 
 	def _ON_eyetracker_gaze(self,data):
 		# Blink module only needs to detect blink (based on time without coords)
+		if (self._delta > self._blink_threshold_offscreen):
+			self.send(Msg.SELECT,"offscreen")
+			self._delta = 0
+		elif (self._delta > self._blink_threshold_long):
+			self.send(Msg.SELECT,"long")
+			self._delta = 0
+		elif (self._delta > self._blink_threshold_med):
+			self.send(Msg.SELECT,"medium")
+			self._delta = 0
+		elif (self._delta > self._blink_threshold_short):
+			self.send(Msg.SELECT,"short")
+			self._delta = 0
 		self._time_last_eye_msg_recvd = time.clock()
 
 	def _DURING_poll(self):
 		if self._time_last_eye_msg_recvd is not None:
 			now = time.clock()
-			delta = now - self._time_last_eye_msg_recvd
-			if delta > self._blink_threshold:
-				if self._blinked is False:
-					self._blinked = True
-					self.send(Msg.SELECT)
-			else:
-				self._blinked = False
+			self._delta = now - self._time_last_eye_msg_recvd
 
 	@staticmethod
 	def script():

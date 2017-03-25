@@ -127,6 +127,15 @@ class RecordKeeper(object):
 			dh_dt.append(d_record)
 		return dh_dt
 
+	def get_history(self):
+		return self._history
+
+	def set_history(self, *values):
+		'''Sets all of the values in the history to a provided values'''
+		for record in self._history:
+			for x in range(0,len(values)):
+				record[x+1] = values[x]
+
 
 if __name__ == '__main__': # Little bit of testing 
 

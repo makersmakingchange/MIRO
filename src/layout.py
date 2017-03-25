@@ -10,11 +10,10 @@ class Layout(Piece):
 		self.subscribe(Uid.WFACE)
 		self._horizontal_division = False
 		self._n_current_keys = 0
-		self._last_eye2 = (0,0,0.0)
-		self._last_eye1 = (0,0,0.0)
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
+		self._gaze_record = RecordKeeper(.5)
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -22,10 +21,12 @@ class Layout(Piece):
 	def _ON_eyetracker_gaze(self,data):
 		'''Only record a single gaze coordinate at a time.'''
 		eye_data = data.split(",")
-		self._last_eye = (float(eye_data[0]),float(eye_data[1]))
-		self._last_eye2 = self._last_eye1
-		self._last_eye1 = self._last_eye
-		self._last_eye = ((self._last_eye1[0]+self._last_eye2[0])/2, (self._last_eye1[1] + self._last_eye2[1])/2) # Average of last two gaze points
+		# Uncomment next 3 lines for filtered
+		self._gaze_record.add_record(float(eye_data[0]),float(eye_data[1])) # raw eyetracker input
+		mean = self._gaze_record.mean()
+		self._last_eye = (mean[1],mean[2])
+		# Uncomment below for unfiltered
+		#self._last_eye = (float(eye_data[0]),float(eye_data[1]))
 		self._generate_feedback()
 	
 	def _generate_feedback(self):
@@ -42,6 +43,10 @@ class Layout(Piece):
 					# Audio feedback is routed through engine to audio
 					self.send_to(Uid.ENGINE,Msg.FEEDBACK, str(index))
 					self._last_feedback_key = coord_string
+					# After changing feedback, set history to center of current selection
+					center_x = (float(ul[0]) + float(br[0]))/2
+					center_y = (float(ul[1]) + float(br[1]))/2
+					self._gaze_record.set_history(center_x,center_y)
 
 	def _contains(self,upper_left, bottom_right):
 		'''Helper function to determine if a shape contains the last
@@ -62,9 +67,15 @@ class Layout(Piece):
 				self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
 
 	def _ON_blink_select(self,data):
-		'''When a blink select signal is emitted, check if the last
-		eye coordinate was within any of the keys'''
-		self._check_select()
+		'''On short blink, check it last eye coordinate was within any keys,
+		On medium and long blink, pass signal to engine to map to specialized function. Do not
+		do anything on offscreen message. Represents timeout.'''
+		if (data == 'short'):
+			self._check_select()
+		elif (data == 'medium'):
+			self.send_to(Uid.ENGINE,Msg.SELECT,"medium")
+		elif (data == 'long'):
+			self.send_to(Uid.ENGINE,Msg.SELECT,"long")
 
 	def _ON_wface_select(self,data):
 		'''When a face select signal is emitted, check if the last
@@ -142,7 +153,7 @@ class Layout(Piece):
 
 	def _ON_engine_options(self,data):
 		options = data.split(',')
-		# Find neumber of options emitted by engine
+		# Find number of options emitted by engine
 		n = len(options)
 		# If those options differ from the current number of options clear the screen of options
 		self._clear_screen()
@@ -156,11 +167,16 @@ class Layout(Piece):
 	def script():
 		text_entry = [
 			'@layout marco',
+			'engine options #alphabet,#numbers,#nontext',
 			'engine options a_to_i,j_to_r,s_to_z',
-			'eyetracker gaze .4,.5',
+			'eyetracker gaze .1,.3',
+			'eyetracker gaze .1,.7',
 			'engine options spc,com,.',
-			'eyetracker gaze .4,.5',
-			'eyetracker gaze .75,.3',
+			'eyetracker gaze 0,0',
+			'eyetracker gaze .9,.3',
+			'eyetracker gaze .9,.3',
+			'eyetracker gaze .9,.3',
+			'eyetracker gaze .9,.3',
 			'@engine stop'
 		]
 		return Script(text_entry)

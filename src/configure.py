@@ -10,7 +10,7 @@ class Configure(Piece):
 		# color schemes denoted [<text color>, <background color>, <preselect color>]
 		self._color_schemes = {
 			'#blackwhiteyellow' : ['#000000','#ffffff','#ffff00'],
-			'#redbluegreen' : ['red','blue','green']
+			'#blackbluegreen' : ['black','blue','green'],
 		}
 
 	def _ON_engine_built(self,data):
@@ -28,11 +28,12 @@ class Configure(Piece):
 		else:	
 			if (str(data) == '#plus'):
 				self._num_keys +=1
+				self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
 			elif(str(data) == '#minus'):
 				if (self._num_keys > 2):
 					# Minimum of 2 keys
 					self._num_keys-=1
-			self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
+				self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
 
 	def _DURING_poll(self):
 		'''Tell engine to build every 2 seconds until it is built'''
@@ -51,7 +52,7 @@ class Configure(Piece):
 		'engine chose #plus',
 		'engine chose #plus',
 		'engine chose #plus',
-		'engine chose #yellowblackmaroon',
+		'engine chose #blackbluegreen',
 		'engine chose #minus',
 		'engine chose #minus',
 		'engine chose #minus',
