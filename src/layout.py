@@ -67,9 +67,15 @@ class Layout(Piece):
 				self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
 
 	def _ON_blink_select(self,data):
-		'''When a blink select signal is emitted, check if the last
-		eye coordinate was within any of the keys'''
-		self._check_select()
+		'''On short blink, check it last eye coordinate was within any keys,
+		On medium and long blink, pass signal to engine to map to specialized function. Do not
+		do anything on offscreen message. Represents timeout.'''
+		if (data == 'short'):
+			self._check_select()
+		elif (data == 'medium'):
+			self.send_to(Uid.ENGINE,Msg.SELECT,"medium")
+		elif (data == 'long'):
+			self.send_to(Uid.ENGINE,Msg.SELECT,"long")
 
 	def _ON_wface_select(self,data):
 		'''When a face select signal is emitted, check if the last
@@ -147,7 +153,7 @@ class Layout(Piece):
 
 	def _ON_engine_options(self,data):
 		options = data.split(',')
-		# Find neumber of options emitted by engine
+		# Find number of options emitted by engine
 		n = len(options)
 		# If those options differ from the current number of options clear the screen of options
 		self._clear_screen()
@@ -161,6 +167,7 @@ class Layout(Piece):
 	def script():
 		text_entry = [
 			'@layout marco',
+			'engine options #alphabet,#numbers,#nontext',
 			'engine options a_to_i,j_to_r,s_to_z',
 			'eyetracker gaze .1,.3',
 			'eyetracker gaze .1,.7',

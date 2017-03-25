@@ -4,7 +4,7 @@ class Configure(Piece):
 
 	def _BEFORE_start(self):
 		self.subscribe(Uid.ENGINE)
-		self._num_keys = 26 # default start with 2 keys
+		self._num_keys = 2 # default start with 2 keys
 		self._engine_built = False
 		self._last_msg = time.clock()
 		# color schemes denoted [<text color>, <background color>, <preselect color>]
@@ -28,11 +28,12 @@ class Configure(Piece):
 		else:	
 			if (str(data) == '#plus'):
 				self._num_keys +=1
+				self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
 			elif(str(data) == '#minus'):
 				if (self._num_keys > 2):
 					# Minimum of 2 keys
 					self._num_keys-=1
-			self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
+				self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
 
 	def _DURING_poll(self):
 		'''Tell engine to build every 2 seconds until it is built'''
