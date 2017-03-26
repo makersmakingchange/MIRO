@@ -14,7 +14,8 @@ class Layout(Piece):
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
 		self._gaze_record = RecordKeeper(.5)
-		self._select_debounce_s = 1.0
+		self._select_debounce_s = .75
+		self._last_select = 0
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)

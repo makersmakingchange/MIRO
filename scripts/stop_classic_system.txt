@@ -3,6 +3,8 @@
 @blink stop
 @layout stop
 @engine stop
+@wface stop
+@face stop
 @text stop
 @audio stop
 @configure stop
