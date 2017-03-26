@@ -148,7 +148,7 @@ class Text(Piece):
 		@staticmethod
 		def script():
   					text_entry = [
-								'@text marco',
+								#'@text marco',
 								#'engine chose H',
 								#'engine chose a',
 								#'engine chose r',
@@ -175,7 +175,7 @@ class Text(Piece):
 								#'engine chose #commit',
 								#'engine chose g',
 								'engine edit True',
-								#'engine edit select1',
+								'engine edit select1',
 								'engine edit select0',
 								#'engine openFile',
 								#'engine edit select0',
@@ -189,6 +189,11 @@ class Text(Piece):
 								'engine chose #commit',
 								'engine edit previous',
 								'engine chose Hello',
+								'engine chose #commit',
+								'engine edit previous',
+								'engine edit select1',
+								'engine edit select0',
+								'engine chose was',
 								'engine chose #commit',
 								#'engine save True',
 								#'engine chose Hi',
