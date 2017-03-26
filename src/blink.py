@@ -11,8 +11,8 @@ class Blink(Piece):
 		self._delta = 0
 		self._blinked = False
 		self._blink_threshold_short = .2
-		self._blink_threshold_med = .75
-		self._blink_threshold_long = 1.25
+		self._blink_threshold_med = 1
+		self._blink_threshold_long = 2
 		self._blink_threshold_offscreen = 3
 		self._select_val = 0
 
