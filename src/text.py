@@ -1,5 +1,4 @@
 from wtfj import*
-import split
 
 '''Translation table must be updated in both tkpiece and text'''
 translation_table = {
@@ -20,7 +19,8 @@ class Text(Piece):
 			self._edit_buffer = ''
 			self._file_buffer = ''
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-			self.menu_options = ['#menu','#keyboard','#undo','#clear','#commit']
+			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last
@@ -49,7 +49,10 @@ class Text(Piece):
 				data = translation_table[data]
 			except KeyError:
 				pass
-			if data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
+
+			if(data in self._ignore):
+				pass
+			elif data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
 				self._edit_buffer = self._edit_buffer + data
 
 			elif data not in self.menu_options:
@@ -57,20 +60,16 @@ class Text(Piece):
 				self.send(Msg.BUFFER,self._text_buffer)
 			else:
 				if data in self.menu_options:
-					if data == '#undo':
+					if data == '#delete':
 						self._text_buffer = list(self._text_buffer)
 						self._text_buffer[-1] = ''
 						self._text_buffer = ''.join(self._text_buffer)
 						self.send(Msg.BUFFER,self._text_buffer)
-						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
 					elif data == '#clear':
 						self._text_buffer = ''
-						self.send(Msg.TEXT,'The text buffer has been cleared')
-					elif data == '#commit':	
+						self.send(Msg.BUFFER,self._text_buffer)
+					elif data == '#save':	
 						if self._edit_mode == False :
-							self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
-							self.send(Msg.TEXT,'saving file')
-							self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
 							with open(self.filename, 'a+') as f:
 								self._text_buffer = self._text_buffer
 								f.write(self._text_buffer)
@@ -78,36 +77,47 @@ class Text(Piece):
 							self._text_buffer = ''
 							self.send(Msg.BUFFER,self._text_buffer)
 						if self._edit_mode == True :
-							self._file_buffer[self.i] = str(self._edit_buffer)
-							self._file_buffer = ' '.join(self._file_buffer)
+							self._file_buffer[0] = str(self._edit_buffer)
+							self._file_buffer = ''.join(self._file_buffer)
 							self.send(Msg.TEXT,'the new changed text buffer is '+ str(self._file_buffer))				
 							self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
 							with open(self.filename, 'w') as f:
-								if self._sentence_num == -1:
-									self._file_buffer = self._text_buffer+self._file_buffer
-								else :
-									self._file_buffer = self._text_buffer +self._file_buffer + ''.join(self.sentences[self._sentence_num+1:])
-								self.send(Msg.TEXT, 'the splited sentences in file are ' + str(self.sentences))
-								self.send(Msg.TEXT,'the newly changed file buffer now has contents'+ str(self._file_buffer))								
+								self._text_buffer = self._file_buffer
 								f.seek(1)
 								f.write(self._file_buffer)
 								f.close()
 							self._edit_mode = False
-							self._text_buffer = ''
-							self._edit_buffer = ''
 				else:
 					self._text_buffer = self._text_buffer + data
 					self.send(Msg.BUFFER,self._text_buffer)
 
+		def _ON_engine_commit(self,data):
+			'''Receive a boolean variable.If evaluated to be true, this function will
+			save the contents in buffer in a file '''
+			if data == 'True' and self._edit_mode == False :
+					self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
+					self.send(Msg.TEXT,'saving file')
+					self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
+					with open(self.filename, 'a+') as f:
+						self._text_buffer = self._text_buffer
+						f.write(self._text_buffer)
+						f.close()
+					self._text_buffer = ''
+					self.send(Msg.BUFFER,self._text_buffer)
+			if self._edit_mode == True :
+					self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
+					self._text_buffer[self.i] = str(self._edit_buffer)
+					self._text_buffer = ''.join(self._text_buffer)
+					self.send(Msg.TEXT,'the new changed text buffer is '+ self._text_buffer)
+					self._edit_mode = False
 
 		def _ON_engine_edit(self,data):
 			'''This function operates when user wants to edit what he/she has typed out in the file '''
 			if data == 'True':
 				self._edit_mode = True
-				self._sentence_num = -1
-				self._file_buffer=self._openFile(self._sentence_num)
-				self.send(Msg.TEXT,'the last sentence entered is '+ str(self._file_buffer))
-				self._length = len(self._file_buffer)
+				self._file_buffer=self._openFile()
+				self.send(Msg.TEXT,'the file last line is '+ str(self._file_buffer))
+				self.length = len(self._text_buffer)
 				self.i = 0
 				self._file_buffer = self._file_buffer.split()
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
@@ -115,33 +125,23 @@ class Text(Piece):
 			if data == 'select0':
 				self._file_buffer[self.i] = ''
 				self.send(Msg.TEXT,'the new string is '+ str(self._file_buffer))
-			elif data == 'select1' and self.i < self._length :
+			elif data == 'select1' and self.i < self.length :
 				self.i = self.i+1
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
-			elif data == 'previous':
-				self._edit_mode = True
-				self._sentence_num -= 1 
-				self._file_buffer=self._openFile(self._sentence_num)
-				self.send(Msg.TEXT,'the last sentence entered is '+ str(self._file_buffer))
-				self._length = len(self._file_buffer)
-				self.i = 0
-				self._file_buffer = self._file_buffer.split()
-				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
-				self.send_to(Msg.TEXT,'THE edit mode is ' + str(self._edit_mode))
-
-		def _openFile(self,_sentence_num):
+		def _openFile(self):
+			self.send(Msg.TEXT,'Hi i am here')
 			f = open(self.filename,'r')
+			line_counter = 0
 			for line in f :
-				self.sentences  = split.split_into_sentences(line)
-				'store all previous text'
-				self._text_buffer  = ''.join(self.sentences[0:_sentence_num])
-				'give back last sentences'
-				last_sentence  = self.sentences[_sentence_num]
-				#self._text_buffer = self._text_buffer + (sentences[-1])
-			print( 'text_buffer has '+str(self._text_buffer))
-			return str(last_sentence)
+						line_counter += 1	
+			f.seek(0)
+			self.send(Msg.TEXT,'There is total'+str(line_counter)+'lines')	
+			for i, line in enumerate(f):
+				if i == line_counter-1:
+						self.send(Msg.TEXT,'the last line is '+line)
+						return str(line) 
+			
 				
-		
 
 
 
@@ -149,23 +149,24 @@ class Text(Piece):
 		def script():
   					text_entry = [
 								'@text marco',
-								#'engine chose H',
-								#'engine chose a',
-								#'engine chose r',
-								#'engine chose v',
-								#'engine chose e',
-								#'engine chose y',
-								#'engine chose  ',
-								#'engine chose J',
-								#'engine chose i',
-								#'engine chose a',
-								#'engine chose n',
+								'engine chose H',
+								'engine chose a',
+								'engine chose r',
+								'engine chose v',
+								'engine chose e',
+								'engine chose y',
+								'engine chose  ',
+								'engine chose J',
+								'engine chose i',
+								'engine chose a',
+								'engine chose n',
 								#'engine chose #clear',
-								#'engine chose 1',
-								#'engine chose .',
-								#'engine chose com',
-								#'engine chose spc',
-								#'engine chose num',
+								'engine chose 1',
+								'engine chose .',
+								'engine chose com',
+								'engine chose spc',
+								'engine chose num',
+								'engine chose #clear',
 								#'engine chose  ',
 								#'engine chose J',
 								#'engine chose i',
@@ -174,29 +175,20 @@ class Text(Piece):
 								#'engine chose #undo',
 								#'engine chose #commit',
 								#'engine chose g',
-								'engine edit True',
-								#'engine edit select1',
-								'engine edit select0',
+								#'engine edit True',
 								#'engine openFile',
 								#'engine edit select0',
-								'engine chose A',
-								'engine chose B',
-								'engine chose #commit',
+								#'engine chose A',
+								#'engine chose B',
 								#'engine chose  ',
-								'engine edit previous',
-								'engine edit select0',
-								'engine chose changed',
-								'engine chose #commit',
-								'engine edit previous',
-								'engine chose Hello',
-								'engine chose #commit',
+								#'engine chose #commit',
 								#'engine save True',
 								#'engine chose Hi',
 								#'engine commit True',
 								#'engine save True',
-								#'engine chose C',
-								#'engine chose D',
-								#'engine chose #commit',
+								#'engine chose A',
+								#'engine chose B',
+								#'engine commit True',
 								'@text stop'
 
 						]
@@ -205,4 +197,3 @@ class Text(Piece):
 if __name__ == '__main__':
 	from sys import argv
 	Runner.run_w_cmd_args(Text,argv)
-
