@@ -14,6 +14,7 @@ class Layout(Piece):
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
 		self._gaze_record = RecordKeeper(.5)
+		self._select_debounce_s = 1.0
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -59,12 +60,17 @@ class Layout(Piece):
 		return False
 
 	def _check_select(self):
-		shapes = self.shape_list.split(",")
-		for index in range(0,len(shapes)/5):
-			ul = (shapes[5*index+1],shapes[5*index+2])
-			br = (shapes[5*index+3],shapes[5*index+4])
-			if (self._contains(ul,br) == True):
-				self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
+		now = time.clock()
+		if now - self._last_select > self._select_debounce_s:
+			shapes = self.shape_list.split(",")
+			for index in range(0,len(shapes)/5):
+				ul = (shapes[5*index+1],shapes[5*index+2])
+				br = (shapes[5*index+3],shapes[5*index+4])
+				if (self._contains(ul,br) == True):
+					self.send_to(Uid.ENGINE,Msg.SELECT,str(index))
+		else:
+			self.err('Received multiple select signals in '+str(self._select_debounce_s)+' seconds')
+		self._last_select = now
 
 	def _ON_blink_select(self,data):
 		'''On short blink, check it last eye coordinate was within any keys,

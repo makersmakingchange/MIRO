@@ -1,6 +1,7 @@
 AUDIO = 'audio'
 AUDIO = 'audio'
 BLINK = 'blink'
+CONFIGURE = 'configure'
 ENGINE = 'engine'
 GO = 'go'
 LAYOUT = 'layout'

@@ -1,6 +1,5 @@
 from wtfj import*
 import split
-
 '''Translation table must be updated in both tkpiece and text'''
 translation_table = {
 	'com': ',',
@@ -20,7 +19,8 @@ class Text(Piece):
 			self._edit_buffer = ''
 			self._file_buffer = ''
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-			self.menu_options = ['#menu','#keyboard','#undo','#clear','#commit']
+			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
 
 		def _contains(self,upper_left, bottom_right):
 			'''Helper function to determine if a shape contains the last
@@ -49,7 +49,10 @@ class Text(Piece):
 				data = translation_table[data]
 			except KeyError:
 				pass
-			if data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
+
+			if(data in self._ignore):
+				pass
+			elif data!= None and str(self._edit_mode) == 'True' and data not in self.menu_options:
 				self._edit_buffer = self._edit_buffer + data
 
 			elif data not in self.menu_options:
@@ -57,20 +60,16 @@ class Text(Piece):
 				self.send(Msg.BUFFER,self._text_buffer)
 			else:
 				if data in self.menu_options:
-					if data == '#undo':
+					if data == '#delete':
 						self._text_buffer = list(self._text_buffer)
 						self._text_buffer[-1] = ''
 						self._text_buffer = ''.join(self._text_buffer)
 						self.send(Msg.BUFFER,self._text_buffer)
-						self.send(Msg.TEXT,'the feedback after undo is'+ self._text_buffer)
 					elif data == '#clear':
 						self._text_buffer = ''
-						self.send(Msg.TEXT,'The text buffer has been cleared')
-					elif data == '#commit':	
+						self.send(Msg.BUFFER,self._text_buffer)
+					elif data == '#save':	
 						if self._edit_mode == False :
-							self.send(Msg.TEXT,'User has just commited '+ self._text_buffer)
-							self.send(Msg.TEXT,'saving file')
-							self.send(Msg.TEXT,'the file will save the text buffer which is ' + self._text_buffer)
 							with open(self.filename, 'a+') as f:
 								self._text_buffer = self._text_buffer
 								f.write(self._text_buffer)
@@ -141,7 +140,6 @@ class Text(Piece):
 			print( 'text_buffer has '+str(self._text_buffer))
 			return str(last_sentence)
 				
-		
 
 
 
@@ -161,11 +159,12 @@ class Text(Piece):
 								#'engine chose a',
 								#'engine chose n',
 								#'engine chose #clear',
-								#'engine chose 1',
-								#'engine chose .',
-								#'engine chose com',
-								#'engine chose spc',
-								#'engine chose num',
+								'engine chose 1',
+								'engine chose .',
+								'engine chose com',
+								'engine chose spc',
+								'engine chose num',
+								'engine chose #clear',
 								#'engine chose  ',
 								#'engine chose J',
 								#'engine chose i',
@@ -177,11 +176,11 @@ class Text(Piece):
 								'engine edit True',
 								'engine edit select1',
 								'engine edit select0',
+								#'engine edit True',
 								#'engine openFile',
 								#'engine edit select0',
-								'engine chose A',
-								'engine chose B',
-								'engine chose #commit',
+								#'engine chose A',
+								#'engine chose B',
 								#'engine chose  ',
 								'engine edit previous',
 								'engine edit select0',
@@ -195,13 +194,14 @@ class Text(Piece):
 								'engine edit select0',
 								'engine chose was',
 								'engine chose #commit',
+								#'engine chose #commit',
 								#'engine save True',
 								#'engine chose Hi',
 								#'engine commit True',
 								#'engine save True',
-								#'engine chose C',
-								#'engine chose D',
-								#'engine chose #commit',
+								#'engine chose A',
+								#'engine chose B',
+								#'engine commit True',
 								'@text stop'
 
 						]
@@ -210,4 +210,3 @@ class Text(Piece):
 if __name__ == '__main__':
 	from sys import argv
 	Runner.run_w_cmd_args(Text,argv)
-
