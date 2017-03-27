@@ -13,7 +13,7 @@ class Layout(Piece):
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
-		self._gaze_record = RecordKeeper(.5)
+		self._gaze_record = RecordKeeper(2.0)
 		self._select_debounce_s = .75
 		self._last_select = 0
 
@@ -77,12 +77,12 @@ class Layout(Piece):
 		'''On short blink, check it last eye coordinate was within any keys,
 		On medium and long blink, pass signal to engine to map to specialized function. Do not
 		do anything on offscreen message. Represents timeout.'''
-		if (data == 'short'):
+		if data == 'short':
 			self._check_select()
-		elif (data == 'medium'):
-			self.send_to(Uid.ENGINE,Msg.SELECT,"medium")
-		elif (data == 'long'):
+		elif data == 'long':
 			self.send_to(Uid.ENGINE,Msg.SELECT,"long")
+		elif data == 'offscreen':
+			self.send_to(Uid.ENGINE,Msg.SELECT,"offscreen")
 
 	def _ON_wface_select(self,data):
 		'''When a face select signal is emitted, check if the last

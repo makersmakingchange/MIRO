@@ -63,9 +63,9 @@ class Engine(Piece):
 	def _ON_select(self,data):
 		'''Process blink data. If blink is short (else condition), act as standard select and work down tree.
 		If blink is medium, undo last action, if blink is long, travel back to root'''
-		if (data == 'medium'):
+		if data == 'long':
 			self._undo()
-		elif (data == 'long'):
+		elif data == 'offscreen':
 			self._current_option = self._options
 			self._send_options()
 		else:
