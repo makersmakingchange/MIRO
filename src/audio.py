@@ -1,6 +1,7 @@
 import winsound
 import pyttsx
 from wtfj import *
+from os import system
 
 AUDIO_PATH = '../res/audio/'
 

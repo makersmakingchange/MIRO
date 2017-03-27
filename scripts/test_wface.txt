@@ -1,9 +1,0 @@
-@system start wface
-@system start tkpiece
-@system start face exe
-@system start layout
-@system start engine
-@zconsole wait 1
-@engine build 2
-@system wait 1
-eyetracker gaze 0.5,0.2

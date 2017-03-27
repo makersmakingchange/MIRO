@@ -39,7 +39,7 @@ class WFace(Piece):
 		
 		noise_1norm = self._noise_record.one_norm()
 		metric_1norm = self._metric_record.one_norm()
-		self.send(Msg.TEXT,pack_csv(metric,metric_1norm[1],noise_1norm[1]))
+		#self.send(Msg.TEXT,pack_csv(metric,metric_1norm[1],noise_1norm[1]))
 		
 		if metric > 0.1:
 			if self._brow == False:
