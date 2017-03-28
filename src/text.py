@@ -19,6 +19,7 @@ class Text(Piece):
 			self.i = 0
 			self._edit_buffer = ''
 			self._file_buffer = ''
+			self._sentence_num = -1
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review']
 			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
@@ -69,8 +70,8 @@ class Text(Piece):
 					elif data == '#clear':
 						self._text_buffer = ''
 						self.send(Msg.BUFFER,self._text_buffer)
-					elif data == '#save':	
-						if self._edit_mode == False :
+					elif data == '#save':
+						if self._edit_mode == False:
 							with open(self.filename, 'a+') as f:
 								self._text_buffer = self._text_buffer
 								f.write(self._text_buffer)
@@ -79,7 +80,7 @@ class Text(Piece):
 							self.send(Msg.BUFFER,self._text_buffer)
 						if self._edit_mode == True :
 							self._file_buffer[self.i] = str(self._edit_buffer)
-							self._file_buffer = ' '.join(self._file_buffer)
+							self._file_buffer = ''.join(self._file_buffer)
 							self.send(Msg.TEXT,'the new changed text buffer is '+ str(self._file_buffer))				
 							self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
 							with open(self.filename, 'w') as f:
@@ -89,15 +90,21 @@ class Text(Piece):
 									self._file_buffer = self._text_buffer +self._file_buffer + ''.join(self.sentences[self._sentence_num+1:])
 								self.send(Msg.TEXT, 'the splited sentences in file are ' + str(self.sentences))
 								self.send(Msg.TEXT,'the newly changed file buffer now has contents'+ str(self._file_buffer))								
-								f.seek(1)
+								f.seek(0)
 								f.write(self._file_buffer)
 								f.close()
 							self._edit_mode = False
 							self._text_buffer = ''
 							self._edit_buffer = ''
 					elif data == '#review':
-							self._text_buffer = self._openFile(-1)
-							self.send(Msg.TEXT,'the last sentence in the faile is ' +str(self._text_buffer))
+						try:
+							self._text_buffer = self._openFile(self._sentence_num)
+						except IndexError:
+							self._sentence_num = -1
+							self._text_buffer = self._openFile(self._sentence_num)
+						self.send(Msg.TEXT,'the last sentence in the faile is ' +str(self._text_buffer))
+						self.send(Msg.BUFFER,self._text_buffer)
+						self._sentence_num = self._sentence_num - 1
 				else:
 					self._text_buffer = self._text_buffer + data
 					self.send(Msg.BUFFER,self._text_buffer)
@@ -107,9 +114,7 @@ class Text(Piece):
 			'''This function operates when user wants to edit what he/she has typed out in the file '''
 			if data == 'True':
 				self._edit_mode = True
-				self._sentence_num = -1
 				self._file_buffer=self._openFile(self._sentence_num)
-				#system('say '+ str(self._file_buffer))
 				self.send(Msg.TEXT,'the last sentence entered is '+ str(self._file_buffer))
 				self._length = len(self._file_buffer)
 				self.i = 0
@@ -122,16 +127,6 @@ class Text(Piece):
 			elif data == 'select1' and self.i < self._length :
 				self.i = self.i+1
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
-			elif data == 'previous':
-				self._edit_mode = True
-				self._sentence_num -= 1 
-				self._file_buffer=self._openFile(self._sentence_num)
-				self.send(Msg.TEXT,'the last sentence entered is '+ str(self._file_buffer))
-				self._length = len(self._file_buffer)
-				self.i = 0
-				self._file_buffer = self._file_buffer.split()
-				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
-				self.send_to(Msg.TEXT,'THE edit mode is ' + str(self._edit_mode))
 
 		def _openFile(self,_sentence_num):
 			f = open(self.filename,'r')
@@ -142,7 +137,7 @@ class Text(Piece):
 				'give back last sentences'
 				last_sentence  = self.sentences[_sentence_num]
 				#self._text_buffer = self._text_buffer + (sentences[-1])
-			print( 'text_buffer has '+str(self._text_buffer))
+			#print( 'text_buffer has '+str(self._text_buffer))
 			return str(last_sentence)
 				
 
@@ -154,6 +149,11 @@ class Text(Piece):
 
 								'@text marco',
 								'engine chose #review',
+								'engine chose #review',
+								'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
 								#'engine chose H',
 								#'engine chose a',
 								#'engine chose r',
@@ -180,21 +180,26 @@ class Text(Piece):
 								#'engine chose #undo',
 								#'engine chose #commit',
 								#'engine chose g',
-								'engine edit True',
+								#'engine edit True',
 								#'engine edit select1',
 								#'engine edit select0',
 								#'engine chose were',
 								#'engine chose #save',
-								#'engine edit True',
+								'engine edit True',
 								#'engine openFile',
 								#'engine edit select0',
 								#'engine chose A',
 								#'engine chose B',
 								#'engine chose  ',
-								#'engine edit previous',
+								'engine edit select1',
+								'engine edit select0',
+								'engine chose t',
+								'engine chose e',
+								'engine chose s',
+								'engine chose t',
 								#'engine edit select0',
 								#'engine chose Tmrw',
-								#'engine chose #save',
+								'engine chose #save',
 								#'engine edit previous',
 								#'engine edit select0',
 								#'engine chose Hello',
