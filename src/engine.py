@@ -21,8 +21,9 @@ class Engine(Piece):
 	''' Letter and menu selection engine '''
 
 	def _BEFORE_start(self):
+		self._last_content = None
 		self._last_selection = None
-		self._first_build = True
+		self._last_node = None
 
 	def _ON_build(self,data):
 		num_options = int(data)
@@ -31,7 +32,6 @@ class Engine(Piece):
 		else:
 			self._options = OptionNode()
 			build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
-			#build_non_ordered_tree(self._options,num_options,keyboard_options,keyboard_handles)
 			build_non_ordered_tree(menu_handles.get('#keyboard'),num_options,keyboard_options,keyboard_handles)
 			build_ordered_tree(keyboard_handles.get('#alphabet'),num_options,letters_lc)
 			build_ordered_tree(keyboard_handles.get('#numbers'),num_options,numbers)
@@ -49,16 +49,29 @@ class Engine(Piece):
 		for word in parts:
 			self.send_to(Uid.AUDIO,Req.SPEAK,word)
 
+	def _undo (self):
+		'''If the last selection was a leaf, move to previous node and delete last letter.
+		If last node is not a leaf, just move up to the last node.'''
+		if (self._last_node != None and self._last_selection != None):
+			if (self._last_node.children[self._last_selection].content in letters_lc or 
+				self._last_node.children[self._last_selection].content in numbers or
+				self._last_node.children[self._last_selection].content in punctuation):
+				self.send(Msg.CHOSE, '#delete')
+			self._current_option = self._last_node
+			self._send_options()
+
 	def _ON_select(self,data):
 		'''Process blink data. If blink is short (else condition), act as standard select and work down tree.
 		If blink is medium, undo last action, if blink is long, travel back to root'''
-		if (data == 'medium'):
-			pass
-		elif (data == 'long'):
+		if data == 'long':
+			self._undo()
+		elif data == 'offscreen':
 			self._current_option = self._options
 			self._send_options()
 		else:
 			selection = int(data)
+			self._last_selection = selection
+			self._last_node = self._current_option
 			self._current_option = self._current_option.children[selection]
 			self._ON_process(None)
 
@@ -75,8 +88,8 @@ class Engine(Piece):
 			if (self._current_option.content[0] != '#'):
 				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
 			self.send(Msg.CHOSE, self._current_option.content)
-			self._last_selection = self._current_option.content
-			if (self._last_selection in letters_lc or self._last_selection in numbers or self._last_selection in punctuation):
+			self._last_content = self._current_option.content
+			if (self._last_content in letters_lc or self._last_content in numbers or self._last_content in punctuation):
 				self._current_option = menu_handles.get('#keyboard')
 			else:
 				self._current_option = self._options
@@ -92,6 +105,7 @@ class Engine(Piece):
 			'@engine select 1',
 			'@engine select 1',
 			'@engine select 0',
+			'@engine select medium',
 			'@engine select 1',
 			'@engine select long',
 			'@engine stop'

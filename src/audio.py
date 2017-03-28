@@ -1,23 +1,25 @@
-#import winsound
-import pygame
+import winsound
+import pyttsx
 from wtfj import *
 from os import system
 
 AUDIO_PATH = '../res/audio/'
 
 class Audio(Piece):
-	
-	def _ON_speak(self,data):
-		if data[0] is '#': 
-			data = data[1:]
-		if data in ['a_to_m','n_to_z','space','undo','next','menu','keyboard','to'] or data in 'abcdefghijklmnopqrstuvwxyz' and len(data)<=1:
-			pygame.init()
-			pygame.mixer.init()
-			sounda = pygame.mixer.Sound(AUDIO_PATH+data+'_sound.wav')
-			#winsound.PlaySound(AUDIO_PATH+data+'_sound.wav',winsound.SND_FILENAME)
-			sounda.play()
+
+	def _BEFORE_start(self):
+		engine = pyttsx.init()
+		engine.startLoop(False)
+		engine.setProperty('rate',100)
+		self._engine = engine
+
+	def _ON_speak(self,data=None):
+		if data[0] is '#': data = data[1:]
+		if data in ['a_to_m','n_to_z','space','undo','next','menu','keyboard','to'] or data in 'abcdefghijklmnopqrstuvwxyz':
+			winsound.PlaySound(AUDIO_PATH+data+'_sound.wav',winsound.SND_FILENAME)
 		else:
-			system('say '+data)
+			self.err('Could not find file for argument ['+str(data)+']')
+			self._engine.say(data)
 
 	@staticmethod
 	def script():
@@ -26,14 +28,15 @@ class Audio(Piece):
 			'@audio uptime',
 			'@audio period 1',
 			'@audio marco',
-			'@audio speak ab',
-			#'@audio speak a_to_m',
-			#'@audio speak #undo',
-			#'@audio period 2',
-			#'@audio speak a',
-			#'@audio speak a_to_m',
-			#'@audio speak #undo',
-			#'@audio uptime',
+			'@audio speak a',
+			'@audio speak a_to_m',
+			'@audio speak #undo',
+			'@audio period 0.2',
+			'@audio speak a',
+			'@audio speak a_to_m',
+			'@audio speak #undo',
+			'@audio speak hello my honey',
+			'@audio uptime',
 			'@audio stop'
 		]
 
