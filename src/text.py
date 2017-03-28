@@ -1,5 +1,6 @@
 from wtfj import*
 import split
+from os import system
 '''Translation table must be updated in both tkpiece and text'''
 translation_table = {
 	'com': ',',
@@ -19,7 +20,7 @@ class Text(Piece):
 			self._edit_buffer = ''
 			self._file_buffer = ''
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save']
+			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review']
 			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
 
 		def _contains(self,upper_left, bottom_right):
@@ -94,6 +95,9 @@ class Text(Piece):
 							self._edit_mode = False
 							self._text_buffer = ''
 							self._edit_buffer = ''
+					elif data == '#review':
+							self._text_buffer = self._openFile(-1)
+							self.send(Msg.TEXT,'the last sentence in the faile is ' +str(self._text_buffer))
 				else:
 					self._text_buffer = self._text_buffer + data
 					self.send(Msg.BUFFER,self._text_buffer)
@@ -105,6 +109,7 @@ class Text(Piece):
 				self._edit_mode = True
 				self._sentence_num = -1
 				self._file_buffer=self._openFile(self._sentence_num)
+				#system('say '+ str(self._file_buffer))
 				self.send(Msg.TEXT,'the last sentence entered is '+ str(self._file_buffer))
 				self._length = len(self._file_buffer)
 				self.i = 0
@@ -146,7 +151,9 @@ class Text(Piece):
 		@staticmethod
 		def script():
   					text_entry = [
-								#'@text marco',
+
+								'@text marco',
+								'engine chose #review',
 								#'engine chose H',
 								#'engine chose a',
 								#'engine chose r',
@@ -159,12 +166,12 @@ class Text(Piece):
 								#'engine chose a',
 								#'engine chose n',
 								#'engine chose #clear',
-								'engine chose 1',
-								'engine chose .',
-								'engine chose com',
-								'engine chose spc',
-								'engine chose num',
-								'engine chose #clear',
+								#'engine chose 1',
+								#'engine chose .',
+								#'engine chose com',
+								#'engine chose spc',
+								#'engine chose num',
+								#'engine chose #clear',
 								#'engine chose  ',
 								#'engine chose J',
 								#'engine chose i',
@@ -174,26 +181,29 @@ class Text(Piece):
 								#'engine chose #commit',
 								#'engine chose g',
 								'engine edit True',
-								'engine edit select1',
-								'engine edit select0',
+								#'engine edit select1',
+								#'engine edit select0',
+								#'engine chose were',
+								#'engine chose #save',
 								#'engine edit True',
 								#'engine openFile',
 								#'engine edit select0',
 								#'engine chose A',
 								#'engine chose B',
 								#'engine chose  ',
-								'engine edit previous',
-								'engine edit select0',
-								'engine chose changed',
-								'engine chose #commit',
-								'engine edit previous',
-								'engine chose Hello',
-								'engine chose #commit',
-								'engine edit previous',
-								'engine edit select1',
-								'engine edit select0',
-								'engine chose was',
-								'engine chose #commit',
+								#'engine edit previous',
+								#'engine edit select0',
+								#'engine chose Tmrw',
+								#'engine chose #save',
+								#'engine edit previous',
+								#'engine edit select0',
+								#'engine chose Hello',
+								#'engine chose #save',
+								#'engine edit previous',
+								#'engine edit select1',
+								#'engine edit select0',
+								#'engine chose was',
+								#'engine chose #save',
 								#'engine chose #commit',
 								#'engine save True',
 								#'engine chose Hi',
