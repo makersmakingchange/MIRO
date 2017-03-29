@@ -16,6 +16,7 @@ class WFace(Piece):
 		self._metric_record = RecordKeeper(1)
 		self._noise_record = RecordKeeper(1)
 		self._brow = False
+		self._mouth = False
 
 	def _ON_face_position(self,data):
 		''' Calculate whether eyebrows have been raised and mouth opened '''
@@ -31,22 +32,33 @@ class WFace(Piece):
 		vals = [float(n) for n in data.split(',')]
 		self._face_record.add_record(*vals)
 		dface_dt = self._face_record.first_derivative()
-		l = length(*(dface_dt[0][2:-1]))
+		neither_brow_nor_mouth = [dface_dt[0][1],dface_dt[0][2],dface_dt[0][3]]
+		l = length(*neither_brow_nor_mouth)
 		self._noise_record.add_record(l)
-		metric = dface_dt[0][1]
 		
-		self._metric_record.add_record(metric)
+		brow_metric = dface_dt[0][1]
+		mouth_metric = dface_dt[0][5]
+
+		self._metric_record.add_record(brow_metric)
 		
 		noise_1norm = self._noise_record.one_norm()
 		metric_1norm = self._metric_record.one_norm()
-		#self.send(Msg.TEXT,pack_csv(metric,metric_1norm[1],noise_1norm[1]))
 		
-		if metric > 0.1:
+		self.send(Msg.TEXT,pack_csv(brow_metric,mouth_metric))
+		
+		if brow_metric > 0.1 and brow_metric/l > 0.7:
 			if self._brow == False:
-					self.send(Msg.SELECT)
+					self.send(Msg.SELECT,'brow')
 					self._brow = True
 		else:
 			self._brow = False
+
+		if mouth_metric > 0.1 and mouth_metric/l > 0.8:
+			if self._mouth == False:
+					self._out.send(Msg.SELECT,'mouth')
+					self._mouth = True
+		else:
+			self._mouth = False
 		
 		#self.send_to(Uid.TKPIECE,Msg.TEXT,pack_csv('feedback',*dface_dt))
 				
