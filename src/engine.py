@@ -11,7 +11,7 @@ menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext']
 keyboard_handles = {}
-edit_options = ['#clear','#save']
+edit_options = ['#clear','#review','#save', '#editdisk']
 configuration_options = ['#numberkeys','#colorscheme']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
@@ -42,7 +42,7 @@ class Engine(Piece):
 			build_non_ordered_tree(configuration_options_handles.get('#colorscheme'),num_options,colorscheme_options)
 			self._current_option = self._options
 			self._ON_process(None)
-			self.send(Msg.BUILT)
+			self.send(Msg.BUILT,str(num_options))
 
 	def _ON_feedback(self,data):
 		parts = self._current_option.children[int(data)].content.split('_')

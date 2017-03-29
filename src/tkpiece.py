@@ -85,11 +85,19 @@ class TkPiece(Piece,Frame):
 		self._canvas.tag_lower(handle)
 
 	def _ON_fontsize(self,data):
+		'''Resize font of all on-screen text'''
 		parts = data.split(',')
 		font_handles = parts[:-1]
-		size = parts[-1]
-		for font_handle in font_handles:
-			self._canvas.itemconfigure(self._handles[font_handle],font=('',int(size)))
+		size = int(float(parts[-1])*self._w/4.5)
+		if (size != self._text_size):
+			self._fonts['default'] = font.Font(family='Helvetica',size=size, weight='bold')
+			self._text_size = size
+			for font_handle in self._handles:
+				try:
+					self._canvas.itemconfigure(self._handles[font_handle],font=font.Font(family='Helvetica',size=size,weight='bold'))
+				except TclError:
+					# pass on items that don't have font value (shapes)
+					pass
 
 	def _ON_position(self,data):
 		try:
@@ -188,10 +196,6 @@ class TkPiece(Piece,Frame):
 		parts = data.split(',')
 		self._canvas.configure(background=parts[1])
 		self._select_fb_color = parts[2]
-		'''for handle in self._handles:
-			self.send(Msg.TEXT, "HERE " + handle)
-			if ('key' in str(handle)):
-				self._canvas.itemconfigure(fill=parts[0])'''
 
 	@staticmethod
 	def on_mouse_move(event):
@@ -272,7 +276,7 @@ class TkPiece(Piece,Frame):
 			'@tkpiece text key1,I',
 			'@tkpiece text key2,R',
 			'@tkpiece text key3,O',
-			'@tkpiece changecolor red,black,green',
+			'@tkpiece fontsize key0,.85',
 			'@tkpiece text key0,m',
 			'@tkpiece feedback .5,.5,.75,.75',
 			'@tkpiece text key1,i',

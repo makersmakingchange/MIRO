@@ -13,9 +13,10 @@ class Layout(Piece):
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
-		self._gaze_record = RecordKeeper(2.0)
+		self._gaze_record = RecordKeeper(1.0)
 		self._select_debounce_s = .75
 		self._last_select = 0
+		self._change_font = True
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -153,6 +154,10 @@ class Layout(Piece):
 					# Update the value of the text field
 					options[key_counter] = options[key_counter].replace('_to_',':')
 					self.send_to(Uid.TKPIECE,Msg.TEXT,'key'+str(key_counter)+','+options[key_counter])
+					if (key_counter == (n-1) and self._change_font == True):
+						# only emit signal based on the dimensions of the last key (always the smallest)
+						self._change_font = False
+						self.send_to(Uid.TKPIECE,Msg.FONTSIZE,'key'+str(key_counter)+','+str((br[1]-ul[1])))
 				j+=1
 				key_counter += 1
 			i+=1
@@ -169,6 +174,9 @@ class Layout(Piece):
 		# Save current number of options displayed and send acknowledgement back				
 		self._n_current_keys = n
 		self.send(Msg.ACK)
+
+	def _ON_engine_built(self,data):
+		self._change_font = True
 
 	@staticmethod
 	def script():
