@@ -80,7 +80,7 @@ class Text(Piece):
 							self.send(Msg.BUFFER,self._text_buffer)
 						if self._edit_mode == True :
 							self._file_buffer[self.i] = str(self._edit_buffer)
-							self._file_buffer = ''.join(self._file_buffer)
+							self._file_buffer = ' '.join(self._file_buffer)
 							self.send(Msg.TEXT,'the new changed text buffer is '+ str(self._file_buffer))				
 							self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
 							with open(self.filename, 'w') as f:
@@ -149,8 +149,8 @@ class Text(Piece):
 
 								'@text marco',
 								'engine chose #review',
-								'engine chose #review',
-								'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
 								#'engine chose #review',
 								#'engine chose #review',
 								#'engine chose #review',
@@ -193,8 +193,8 @@ class Text(Piece):
 								#'engine chose  ',
 								'engine edit select1',
 								'engine edit select0',
-								'engine chose t',
-								'engine chose e',
+								'engine chose a',
+								'engine chose a',
 								'engine chose s',
 								'engine chose t',
 								#'engine edit select0',
