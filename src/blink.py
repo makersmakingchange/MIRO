@@ -10,9 +10,9 @@ class Blink(Piece):
 		self._time_last_eye_msg_recvd = None
 		self._delta = 0
 		self._blinked = False
-		self._blink_threshold_short = .4
-		self._blink_threshold_long = 1.5
-		self._blink_threshold_offscreen = 3
+		self._blink_threshold_short = .5
+		self._blink_threshold_long = 2
+		self._blink_threshold_offscreen = 8
 		self._select_val = 0
 
 	def _ON_eyetracker_gaze(self,data):
@@ -20,9 +20,9 @@ class Blink(Piece):
 		if (self._delta > self._blink_threshold_offscreen):
 			self.send(Msg.SELECT,"offscreen")
 			self._delta = 0
-		#elif (self._delta > self._blink_threshold_long):
-		#	self.send(Msg.SELECT,"long")
-		#	self._delta = 0
+		elif (self._delta > self._blink_threshold_long):
+			self.send(Msg.SELECT,"long")
+			self._delta = 0
 		elif (self._delta > self._blink_threshold_short):
 			self.send(Msg.SELECT,"short")
 			self._delta = 0

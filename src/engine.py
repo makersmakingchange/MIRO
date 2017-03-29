@@ -9,7 +9,7 @@ numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','#delete','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
-keyboard_options = ['#alphabet','#numbers','#nontext']
+keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
 keyboard_handles = {}
 edit_options = ['#clear','#review','#save', '#editdisk']
 configuration_options = ['#numberkeys','#colorscheme']
@@ -22,8 +22,6 @@ class Engine(Piece):
 
 	def _BEFORE_start(self):
 		self._last_content = None
-		self._last_selection = None
-		self._last_node = None
 
 	def _ON_build(self,data):
 		num_options = int(data)
@@ -50,14 +48,9 @@ class Engine(Piece):
 			self.send_to(Uid.AUDIO,Req.SPEAK,word)
 
 	def _undo (self):
-		'''If the last selection was a leaf, move to previous node and delete last letter.
-		If last node is not a leaf, just move up to the last node.'''
-		if (self._last_node != None and self._last_selection != None):
-			if (self._last_node.children[self._last_selection].content in letters_lc or 
-				self._last_node.children[self._last_selection].content in numbers or
-				self._last_node.children[self._last_selection].content in punctuation):
-				self.send(Msg.CHOSE, '#delete')
-			self._current_option = self._last_node
+		'''Move to parent of current node'''
+		if (self._current_option.parent != None):
+			self._current_option = self._current_option.parent
 			self._send_options()
 
 	def _ON_select(self,data):
@@ -70,8 +63,6 @@ class Engine(Piece):
 			self._send_options()
 		else:
 			selection = int(data)
-			self._last_selection = selection
-			self._last_node = self._current_option
 			self._current_option = self._current_option.children[selection]
 			self._ON_process(None)
 
@@ -89,7 +80,7 @@ class Engine(Piece):
 				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
 			self.send(Msg.CHOSE, self._current_option.content)
 			self._last_content = self._current_option.content
-			if (self._last_content in letters_lc or self._last_content in numbers or self._last_content in punctuation):
+			if (self._last_content in letters_lc or self._last_content in numbers or self._last_content in punctuation or self._last_content == '#speak'):
 				self._current_option = menu_handles.get('#keyboard')
 			else:
 				self._current_option = self._options
@@ -105,7 +96,6 @@ class Engine(Piece):
 			'@engine select 1',
 			'@engine select 1',
 			'@engine select 0',
-			'@engine select medium',
 			'@engine select 1',
 			'@engine select long',
 			'@engine stop'
@@ -120,6 +110,7 @@ def build_ordered_tree(head,num_keys,choices):
 		for option in choices:
 			opt = OptionNode(option)
 			head.add_child(opt)
+			opt.add_parent(head)
 		return
 	else:
 		seed_value = int(len(choices)/num_keys) + (len(choices) % num_keys > 0) # Rounds decimal results up to nearest int
@@ -143,6 +134,7 @@ def build_ordered_tree(head,num_keys,choices):
 				opt_str = opt_list[0]
 			opt = OptionNode(opt_str)
 			head.add_children(opt)
+			opt.add_parent(head)
 			build_ordered_tree(opt, num_keys, opt_list)
 
 def build_non_ordered_tree(head,num_keys,choices,handles=None):
@@ -156,16 +148,19 @@ def build_non_ordered_tree(head,num_keys,choices,handles=None):
 			for j in range(num_keys-1):
 				node = OptionNode(choices[key_index])
 				head.add_child(node)
+				node.add_parent(head)
 				if (handles != None):
 					handles[node.content] = node
 				keys_to_place-=1
 				key_index+=1
 			next_node = OptionNode('#next')
 			head.add_child(next_node)
+			next_node.add_parent(head)
 			head = next_node
 		else:
 			node = OptionNode(choices[key_index])
 			head.add_child(node)
+			node.add_parent(head)
 			if (handles != None):
 				handles[node.content] = node
 			keys_to_place-=1
@@ -191,5 +186,8 @@ class OptionNode(object):
 	def add_children(self,*children):
 		for child in children:
 			self.add_child(child)
+
+	def add_parent(self,parent):
+		self.parent = parent
 
 if __name__ == '__main__': main()

@@ -21,7 +21,7 @@ class Text(Piece):
 			self._file_buffer = ''
 			self._sentence_num = 0
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review']
+			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review','#speak']
 			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
 
 		def _ON_engine_chose(self,data):
@@ -46,6 +46,8 @@ class Text(Piece):
 						self._text_buffer[-1] = ''
 						self._text_buffer = ''.join(self._text_buffer)
 						self.send(Msg.BUFFER,self._text_buffer)
+					elif data == '#speak':
+						self.send_to(Uid.AUDIO,Req.SPEAK,self._text_buffer)
 					elif data == '#clear':
 						self._text_buffer = ''
 						self.send(Msg.BUFFER,self._text_buffer)

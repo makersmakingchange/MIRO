@@ -140,6 +140,8 @@ class Layout(Piece):
 				self.shape_list = self.shape_list + shape_type + "," + str(ul[0]) + "," + str(ul[1]) + "," + str(br[0]) + "," + str(br[1]) + ","
 				x = (ul[0] + br[0])/2
 				y = (ul[1] + br[1])/2
+				width = br[0]-ul[0]
+				height = br[1]-ul[1]
 				# Handle images
 				if options[key_counter][0] == '#':
 					option = options[key_counter]
@@ -147,7 +149,7 @@ class Layout(Piece):
 					# Save the image handle as the option name
 					self._imagenames[key_counter] = option
 					# Create and draw the image
-					self.send_to(Uid.TKPIECE,Req.IMAGE,option+','+str(x)+','+str(y))
+					self.send_to(Uid.TKPIECE,Req.IMAGE,option+','+str(x)+','+str(y)+','+str(width*.5)+','+str(height*.5))
 				# Handle Text
 				else:			
 					self.send_to(Uid.TKPIECE,Req.CREATE,'text,key'+str(key_counter)+','+str(x)+','+str(y))
@@ -157,7 +159,7 @@ class Layout(Piece):
 					if (key_counter == (n-1) and self._change_font == True):
 						# only emit signal based on the dimensions of the last key (always the smallest)
 						self._change_font = False
-						self.send_to(Uid.TKPIECE,Msg.FONTSIZE,'key'+str(key_counter)+','+str((br[1]-ul[1])))
+						self.send_to(Uid.TKPIECE,Msg.FONTSIZE,'key'+str(key_counter)+','+str(height))
 				j+=1
 				key_counter += 1
 			i+=1
