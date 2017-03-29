@@ -9,7 +9,7 @@ numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','#delete','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
-keyboard_options = ['#alphabet','#numbers','#nontext']
+keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
 keyboard_handles = {}
 edit_options = ['#clear','#review','#save', '#editdisk']
 configuration_options = ['#numberkeys','#colorscheme']
@@ -80,7 +80,7 @@ class Engine(Piece):
 				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)
 			self.send(Msg.CHOSE, self._current_option.content)
 			self._last_content = self._current_option.content
-			if (self._last_content in letters_lc or self._last_content in numbers or self._last_content in punctuation):
+			if (self._last_content in letters_lc or self._last_content in numbers or self._last_content in punctuation or self._last_content == '#speak'):
 				self._current_option = menu_handles.get('#keyboard')
 			else:
 				self._current_option = self._options
