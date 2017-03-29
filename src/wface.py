@@ -43,22 +43,22 @@ class WFace(Piece):
 		
 		noise_1norm = self._noise_record.one_norm()
 		metric_1norm = self._metric_record.one_norm()
-		#self.send(Msg.TEXT,pack_csv(metric,metric_1norm[1],noise_1norm[1]))
 		
-		if l < 0.25:
-			if brow_metric > 0.08 and brow_metric/l > 0.7:
-				if self._brow == False:
-						self._out.send('brow '+Msg.SELECT+'         '+pack_csv(l))
-						self._brow = True
-			else:
-				self._brow = False
+		self.send(Msg.TEXT,pack_csv(brow_metric,mouth_metric))
+		
+		if brow_metric > 0.1 and brow_metric/l > 0.7:
+			if self._brow == False:
+					self.send(Msg.SELECT,'brow')
+					self._brow = True
+		else:
+			self._brow = False
 
-			if mouth_metric > 0.08 and mouth_metric/l > 1.0:
-				if self._mouth == False:
-						self._out.send('mouth '+Msg.SELECT+'        '+pack_csv(l))
-						self._mouth = True
-			else:
-				self._mouth = False
+		if mouth_metric > 0.1 and mouth_metric/l > 0.8:
+			if self._mouth == False:
+					self._out.send(Msg.SELECT,'mouth')
+					self._mouth = True
+		else:
+			self._mouth = False
 		
 		#self.send_to(Uid.TKPIECE,Msg.TEXT,pack_csv('feedback',*dface_dt))
 				
