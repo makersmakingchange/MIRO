@@ -64,12 +64,18 @@ class TkPiece(Piece,Frame):
 
 	def _ON_image(self,data):
 		try:
-			image_file,x,y = data.split(',')
+			
+			image_file,x,y,w,h = data.split(',')
+
+			w = int(float(w)*self._w)
+			h = int(float(h)*self._h)
+
 			#TODO This is a lazy and stupid way to load images
 			try:
 				image = Image.open(IMAGE_PATH+image_file+'.png')
 			except IOError:
 				image = Image.open(IMAGE_PATH+image_file+'.jpg')
+			image = image.resize((h,h), Image.ANTIALIAS)
 			photo = ImageTk.PhotoImage(image)
 			self._images[image_file] = photo
 			x = int(self._w*float(x))
@@ -282,6 +288,7 @@ class TkPiece(Piece,Frame):
 			'@tkpiece text key1,i',
 			'@tkpiece text key2,r',
 			'@tkpiece text key3,o',
+			'@tkpiece image test,0.5,0.5,1,1',
 			'@tkpiece stop'
 		]
 		return Script(text_entry)
