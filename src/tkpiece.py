@@ -209,27 +209,33 @@ class TkPiece(Piece,Frame):
 			float_x,float_y = TkPiece.tkpiece_ref.scale(event.x,event.y)
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,str(float_x)+','+str(float_y))
 		except Exception as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 		except TclError as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 
 	@staticmethod
 	def on_left_click(event):
 		try:
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,'left_click')
 		except Exception as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 		except TclError as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 
 	@staticmethod
 	def on_right_click(event):
 		try:
 			TkPiece.tkpiece_ref.send(Msg.MOUSE,'right_click')
 		except Exception as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 		except TclError as e:
-			TkPiece.tkpiece_ref.err(repr(e))
+			#TkPiece.tkpiece_ref.err(repr(e))
+			pass # TODO improve robustness
 
 	@staticmethod
 	def script():

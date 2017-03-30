@@ -115,8 +115,9 @@ class Piece(object):
 						getattr(self,'_ON_'+uid+'_'+topic)(data)
 						return True
 					except AttributeError as e:
-						self.err('No interpretation of message ['+msg+'] available')
-						raise e
+						#self.err('No interpretation of message ['+msg+'] available')
+						#raise e
+						pass # Fail silently if piece emits a signal
 		except TypeError: return False
 		except Exception as e:
 			self.err('Exception thrown\n'+traceback.format_exc())

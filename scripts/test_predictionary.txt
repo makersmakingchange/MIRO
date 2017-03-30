@@ -1,0 +1,10 @@
+@system start tkpiece
+@system start engine
+@system start layout
+@system start text
+@system start mouse_to_eye
+@system start predictionary
+@engine wait 1
+@engine build 2
+@predictionary wait 1
+@predictionary build

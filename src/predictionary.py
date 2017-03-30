@@ -40,7 +40,7 @@ class Predictionary(Piece):
 		next_char_root = self._next_char_root = Node()
 		break_chars = [' ',':',';',',','.','\'','"','?','-','_','0','1','2','3','4','5','6','7','8','9','(',')']
 		omit_chars = ['\n','\t','\r']
-		self._completion_chars = [' ',',','.','?','!']
+		self._completion_chars = [' ',',','.','?','!','spc']
 		with open(filename) as f:
 			last_char = ' '
 			for line in f:
@@ -140,24 +140,13 @@ class Predictionary(Piece):
 
 	def _ON_engine_chose(self,data):
 		''' Move down the dictionary tree if data is a valid choice. Else switch to frequency method '''
-		if data is not None:
-			try:
-				self._head = self._head[data]
-			except:
-				self.err(data+' selection not available')
-				return
-			word_found = None
-			if len(self._head) == 0:
-				#print('self._head is of type ' + str(type(self._head)))
-				word_found = self._get_word(self._head)
-				self.send(Msg.TEXT,word_found)
-			elif data in self._completion_chars:
-				self._ON_reset()
-			else:
-				options = ''.join([char+',' for char in self._get_children()])[:-1]
-				self.send(Msg.OPTIONS,options)
-		else:
-			self.err('None value passed to Predictionary.process()')
+		try:
+			self._head = self._head[data]
+			options = ''.join([char+',' for char in self._get_children()])[:-1]
+			self.send(Msg.OPTIONS,options)
+		except KeyError:
+			self.err(data+' selection not available')
+			self._ON_reset()
 
 	def _get_arrangement(self):
 		''' Get a list of all the available chars in the dictionary '''
