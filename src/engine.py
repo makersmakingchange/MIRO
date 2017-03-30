@@ -65,9 +65,8 @@ class Engine(Piece):
 			self.send(Msg.BUILT,str(num_options))
 
 	def _ON_feedback(self,data):
-		parts = self._current_option.children[int(data)].content.split('_')
-		for word in parts:
-			self.send_to(Uid.AUDIO,Req.SPEAK,word)
+		phrase = self._current_option.children[int(data)].content.replace('_',' ')
+		self.send_to(Uid.AUDIO,Req.SPEAK,phrase)
 
 	def _undo (self):
 		'''Move to parent of current node'''
@@ -99,10 +98,10 @@ class Engine(Piece):
 	def _ON_predictionary_options(self,data):
 		options = data.split(',')
 		predict = OptionNode('#predict')
-		next = OptionNode('#next')
-		next.add_child(keyboard_handles.get('#alphabet'))
+		next_opt = OptionNode('#next')
+		next_opt.add_child(keyboard_handles.get('#keyboard'))
 		predict.add_child(OptionNode(options[0]))
-		predict.add_child(next)
+		predict.add_child(next_opt)
 		self._current_option = predict
 		self._send_options()
 		#self.send(Msg.ACK,'Got predict options')
@@ -216,7 +215,6 @@ class OptionNode(object):
 
 	def add_child(self,child):
 		self.children.append(child)
-		child.parent = self
 
 	def add_children(self,*children):
 		for child in children:

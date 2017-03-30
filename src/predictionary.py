@@ -143,7 +143,8 @@ class Predictionary(Piece):
 		try:
 			self._head = self._head[data]
 			options = ''.join([char+',' for char in self._get_children()])[:-1]
-			self.send(Msg.OPTIONS,options)
+			if (options != ''):
+				self.send(Msg.OPTIONS,options)
 		except KeyError:
 			self.err(data+' selection not available')
 			self._ON_reset()
