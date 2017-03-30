@@ -11,7 +11,7 @@ menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
 keyboard_handles = {}
-edit_options = ['#clear','#review','#save', '#editdisk']
+edit_options = ['#clear','#review','#save']
 configuration_options = ['#numberkeys','#colorscheme']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
@@ -25,6 +25,7 @@ class Engine(Piece):
 		self._last_content = None
 		self.subscribe(Uid.PREDICTIONARY)
 		self._predictionary_head = OptionNode('predictionary')
+		self._spoken_phrases = []
 
 	def _ON_build(self,data):
 		''' 
@@ -66,7 +67,9 @@ class Engine(Piece):
 
 	def _ON_feedback(self,data):
 		phrase = self._current_option.children[int(data)].content.replace('_',' ')
-		self.send_to(Uid.AUDIO,Req.SPEAK,phrase)
+		if phrase not in self._spoken_phrases:
+			self.send_to(Uid.AUDIO,Req.SPEAK,phrase)
+			self._spoken_phrases.append(phrase)
 
 	def _undo (self):
 		'''Move to parent of current node'''
@@ -88,6 +91,7 @@ class Engine(Piece):
 			self._ON_process(None)
 
 	def _send_options(self):
+		self._spoken_phrases = []
 		msg = ''
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content

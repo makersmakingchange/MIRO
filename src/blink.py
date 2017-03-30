@@ -11,8 +11,8 @@ class Blink(Piece):
 		self._delta = 0
 		self._blinked = False
 		self._blink_threshold_short = .2
-		self._blink_threshold_long = 2
-		self._blink_threshold_offscreen = 2
+		self._blink_threshold_long = 1.5
+		self._blink_threshold_offscreen = 3
 		self._select_val = 0
 
 	def _ON_eyetracker_gaze(self,data):
