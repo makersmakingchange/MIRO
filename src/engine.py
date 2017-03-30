@@ -12,10 +12,11 @@ menu_handles = {}
 keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
 keyboard_handles = {}
 edit_options = ['#clear','#review','#save']
-configuration_options = ['#numberkeys','#colorscheme']
+configuration_options = ['#numberkeys','#colorscheme','#selectionmechanism']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
 colorscheme_options = ['#blackwhiteyellow','#blackbluegreen']
+selectionmechanism_options = ['#faceselect','#blinkselect']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -61,6 +62,7 @@ class Engine(Piece):
 			build_non_ordered_tree(menu_handles.get('#configure'),num_options,configuration_options,configuration_options_handles)
 			build_non_ordered_tree(configuration_options_handles.get('#numberkeys'),num_options,numkeys_options)
 			build_non_ordered_tree(configuration_options_handles.get('#colorscheme'),num_options,colorscheme_options)
+			build_non_ordered_tree(configuration_options_handles.get('#selectionmechanism'),numkeys_options,selectionmechanism_options)
 			self._current_option = self._options
 			self._ON_process(None)
 			self.send(Msg.BUILT,str(num_options))

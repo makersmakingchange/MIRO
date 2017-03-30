@@ -22,7 +22,7 @@ class Text(Piece):
 			self._sentence_num = 0
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review','#speak']
-			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen','#selectionmechanism','#blinkselect','#faceselect']
 
 		def _ON_engine_chose(self,data):
 			'''Receive currently chosen letter'''
@@ -138,12 +138,14 @@ class Text(Piece):
   					text_entry = [
 
 								'@text marco',
+								#'engine chose Today is good.',
+								#'engine chose Do you want to go out?',
+								#'engine chose #save',
 								'engine chose #review',
 								'engine edit True',
 								'engine edit select1',
-								'engine edit select1',
 								'engine edit select0',
-								'engine chose wanna',
+								'engine chose hello',
 								'engine chose #save',
 								'@text stop'
 
