@@ -41,6 +41,10 @@ class Configure(Piece):
 				self._stop_selection()
 				self.send_to(Uid.SYSTEM,Msg.START,'wface')
 				self.send_to(Uid.SYSTEM,Msg.START,'face exe')
+			elif(data == '#faster'):
+				self.send_to(Uid.AUDIO,Msg.SPEED,'faster')
+			elif(data == '#slower'):
+				self.send_to(Uid.AUDIO,Msg.SPEED,'slower')
 
 	def _stop_selection(self):
 		self.send_to(Uid.BLINK,"stop")

@@ -22,7 +22,8 @@ class Text(Piece):
 			self._sentence_num = 0
 			self.choices = [' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review','#speak']
-			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen','#selectionmechanism','#blinkselect','#faceselect']
+			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen','#selectionmechanism','#blinkselect',
+			'#faceselect','#slower','#faster','#audiosettings','#home']
 
 		def _ON_engine_chose(self,data):
 			'''Receive currently chosen letter'''

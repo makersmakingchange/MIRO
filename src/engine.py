@@ -9,14 +9,15 @@ numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','#delete','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
-keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
+keyboard_options = ['#alphabet','#numbers','#nontext','#speak','#home']
 keyboard_handles = {}
 edit_options = ['#clear','#review','#save']
-configuration_options = ['#numberkeys','#colorscheme','#selectionmechanism']
+configuration_options = ['#numberkeys','#colorscheme','#selectionmechanism','#audiosettings']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
 colorscheme_options = ['#blackwhiteyellow','#blackbluegreen']
 selectionmechanism_options = ['#faceselect','#blinkselect']
+audiosettings_options = ['#slower','#faster']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
@@ -62,7 +63,8 @@ class Engine(Piece):
 			build_non_ordered_tree(menu_handles.get('#configure'),num_options,configuration_options,configuration_options_handles)
 			build_non_ordered_tree(configuration_options_handles.get('#numberkeys'),num_options,numkeys_options)
 			build_non_ordered_tree(configuration_options_handles.get('#colorscheme'),num_options,colorscheme_options)
-			build_non_ordered_tree(configuration_options_handles.get('#selectionmechanism'),numkeys_options,selectionmechanism_options)
+			build_non_ordered_tree(configuration_options_handles.get('#selectionmechanism'),num_options,selectionmechanism_options)
+			build_non_ordered_tree(configuration_options_handles.get('#audiosettings'),num_options,audiosettings_options)
 			self._current_option = self._options
 			self._ON_process(None)
 			self.send(Msg.BUILT,str(num_options))

@@ -5,13 +5,28 @@ import win32com.client as wincl # pip install pypiwin32
 
 AUDIO_PATH = '../res/audio/'
 
-speak = wincl.Dispatch("SAPI.SpVoice")
-speak.Speak('')
-speak.Rate = 3
+#speak = wincl.Dispatch("SAPI.SpVoice")
+#speak.Speak('')
+#speak.Rate = 10
 
 
 class Audio(Piece):
 	''' Searches for prerecorded wavs of argument passed to it. If not found calls text-to-speech conversion '''
+
+	def _BEFORE_start(self):
+		self.speak = wincl.Dispatch("SAPI.SpVoice")
+		self.speak.Speak('')
+		self.speak.Rate = 3
+		self._current_rate = 3
+
+	def _ON_speed(self,data):
+		if (data == 'faster'):
+			self.speak.Rate = self._current_rate + 1
+			self._current_rate = self._current_rate + 1
+		elif (data == 'slower'):
+			if (self.speak.Rate > 1):
+				self.speak.Rate = self._current_rate - 1
+				self._current_rate = self._current_rate - 1
 
 	def _ON_speak(self,data=None):
 		if data[0] is '#': data = data[1:]
@@ -19,7 +34,7 @@ class Audio(Piece):
 		#	winsound.PlaySound(AUDIO_PATH+data+'_sound.wav',winsound.SND_FILENAME)
 		#else:
 		#	self.err('Could not find file for argument ['+str(data)+']')			
-		speak.Speak(data)
+		self.speak.Speak(data)
 
 	@staticmethod
 	def script():
@@ -27,8 +42,32 @@ class Audio(Piece):
 		script = [
 			'@audio uptime',
 			'@audio marco',
-			'@audio period 3',
+			'@audio period 2',
 			'@audio speak anything I want to say',
+			'@audio speak hello my honey',
+			'@audio speed faster',
+			'@audio speak hello my honey',
+			'@audio speed faster',
+			'@audio speak hello my honey',
+			'@audio speed faster',
+			'@audio speak hello my honey',
+			'@audio speed faster',
+			'@audio speak hello my honey',
+			'@audio speed faster',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
+			'@audio speak hello my honey',
+			'@audio speed slower',
 			'@audio speak hello my honey',
 			'@audio speak #undo',
 			'@audio period 0.2',
