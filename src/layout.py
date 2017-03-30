@@ -17,6 +17,7 @@ class Layout(Piece):
 		self._select_debounce_s = .75
 		self._last_select = 0
 		self._change_font = True
+		self._speak_preview = True
 
 	def _ON_text_buffer(self,data):
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
@@ -40,7 +41,8 @@ class Layout(Piece):
 			br = (shapes[5*index+3],shapes[5*index+4])
 			coord_string = str(ul[0]) + ',' + str(ul[1]) + ',' + str(br[0]) + ',' + str(br[1])
 			if (self._contains(ul,br) == True):
-				if (coord_string != self._last_feedback_key):
+				if (coord_string != self._last_feedback_key or self._speak_preview == True):
+					self._speak_preview = False
 					# Visual feedback goes directly to tkpiece
 					self.send_to(Uid.TKPIECE,Msg.FEEDBACK, coord_string)
 					# Audio feedback is routed through engine to audio
@@ -166,6 +168,7 @@ class Layout(Piece):
 		self.shape_list = self.shape_list[0:len(self.shape_list)-1]
 
 	def _ON_engine_options(self,data):
+		self._speak_preview = True
 		options = data.split(',')
 		# Find number of options emitted by engine
 		n = len(options)
