@@ -34,6 +34,22 @@ class Configure(Piece):
 					# Minimum of 2 keys
 					self._num_keys-=1
 				self.send_to(Uid.ENGINE,Msg.BUILD,str(self._num_keys))
+			elif(str(data) == '#blinkselect'):
+				self._stop_selection()
+				self.send_to(Uid.SYSTEM,Msg.START,'blink')
+			elif(str(data) == '#faceselect'):
+				self._stop_selection()
+				self.send_to(Uid.SYSTEM,Msg.START,'wface')
+				self.send_to(Uid.SYSTEM,Msg.START,'face exe')
+			elif(data == '#faster'):
+				self.send_to(Uid.AUDIO,Msg.SPEED,'faster')
+			elif(data == '#slower'):
+				self.send_to(Uid.AUDIO,Msg.SPEED,'slower')
+
+	def _stop_selection(self):
+		self.send_to(Uid.BLINK,"stop")
+		self.send_to(Uid.FACE,"stop")
+		self.send_to(Uid.WFACE,"stop")
 
 	def _DURING_poll(self):
 		'''Tell engine to build every 2 seconds until it is built'''
@@ -54,10 +70,8 @@ class Configure(Piece):
 		'engine chose #plus',
 		'engine chose #blackbluegreen',
 		'engine chose #minus',
-		'engine chose #minus',
-		'engine chose #minus',
-		'engine chose #minus',
-		'engine chose #minus',
+		'engine chose #faceselect',
+		'engine chose #blinkselect',
 		'@configure stop'
 		]
 		return Script(text_entry)

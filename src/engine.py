@@ -9,24 +9,49 @@ numbers = ['0','1','2','3','4','5','6','7','8','9']
 punctuation = ['spc','#delete','.','com','\'','\"','?','!',';','-',':','(',')','num','$','[',']','{','}','/','\\']
 menu_options = ['#keyboard','#revise','#configure']
 menu_handles = {}
-keyboard_options = ['#alphabet','#numbers','#nontext','#speak']
+keyboard_options = ['#alphabet','#numbers','#nontext','#speak','#home']
 keyboard_handles = {}
-edit_options = ['#clear','#review','#save', '#editdisk']
-configuration_options = ['#numberkeys','#colorscheme']
+edit_options = ['#clear','#review','#save']
+configuration_options = ['#numberkeys','#colorscheme','#selectionmechanism','#audiosettings']
 configuration_options_handles = {}
 numkeys_options = ['#plus','#minus']
 colorscheme_options = ['#blackwhiteyellow','#blackbluegreen']
+selectionmechanism_options = ['#faceselect','#blinkselect']
+audiosettings_options = ['#slower','#faster']
 
 class Engine(Piece):
 	''' Letter and menu selection engine '''
 
 	def _BEFORE_start(self):
+		''' Set last selection to None, subscribe to predictionary for priority options '''
 		self._last_content = None
+		self.subscribe(Uid.PREDICTIONARY)
+		self._predictionary_head = OptionNode('predictionary')
+		self._spoken_phrases = []
 
 	def _ON_build(self,data):
+		''' 
+		Builds the internal tree structure that holds choices for letters, and menu items, referred to 
+		generically as options, using the OptionNode class as tree nodes. The command '@engine build 2'
+		builds an option tree with at most two options on the screen, so selecting the '#alphabet' option
+		would then break the alphabet into a binary tree, with the first two options being 'a_to_m' and
+		'a_to_z'.
+		
+		Menu items and actions are prefaced with the '#' character, letters and other characters are 
+		represented as ASCII symbols.
+		
+		A range of letters is represented by joining the first and last letters with '_to_', e.g. 'a_to_m'.
+
+		Options are presented to other Pieces by emitting the signal 'engine options option1,option2,option2' 
+		e.g. with a binary tree after selecting 'a_to_m' the engine would emit 'engine options a_to_g,h_to_m'.
+
+		Selections are made from the engine by issuing the command 'engine select N', with N being a number
+		from 0 to the number of options available, e.g. 'engine select 0' selects the first option available,
+		usually the left and upper-most option if a GUI is present in the system.
+		'''
 		num_options = int(data)
 		if (num_options == 1):
-			self.send(Msg.ERR,'1 key layout invalid\n')
+			self.err('1 key layout invalid')
 		else:
 			self._options = OptionNode()
 			build_non_ordered_tree(self._options,num_options,menu_options,menu_handles)
@@ -38,14 +63,17 @@ class Engine(Piece):
 			build_non_ordered_tree(menu_handles.get('#configure'),num_options,configuration_options,configuration_options_handles)
 			build_non_ordered_tree(configuration_options_handles.get('#numberkeys'),num_options,numkeys_options)
 			build_non_ordered_tree(configuration_options_handles.get('#colorscheme'),num_options,colorscheme_options)
+			build_non_ordered_tree(configuration_options_handles.get('#selectionmechanism'),num_options,selectionmechanism_options)
+			build_non_ordered_tree(configuration_options_handles.get('#audiosettings'),num_options,audiosettings_options)
 			self._current_option = self._options
 			self._ON_process(None)
 			self.send(Msg.BUILT,str(num_options))
 
 	def _ON_feedback(self,data):
-		parts = self._current_option.children[int(data)].content.split('_')
-		for word in parts:
-			self.send_to(Uid.AUDIO,Req.SPEAK,word)
+		phrase = self._current_option.children[int(data)].content.replace('_',' ')
+		if phrase not in self._spoken_phrases:
+			self.send_to(Uid.AUDIO,Req.SPEAK,phrase)
+			self._spoken_phrases.append(phrase)
 
 	def _undo (self):
 		'''Move to parent of current node'''
@@ -67,12 +95,24 @@ class Engine(Piece):
 			self._ON_process(None)
 
 	def _send_options(self):
+		self._spoken_phrases = []
 		msg = ''
 		for i in range(len(self._current_option.children)):
 			msg += self._current_option.children[i].content
 			if i < len(self._current_option.children)-1:
 				msg += ','
-		self.send(Msg.OPTIONS,msg)		
+		self.send(Msg.OPTIONS,msg)
+
+	def _ON_predictionary_options(self,data):
+		options = data.split(',')
+		predict = OptionNode('#predict')
+		next_opt = OptionNode('#next')
+		next_opt.add_child(keyboard_handles.get('#keyboard'))
+		predict.add_child(OptionNode(options[0]))
+		predict.add_child(next_opt)
+		self._current_option = predict
+		self._send_options()
+		#self.send(Msg.ACK,'Got predict options')
 
 	def _ON_process(self,data):
 		if len(self._current_option.children) == 0:
@@ -98,6 +138,8 @@ class Engine(Piece):
 			'@engine select 0',
 			'@engine select 1',
 			'@engine select long',
+			'predictionary options r',
+			'predictionary options a,z',
 			'@engine stop'
 		])
 
@@ -181,7 +223,6 @@ class OptionNode(object):
 
 	def add_child(self,child):
 		self.children.append(child)
-		child.parent = self
 
 	def add_children(self,*children):
 		for child in children:
