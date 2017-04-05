@@ -10,10 +10,12 @@ pyfiles = [f for f in listdir(pypath) if isfile(join(pypath,f))]
 exefiles = [f for f in listdir(exepath) if not isfile(join(exepath,f))]
 
 def _print(msg):
+	''' Switch to file output for debugging if needed '''
 	print(msg)
 	pass
 
 def print_bar(msg,top=True,bottom=True):
+	''' Pretty printing of a message '''
 	bar = ''
 	for char in msg:
 		bar += '-'
