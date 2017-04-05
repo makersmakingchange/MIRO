@@ -70,6 +70,8 @@ class Engine(Piece):
 			self.send(Msg.BUILT,str(num_options))
 
 	def _ON_feedback(self,data):
+		'''Facilitates audio previewing. Message received from Layout module indicating which key
+		gaze is within. Engine knows what the content of the key is, so it is responsible for telling audio what to say.'''
 		phrase = self._current_option.children[int(data)].content.replace('_',' ')
 		if phrase not in self._spoken_phrases:
 			self.send_to(Uid.AUDIO,Req.SPEAK,phrase)
@@ -95,6 +97,8 @@ class Engine(Piece):
 			self._ON_process(None)
 
 	def _send_options(self):
+		'''Useful helper function that broadcasts what the current on screen options are. This method is
+		used whenever the on screen options change.'''
 		self._spoken_phrases = []
 		msg = ''
 		for i in range(len(self._current_option.children)):
@@ -115,6 +119,8 @@ class Engine(Piece):
 		#self.send(Msg.ACK,'Got predict options')
 
 	def _ON_process(self,data):
+		'''Method used to determine if a single letter selection was made. If so, it is spoken aloud and the current option
+		is set to the root of the keyboard'''
 		if len(self._current_option.children) == 0:
 			if (self._current_option.content[0] != '#'):
 				self.send_to(Uid.AUDIO,Req.SPEAK,self._current_option.content)

@@ -1,6 +1,8 @@
 from wtfj import*
 
 class Layout(Piece):
+	'''Model of what is displayed onscreen. Communication with tkpiece is first
+	routed through this module.'''
 
 	def _BEFORE_start(self):
 		self.subscribe(Uid.ENGINE)
@@ -20,6 +22,8 @@ class Layout(Piece):
 		self._speak_preview = True
 
 	def _ON_text_buffer(self,data):
+		'''Text stores the current value of the feedback buffer. Signals sent to tkpiece are
+		routed through layout module.'''
 		self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback'+','+data)
 
 	def _ON_eyetracker_gaze(self,data):
@@ -108,7 +112,10 @@ class Layout(Piece):
 		self._n_current_keys = 0
 
 	def _divide_screen(self,n,options):
-		'''Helper method that determines how to divide the screen between the number of keys (n) on the screen'''
+		'''Helper method that determines how to divide the screen between the number of keys (n) on the screen. Produces
+		a string to represent the on screen keys in the following format: upper_left_1,bottom_right_1,upper_left_2,bottom_right_2
+		such that upper_left and upper_right are tuples with the x and y coordinates of the upper left and bottom right corners of the
+		shape, respectively.'''
 		max_rows = 5
 		shape_type = "rect"
 		assert(max_rows == 5)
@@ -168,6 +175,9 @@ class Layout(Piece):
 		self.shape_list = self.shape_list[0:len(self.shape_list)-1]
 
 	def _ON_engine_options(self,data):
+		'''Determine how to divide the screen based on the number of options of the curent node of the engine.
+		Only display as many keys as needed. Ex: 2 engine options, only display 2 keys. 5 engine options, display
+		5 keys.'''
 		self._speak_preview = True
 		options = data.split(',')
 		# Find number of options emitted by engine
@@ -181,6 +191,8 @@ class Layout(Piece):
 		self.send(Msg.ACK)
 
 	def _ON_engine_built(self,data):
+		'''Prevents text scaling from occurring whenver the number of on screen keys changes. Instead,
+		text is only scaled when the engine is built with a different number of keys.'''
 		self._change_font = True
 
 	@staticmethod
