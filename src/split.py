@@ -10,20 +10,11 @@ websites = "[.](com|net|org|io|gov)"
 def split_into_sentences(text):
     text = " " + text + "  "
     text = text.replace("\n"," ")
-    text = re.sub(prefixes,"\\1<prd>",text)
-    text = re.sub(websites,"<prd>\\1",text)
-    if "Ph.D" in text: text = text.replace("Ph.D.","Ph<prd>D<prd>")
-    text = re.sub("\s" + caps + "[.] "," \\1<prd> ",text)
-    text = re.sub(acronyms+" "+starters,"\\1<stop> \\2",text)
-    text = re.sub(caps + "[.]" + caps + "[.]" + caps + "[.]","\\1<prd>\\2<prd>\\3<prd>",text)
-    text = re.sub(caps + "[.]" + caps + "[.]","\\1<prd>\\2<prd>",text)
-    text = re.sub(" "+suffixes+"[.] "+starters," \\1<stop> \\2",text)
-    text = re.sub(" "+suffixes+"[.]"," \\1<prd>",text)
-    text = re.sub(" " + caps + "[.]"," \\1<prd>",text)
     if "”" in text: text = text.replace(".”","”.")
     if "\"" in text: text = text.replace(".\"","\".")
     if "!" in text: text = text.replace("!\"","\"!")
     if "?" in text: text = text.replace("?\"","\"?")
+    #text = re.sub(r'\.\s','. <stop> ',text)
     text = text.replace(".",".<stop>")
     text = text.replace("?","?<stop>")
     text = text.replace("!","!<stop>")
@@ -32,5 +23,14 @@ def split_into_sentences(text):
     sentences = sentences[:-1]
     sentences = [s.strip() for s in sentences]
     return sentences
-#text = 'Hello world. Today is a good day.'
-#print(split_into_sentences(text))
+#line = 'Hello world.Today is a good day.'
+#pattern = re.compile(r'\.\s')
+#line =re.sub(r'\.\s','.<stop> <stop>',line)
+#print(line)
+#if pattern.search(line):
+    #print(line)
+#print(split_into_sentences(line))
+#string = 'hello.<stop> <stop>Today'
+#print(string.split('<stop>'))
+#print(re.sub(r'\s+',' ','Hello world. Today is a good day.'))
+#print()

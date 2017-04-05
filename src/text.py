@@ -54,6 +54,8 @@ class Text(Piece):
 						self.send(Msg.BUFFER,self._text_buffer)
 					elif data == '#save':
 						if self._edit_mode == False:
+							if '.' not in self._text_buffer :
+								self._text_buffer += '.'
 							with open(self.filename, 'a+') as f:
 								self._text_buffer = self._text_buffer
 								f.write(self._text_buffer)
@@ -70,15 +72,16 @@ class Text(Piece):
 								self._edit_buffer = self._edit_buffer
 							self._file_buffer[self.i] = str(self._edit_buffer)
 							self._file_buffer = ' '.join(self._file_buffer)
-							self.send(Msg.TEXT,'the new changed text buffer is '+ str(self._file_buffer))				
-							self.send(Msg.TEXT,'The edit buffer has '+ self._edit_buffer)
+								
+							if '.' not in str(self._file_buffer) and self.i==self._length-1:
+								self._file_buffer= self._file_buffer.split(' ')
+								self._file_buffer[-2] += '.'
+								self._file_buffer=' '.join(self._file_buffer)
 							with open(self.filename, 'w') as f:
 								if self._sentence_num == -1:
-									self._file_buffer = self._text_buffer+self._file_buffer
+									self._file_buffer = self._text_buffer +' '+ self._file_buffer
 								else :
-									self._file_buffer = self._text_buffer +self._file_buffer + ' '.join(self.sentences[self._sentence_num+1:])
-								self.send(Msg.TEXT, 'the splited sentences in file are ' + str(self.sentences))
-								self.send(Msg.TEXT,'the newly changed file buffer now has contents'+ str(self._file_buffer))								
+									self._file_buffer = self._text_buffer +self._file_buffer +' '+ ''.join(self.sentences[self._sentence_num+1:])								
 								f.seek(0)
 								f.write(self._file_buffer)
 								f.close()
@@ -92,9 +95,7 @@ class Text(Piece):
 						except IndexError:
 							self._sentence_num = -1
 							self._text_buffer = self._openFile(self._sentence_num)
-						self.send(Msg.TEXT,'the last sentence in the faile is ' +str(self._text_buffer))
 						self.send(Msg.BUFFER,self._text_buffer)
-						#self._sentence_num = self._sentence_num - 1
 				else:
 					self._text_buffer = self._text_buffer + data
 					self.send(Msg.BUFFER,self._text_buffer)
@@ -104,14 +105,13 @@ class Text(Piece):
 			'''This function operates when user wants to edit what he/she has typed out in the file '''
 			if data == 'True':
 				self._edit_mode = True
-				self._file_buffer=self._openFile(self._sentence_num)
-				self.send(Msg.TEXT,'the last sentence entered is '+ str(list(self._file_buffer)))
+				self._file_buffer=self._openFile(self._sentence_num)	
+				self.send(Msg.TEXT,'the last sentence entered is '+ ','.join(self._file_buffer.split()))
+				self.send(Msg.BUFFER,self._file_buffer.split())
 				self._length = len(self._file_buffer.split())
-				self.send(Msg.TEXT,'hhhhhhhhhh length is'+ str(self._length))
 				self.i = 0
 				self._file_buffer = self._file_buffer.split()
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
-				self.send_to(Msg.TEXT,'THE edit mode is ' + str(self._edit_mode))
 			if data == 'select0':
 				self._file_buffer[self.i] = ''
 				self.send(Msg.TEXT,'the new string is '+ str(self._file_buffer))
@@ -123,9 +123,9 @@ class Text(Piece):
 			f = open(self.filename,'r')
 			for line in f :
 				self.sentences  = split.split_into_sentences(line)
-				self.send(Msg.TEXT,'The sentences in the file are' + str(self.sentences))
+				#self.send(Msg.TEXT,'The sentences in the file are' + str(self.sentences))
 				'store all previous text'
-				self._text_buffer  = ''.join(self.sentences[0:_sentence_num])
+				self._text_buffer  = ' '.join(self.sentences[0:_sentence_num])
 				'give back last sentences'
 				last_sentence  = self.sentences[_sentence_num]
 
@@ -139,15 +139,17 @@ class Text(Piece):
   					text_entry = [
 
 								'@text marco',
-								#'engine chose Today is good.',
-								#'engine chose Do you want to go out?',
+								#'engine chose a',
+								#'engine chose .',
 								#'engine chose #save',
 								'engine chose #review',
-								'engine edit True',
-								'engine edit select1',
-								'engine edit select0',
-								'engine chose hello',
-								'engine chose #save',
+								'engine chose #review',
+								#'engine edit True',
+								#'engine edit select1',
+								#'engine edit select1',
+								#'engine edit select0',
+								#'engine chose me',
+								#'engine chose #save',
 								'@text stop'
 
 						]
