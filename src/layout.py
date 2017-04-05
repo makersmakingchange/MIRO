@@ -13,7 +13,7 @@ class Layout(Piece):
 		self._last_eye = (0.0,0.0)
 		self._imagenames = {}
 		self._last_feedback_key = '-1,-1,-1,-1'
-		self._gaze_record = RecordKeeper(1.0)
+		self._gaze_record = RecordKeeper(1.75) #Jarrod = 1.5
 		self._select_debounce_s = .75
 		self._last_select = 0
 		self._change_font = True
@@ -46,7 +46,7 @@ class Layout(Piece):
 					# Visual feedback goes directly to tkpiece
 					self.send_to(Uid.TKPIECE,Msg.FEEDBACK, coord_string)
 					# Audio feedback is routed through engine to audio
-					self.send_to(Uid.ENGINE,Msg.FEEDBACK, str(index))
+					#self.send_to(Uid.ENGINE,Msg.FEEDBACK, str(index))
 					self._last_feedback_key = coord_string
 					# After changing feedback, set history to center of current selection
 					center_x = (float(ul[0]) + float(br[0]))/2
