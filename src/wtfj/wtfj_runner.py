@@ -9,6 +9,31 @@ class Runner:
 
 	@staticmethod
 	def run(uid,mode=None):
+		''' 
+		This runner connects a Piece to an input and an output based on a Mode 
+		argument passed to the 'run(uid,mode=None)' function. The runner then 
+		starts the Piece passed to it in a seperate process, connecting it as
+		follows:
+
+		Mode.TEST : Connects it to a Script defined by the Piece's own
+					static script() method
+
+		Mode.ZPRINTER : Subscribes to all messages and prints them to a new 
+						console window
+
+		Mode.ZCONSOLE : Opens a new console window allowing user input into
+						the system
+
+		Mode.ZCLIENT : Standard client using zmq
+
+		Mode.ZSERVER : Standard server using zmq
+
+		Mode.INTERACTIVE : Starts a new console window allowing real-time user
+						   input into the system and printing output
+
+		Mode.EXE : Runs executable in the ../bin folder, executable has built-
+				   in client-mode input and output connectors
+		'''
 		if mode == None:
 			mode = uid
 		if mode == Mode.EXE: 
