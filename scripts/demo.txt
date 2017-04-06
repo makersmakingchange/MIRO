@@ -1,0 +1,8 @@
+@system start tkpiece
+@system start text
+@system start layout
+@system start engine
+@system start eyetracker exe
+@system start blink
+@system start configure
+@system start audio
