@@ -11,6 +11,7 @@ translation_table = {
 class Text(Piece):
 
 		def _BEFORE_start(self):
+			'''subscribe to engine and initialized usable commands and acceptable characters.'''
 			self.subscribe(Uid.ENGINE)
 			self.subscribe(Uid.BLINK)
 			self._text_buffer = ''
@@ -24,11 +25,15 @@ class Text(Piece):
 			self.menu_options = ['#menu','#keyboard','#delete','#clear','#save','#review','#speak']
 			self._ignore = ['#configure','#plus','#minus','#numkeys','#colorscheme','#blackwhiteyellow','#blackbluegreen','#selectionmechanism','#blinkselect',
 			'#faceselect','#slower','#faster','#audiosettings','#home']
+			f = open(self.filename,'r')
+			self._lines = f.readlines()
+			self._line_counter = len(self._lines)
 
 		def _ON_engine_chose(self,data):
 			'''Receive currently chosen letter'''
 			try:
 				data = translation_table[data]
+
 			except KeyError:
 				pass
 
@@ -62,8 +67,10 @@ class Text(Piece):
 								f.close()
 							self._text_buffer = ''
 							self.send(Msg.BUFFER,self._text_buffer)
+							f = open(self.filename,'r')
+							self._lines = f.readlines()
+							self._line_counter = len(self._lines)
 						if self._edit_mode == True :
-							
 							if self.i==self._length-1:
 								self._edit_buffer = list(self._edit_buffer)
 								self._edit_buffer += ' '
@@ -72,7 +79,6 @@ class Text(Piece):
 								self._edit_buffer = self._edit_buffer
 							self._file_buffer[self.i] = str(self._edit_buffer)
 							self._file_buffer = ' '.join(self._file_buffer)
-								
 							if '.' not in str(self._file_buffer) and self.i==self._length-1:
 								self._file_buffer= self._file_buffer.split(' ')
 								self._file_buffer[-2] += '.'
@@ -94,7 +100,14 @@ class Text(Piece):
 							self._text_buffer = self._openFile(self._sentence_num)
 						except IndexError:
 							self._sentence_num = -1
-							self._text_buffer = self._openFile(self._sentence_num)
+							if self._line_counter -1 ==0:
+								self._line_counter = len(self._lines) 
+							else: 
+								self._line_counter-=1
+							try:
+								self._text_buffer = self._openFile(self._sentence_num)
+							except IndexError:
+								self.send(Msg.TEXT,'There is no more new contents to be reviewed')
 						self.send(Msg.BUFFER,self._text_buffer)
 				else:
 					self._text_buffer = self._text_buffer + data
@@ -120,15 +133,12 @@ class Text(Piece):
 				self.send_to(Uid.TKPIECE,Msg.TEXT,'feedback,'+self._file_buffer[self.i])
 
 		def _openFile(self,_sentence_num):
-			f = open(self.filename,'r')
-			for line in f :
-				self.sentences  = split.split_into_sentences(line)
-				#self.send(Msg.TEXT,'The sentences in the file are' + str(self.sentences))
-				'store all previous text'
-				self._text_buffer  = ' '.join(self.sentences[0:_sentence_num])
-				'give back last sentences'
-				last_sentence  = self.sentences[_sentence_num]
-
+			'''return the sentence specified by the _sentence_num'''
+			self.sentences  = split.split_into_sentences(self._lines[self._line_counter-1])
+			'store all previous text'
+			self._text_buffer  = ' '.join(self.sentences[0:_sentence_num])
+			'give back last sentences'
+			last_sentence  = self.sentences[_sentence_num]
 			return str(last_sentence)
 				
 
@@ -144,12 +154,16 @@ class Text(Piece):
 								#'engine chose #save',
 								'engine chose #review',
 								'engine chose #review',
-								#'engine edit True',
-								#'engine edit select1',
-								#'engine edit select1',
-								#'engine edit select0',
-								#'engine chose me',
-								#'engine chose #save',
+								'engine chose #review',
+								'engine chose #review',
+								'engine chose #review',
+								'engine chose #review',
+								'engine chose #review',
+								'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
+								#'engine chose #review',
 								'@text stop'
 
 						]
