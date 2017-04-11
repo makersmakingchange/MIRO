@@ -60,7 +60,9 @@ class TkPiece(Piece,Frame):
 		except TclError as e:
 			self.err('Graphics error\n'+repr(e))
 
-	def _ON_esc(self,data): self.stop()
+	def _ON_esc(self,data):
+                self.send_to(Uid.SYSTEM,Req.STOP)
+                self.stop()
 
 	def _ON_image(self,data):
 		try:

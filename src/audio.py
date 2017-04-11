@@ -1,7 +1,12 @@
 import winsound
 from wtfj import *
 from os import system
-import win32com.client as wincl # pip install pypiwin32
+try:
+        import win32com.client as wincl # pip install pypiwin32
+except ImportError:
+        import pip
+        pip.main(['install','pypiwin32'])
+        import win32com.client as wincl
 
 AUDIO_PATH = '../res/audio/'
 
