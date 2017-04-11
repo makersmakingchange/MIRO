@@ -60,7 +60,9 @@ class TkPiece(Piece,Frame):
 		except TclError as e:
 			self.err('Graphics error\n'+repr(e))
 
-	def _ON_esc(self,data): self.stop()
+	def _ON_esc(self,data): 
+		self.send_to(Uid.SYSTEM,Req.STOP)
+		self.stop()
 
 	def _ON_image(self,data):
 		try:
@@ -297,7 +299,12 @@ class TkPiece(Piece,Frame):
 			'@tkpiece image test,0.5,0.5,1,1',
 			'@tkpiece stop'
 		]
-		return Script(text_entry)
+		#return Script(text_entry)
+		return Script([
+			'@tkpiece marco',
+			'@tkpiece wait 1',
+			'@tkpiece esc'
+		])
 
 
 if __name__ == '__main__': main()

@@ -1,17 +1,12 @@
-import winsound
 from wtfj import *
 from os import system
-import win32com.client as wincl # pip install pypiwin32
+import win32com.client as wincl # pip install pypiwin32 if not available
 
 AUDIO_PATH = '../res/audio/'
 
-#speak = wincl.Dispatch("SAPI.SpVoice")
-#speak.Speak('')
-#speak.Rate = 10
-
 
 class Audio(Piece):
-	''' Searches for prerecorded wavs of argument passed to it. If not found calls text-to-speech conversion '''
+	''' Calls text-to speech '''
 
 	def _BEFORE_start(self):
 		self.speak = wincl.Dispatch("SAPI.SpVoice")
@@ -30,10 +25,6 @@ class Audio(Piece):
 
 	def _ON_speak(self,data=None):
 		if data[0] is '#': data = data[1:]
-		#if data in ['a_to_m','n_to_z','undo','to'] or data in 'abcdefghijklmnopqrstuvwxyz':
-		#	winsound.PlaySound(AUDIO_PATH+data+'_sound.wav',winsound.SND_FILENAME)
-		#else:
-		#	self.err('Could not find file for argument ['+str(data)+']')			
 		self.speak.Speak(data)
 
 	@staticmethod
