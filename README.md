@@ -25,3 +25,7 @@ Parts of the program are compiled executables and others are python scripts
   * Inside the python source folder the `wtfj` folder contains the module classes for shared communication protocol, important classes like Piece, and utilities  
   
 More details and tutorials will be coming in April 2017, for now please contact max.prokopenko _at_ gmail.com with any questions.  
+
+<!-- ABOUT MMC START -->
+
+<!-- ABOUT MMC END -->
